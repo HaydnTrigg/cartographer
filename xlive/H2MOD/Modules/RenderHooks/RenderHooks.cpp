@@ -64,152 +64,154 @@ namespace RenderHooks
 	{
 		int window_width = GUI::GetDisplayMode().Width;
 
-		if (e == e_layer_type::lightmap_shadows_1 || e == e_layer_type::lightmap_shadows_2)
-			switch(H2Config_Override_Shadows)
-			{
-				case tex_low: 
-					return 512;
-				case tex_high: 
-					return 2048;
-				case tex_ultra: 
-					return 4096;
-			}
-		if (e == e_layer_type::dynamic_shadows) {
-			switch (H2Config_Override_Shadows)
-			{
-				case tex_low:
-					return 512;
-				case tex_high:
-					return 2048;
-				case tex_ultra:
-					return 4096;
-			}
-		}
-		if(e == e_layer_type::water)
+		switch (e)
 		{
-			switch(H2Config_Override_Water)
-			{
-				case tex_low:
-					return 512;
-				case tex_high:
-					return 2048;
-				case tex_ultra:
-					return 4096;
-			}
-		}
-		if (e == e_layer_type::bloom)
-		{
-			switch (H2Config_Override_ScreenFX)
-			{
-			case tex_low:
-				return window_width / 8;
-			case tex_high:
-				return window_width;
-			case tex_ultra:
-				return window_width * 2;
-			}
-		}
-		if (e == e_layer_type::unk_15)
-		{
-			switch (H2Config_Override_ScreenFX)
-			{
-			case tex_low:
-				return window_width / 4;
-			case tex_high:
-				return window_width;
-			case tex_ultra:
-				return window_width * 2;
-			}
-		}
-		if (e == e_layer_type::tex_camera)
-		{
-			switch (H2Config_Override_ScreenFX)
-			{
-			case tex_low:
-				return window_width / 4;
-			case tex_high:
-				return window_width;
-			case tex_ultra:
-				return window_width * 2;
-			}
-		}
-		return width;
-	}
-	int getHeight(e_layer_type e, unsigned int height)
-	{
-		int window_height = GUI::GetDisplayMode().Height;
-
-		if (e == e_layer_type::lightmap_shadows_1 || e == e_layer_type::lightmap_shadows_2)
-			switch (H2Config_Override_Shadows)
-			{
-				case tex_low:
-					return 512;
-				case tex_high:
-					return 2048;
-				case tex_ultra:
-					return 4096;
-			}
-		if (e == e_layer_type::dynamic_shadows) {
-			switch (H2Config_Override_Shadows)
-			{
-				case tex_low:
-					return 512;
-				case tex_high:
-					return 2048;
-				case tex_ultra:
-					return 4096;
-			}
-		}
-		if (e == e_layer_type::water)
-		{
-			switch (H2Config_Override_Water)
-			{
+			case e_layer_type::lightmap_shadows_1:
+			case e_layer_type::lightmap_shadows_2:
+				switch (H2Config_Override_Shadows)
+				{
+					case tex_low:
+						return 512;
+					case tex_high:
+						return 2048;
+					case tex_ultra:
+						return 4096;
+				}
+				break;
+			case e_layer_type::dynamic_shadows:
+				switch (H2Config_Override_Shadows)
+				{
+					case tex_low:
+						return 512;
+					case tex_high:
+						return 2048;
+					case tex_ultra:
+						return 4096;
+				}
+				break;
+			case e_layer_type::water:
+				switch (H2Config_Override_Water)
+				{
 				case tex_low:
 					return 256;
 				case tex_high:
 					return 1024;
 				case tex_ultra:
 					return 2048;
-			}
+				}
+				break;
+			case e_layer_type::bloom:
+				switch (H2Config_Override_ScreenFX)
+				{
+				case tex_low:
+					return window_width / 8;
+				case tex_high:
+					return window_width;
+				case tex_ultra:
+					return window_width * 2;
+				}
+				break;
+			case e_layer_type::unk_15:
+				switch (H2Config_Override_ScreenFX)
+				{
+				case tex_low:
+					return window_width / 4;
+				case tex_high:
+					return window_width;
+				case tex_ultra:
+					return window_width * 2;
+				}
+				break;
+			case e_layer_type::tex_camera:
+				switch (H2Config_Override_ScreenFX)
+				{
+				case tex_low:
+					return window_width / 4;
+				case tex_high:
+					return window_width;
+				case tex_ultra:
+					return window_width * 2;
+				}
+				break;
 		}
-		if (e == e_layer_type::bloom)
+		return width;
+	}
+	int getHeight(e_layer_type e, unsigned int height)
+	{
+		int window_height = GUI::GetDisplayMode().Height;
+		switch (e)
 		{
-			switch (H2Config_Override_ScreenFX)
-			{
-			case tex_low:
-				return window_height / 8;
-			case tex_high:
-				return window_height;
-			case tex_ultra:
-				return window_height * 2;
-			}
-		}
-		if (e == e_layer_type::unk_15)
-		{
-			switch (H2Config_Override_ScreenFX)
-			{
-			case tex_low:
-				return window_height / 4;
-			case tex_high:
-				return window_height;
-			case tex_ultra:
-				return window_height * 2;
-			}
-		}
-		if (e == e_layer_type::tex_camera)
-		{
-			switch (H2Config_Override_ScreenFX)
-			{
-			case tex_low:
-				return window_height / 4;
-			case tex_high:
-				return window_height;
-			case tex_ultra:
-				return window_height * 2;
-			}
+			case e_layer_type::lightmap_shadows_1:
+			case e_layer_type::lightmap_shadows_2:
+				switch (H2Config_Override_Shadows)
+				{
+					case tex_low:
+						return 512;
+					case tex_high:
+						return 2048;
+					case tex_ultra:
+						return 4096;
+				}
+				break;
+			case e_layer_type::dynamic_shadows:
+				switch (H2Config_Override_Shadows)
+				{
+					case tex_low:
+						return 512;
+					case tex_high:
+						return 2048;
+					case tex_ultra:
+						return 4096;
+				}
+				break;
+			case e_layer_type::water:
+				switch (H2Config_Override_Water)
+				{
+				case tex_low:
+					return 256;
+				case tex_high:
+					return 1024;
+				case tex_ultra:
+					return 2048;
+				}
+				break;
+			case e_layer_type::bloom:
+				switch (H2Config_Override_ScreenFX)
+				{
+				case tex_low:
+					return window_height / 8;
+				case tex_high:
+					return window_height;
+				case tex_ultra:
+					return window_height * 2;
+				}
+				break;
+			case e_layer_type::unk_15:
+				switch (H2Config_Override_ScreenFX)
+				{
+				case tex_low:
+					return window_height / 4;
+				case tex_high:
+					return window_height;
+				case tex_ultra:
+					return window_height * 2;
+				}
+				break;
+			case e_layer_type::tex_camera:
+				switch (H2Config_Override_ScreenFX)
+				{
+				case tex_low:
+					return window_height / 4;
+				case tex_high:
+					return window_height;
+				case tex_ultra:
+					return window_height * 2;
+				}
+				break;
 		}
 		return height;
 	}
+
 	bool __cdecl h_initialize_rasterizer_layer(e_layer_type type, unsigned int width, unsigned int height, bool fmt, int a5)
 	{
 		oWidth = getWidth(type, width);
