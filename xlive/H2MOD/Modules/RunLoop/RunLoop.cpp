@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "RunLoop.h"
 
 #include "H2MOD\Modules\Utils\Utils.h"
@@ -7,10 +6,9 @@
 #include "H2MOD\Modules\OnScreenDebug\OnscreenDebug.h"
 
 #include "H2MOD\Modules\CustomMenu\CustomMenu.h"
-#include "H2MOD\Modules\Networking\NetworkSession\NetworkSession.h"
+#include "H2MOD/Modules/Networking/Networking.h"
 #include "H2MOD\Modules\Config\Config.h"
 #include "XLive\xnet\IpManagement\XnIp.h"
-#include "H2MOD\Modules\Networking\NetworkStats\NetworkStats.h"
 #include "H2MOD/Modules/Stats/StatsHandler.h"
 #include "H2MOD/Modules/EventHandler/EventHandler.h"
 #include "H2MOD/GUI/GUI.h"
@@ -19,6 +17,8 @@
 #include "H2MOD/Modules/MainLoopPatches/UncappedFPS2/UncappedFPS2.h"
 #include "Blam/Engine/Game/GameTimeGlobals.h"
 #include "H2MOD/Engine/Engine.h"
+
+#include "Util/Hooks/Hook.h"
 
 extern LPDIRECT3DDEVICE9 pDevice;
 

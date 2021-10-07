@@ -1,5 +1,8 @@
 #pragma once
-#include "Globals.h"
+
+#include "..\VariantSystem.h"
+
+#include "Blam/Cache/DataTypes/BlamDataTypes.h"
 
 class FireFightHandler : public GameClientServerHandler {
 public:
@@ -11,7 +14,7 @@ public:
 	datum GetKilledDatum();
 private:
 	XUID xuid;
-	datum killed_datum;
+	datum killed_datum = DATUM_NONE;
 };
 
 

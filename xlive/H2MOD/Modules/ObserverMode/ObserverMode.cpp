@@ -144,8 +144,8 @@ namespace ObserverMode
 		else
 			currentPlayerIndex++;
 
-		datum newIndex = ((datum)pArray->datum[0x204 * currentPlayerIndex + 0x28]);
-		if (newIndex.IsNull())
+		datum newIndex = ((datum)pArray->data[0x204 * currentPlayerIndex + 0x28]);
+		if (DATUM_IS_NONE(newIndex))
 			NextPlayer();
 		else
 			observer_current_index = newIndex;
@@ -189,7 +189,7 @@ namespace ObserverMode
 		if (ObserverMode == observer_firstperson) {
 			PlayerIterator playerIt;
 
-			datum unitIndexSameAsObserverIndex(datum::Null);
+			datum unitIndexSameAsObserverIndex(DATUM_NONE);
 
 			while (playerIt.get_next_active_player())
 			{
@@ -203,7 +203,7 @@ namespace ObserverMode
 				
 			auto control = PlayerControl::GetControls(0);
 			auto player_actions = PlayerControl::GetPlayerActions(currentPlayerIndex);
-			Player::getPlayer(h2mod->get_player_datum_index_from_controller_index(0).Index)->controlled_unit_index = observer_current_index;
+			Player::getPlayer(DATUM_ABSOLUTE_INDEX(h2mod->get_player_datum_index_from_controller_index(0)))->controlled_unit_index = observer_current_index;
 			//control->ControllingDatum = observer_current_index;
 			//control->Actions.yaw = player_actions->facing.yaw.as_rad();
 			//control->Actions.pitch = player_actions->facing.pitch.as_rad();
@@ -219,18 +219,18 @@ namespace ObserverMode
 	//unk is believed to be the editor_camera setting
 	void FollowObject(int local_player_index, int unk)
 	{
-		s_datum_array* Objects = *Memory::GetAddress<s_datum_array**>(0x4E461C);
+		s_data_array* Objects = *Memory::GetAddress<s_data_array**>(0x4E461C);
 		if (observer_current_index == -1) {
 			NextPlayer();
 		}
 		if(unk != 65535){
 			*(DWORD*)(unk + 8) = 0;
-			*(DWORD*)(unk) = observer_current_index.Index;
+			*(DWORD*)(unk) = DATUM_ABSOLUTE_INDEX(observer_current_index);
 			*(WORD*)(unk + 4) = -1;
 
-			auto object = *(DWORD*)&Objects->datum[12 * observer_current_index.Index + 4];
+			auto object = *(DWORD*)&Objects->data[12 * DATUM_ABSOLUTE_INDEX(observer_current_index) + 4];
 			//LOG_INFO_GAME("[ObserverMode] Object {}, Address {}", observer_current_index, IntToString<int>(object, std::hex));
-			sub_7BD2EC(observer_current_index.Index, (DWORD*)(unk + 12));
+			sub_7BD2EC(DATUM_ABSOLUTE_INDEX(observer_current_index), (DWORD*)(unk + 12));
 		}
 	}
 

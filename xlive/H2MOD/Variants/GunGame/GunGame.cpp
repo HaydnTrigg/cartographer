@@ -1,6 +1,11 @@
-#include "stdafx.h"
-#include "Globals.h"
+
+#include "GunGame.h"
+
+#include "H2MOD.h"
 #include "H2MOD\Engine\Engine.h"
+#include "H2MOD/Modules/Networking/Networking.h"
+
+#include "Util\ReadIniArguments.h"
 
 using namespace NetworkSession;
 
@@ -97,8 +102,8 @@ void GunGame::readWeaponLevels()
 void GunGame::initWeaponLevels() {
 	if (weapon_one != 0) {
 		LOG_TRACE_GAME("[H2Mod-GunGame] : Intialize() - weapon_one: {}", weapon_one);
-		LOG_TRACE_GAME("[H2Mod-GunGame] : Intialize() - weapon_one enum:  {:x}", weaponDatums[weapon_one].ToInt());
-		LOG_TRACE_GAME("[H2Mod-GunGame] : Intialize() - weapon_two enum:  {:x}", weaponDatums[weapon_two].ToInt());
+		LOG_TRACE_GAME("[H2Mod-GunGame] : Intialize() - weapon_one enum:  {:x}", weaponDatums[weapon_one]);
+		LOG_TRACE_GAME("[H2Mod-GunGame] : Intialize() - weapon_two enum:  {:x}", weaponDatums[weapon_two]);
 		GunGame::levelWeapon[0] = weaponDatums[weapon_one];
 		GunGame::levelWeapon[1] = weaponDatums[weapon_two];
 		GunGame::levelWeapon[2] = weaponDatums[weapon_three];
@@ -115,21 +120,21 @@ void GunGame::initWeaponLevels() {
 		GunGame::levelWeapon[13] = weaponDatums[weapon_fourteen];
 		GunGame::levelWeapon[14] = weaponDatums[weapon_fiffteen];
 	} else {
-		GunGame::levelWeapon[0] = Weapon::energy_blade_useless;
-		GunGame::levelWeapon[1] = Weapon::needler;
-		GunGame::levelWeapon[2] = Weapon::plasma_pistol;
-		GunGame::levelWeapon[3] = Weapon::magnum;
-		GunGame::levelWeapon[4] = Weapon::smg;
-		GunGame::levelWeapon[5] = Weapon::plasma_rifle;
-		GunGame::levelWeapon[6] = Weapon::brute_plasma_rifle;
-		GunGame::levelWeapon[7] = Weapon::juggernaut_powerup;
-		GunGame::levelWeapon[8] = Weapon::shotgun;
-		GunGame::levelWeapon[9] = Weapon::brute_shot;
-		GunGame::levelWeapon[10] = Weapon::covenant_carbine;
-		GunGame::levelWeapon[11] = Weapon::battle_rifle;
-		GunGame::levelWeapon[12] = Weapon::beam_rifle;
-		GunGame::levelWeapon[13] = Weapon::sniper_rifle;
-		GunGame::levelWeapon[14] = Weapon::rocket_launcher;
+		GunGame::levelWeapon[0] = e_weapons_datum_index::energy_blade_useless;
+		GunGame::levelWeapon[1] = e_weapons_datum_index::needler;
+		GunGame::levelWeapon[2] = e_weapons_datum_index::plasma_pistol;
+		GunGame::levelWeapon[3] = e_weapons_datum_index::magnum;
+		GunGame::levelWeapon[4] = e_weapons_datum_index::smg;
+		GunGame::levelWeapon[5] = e_weapons_datum_index::plasma_rifle;
+		GunGame::levelWeapon[6] = e_weapons_datum_index::brute_plasma_rifle;
+		GunGame::levelWeapon[7] = e_weapons_datum_index::juggernaut_powerup;
+		GunGame::levelWeapon[8] = e_weapons_datum_index::shotgun;
+		GunGame::levelWeapon[9] = e_weapons_datum_index::brute_shot;
+		GunGame::levelWeapon[10] = e_weapons_datum_index::covenant_carbine;
+		GunGame::levelWeapon[11] = e_weapons_datum_index::battle_rifle;
+		GunGame::levelWeapon[12] = e_weapons_datum_index::beam_rifle;
+		GunGame::levelWeapon[13] = e_weapons_datum_index::sniper_rifle;
+		GunGame::levelWeapon[14] = e_weapons_datum_index::rocket_launcher;
 	}
 }
 
@@ -148,7 +153,7 @@ void GunGame::spawnPlayerServer(int playerIndex) {
 	LOG_TRACE_GAME(L"[H2Mod-GunGame]: SpawnPlayer() player index: {}, player name: {1}", playerIndex, Player::getName(playerIndex));
 
 	datum unit_datum_index = Player::getPlayerUnitDatumIndex(playerIndex);
-	char* unit_object = Engine::Objects::try_and_get_data_with_type(unit_datum_index, FLAG(e_object_type::biped));
+	char* unit_object = (char*)object_try_and_get_and_verify_type(unit_datum_index, FLAG(e_object_type::biped));
 
 	if (unit_object) {
 		int level = GunGame::gungamePlayers[getPlayerXuid(playerIndex)];
@@ -173,7 +178,7 @@ void GunGame::spawnPlayerServer(int playerIndex) {
 
 void GunGame::playerDiedServer(int unit_datum_index)
 {
-	char* unit_object = Engine::Objects::try_and_get_data_with_type(unit_datum_index, FLAG(e_object_type::biped));
+	char* unit_object = (char*)object_try_and_get_and_verify_type(unit_datum_index, FLAG(e_object_type::biped));
 	if (unit_object) {
 		int playerIndex = h2mod->get_player_index_from_unit_datum_index(unit_datum_index);
 		h2mod->set_player_unit_grenades_count(playerIndex, e_grenades::Fragmentation, 0, true);
@@ -242,7 +247,7 @@ void GunGameInitializer::onPeerHost() {
 	GunGame::resetPlayerLevels();
 	//TODO: is this really necessary (from old code)?
 	//init peer host gun game level
-	GunGame::gungamePlayers[getPlayerXuid(h2mod->get_player_datum_index_from_controller_index(0).ToAbsoluteIndex())] = 0;
+	GunGame::gungamePlayers[getPlayerXuid(DATUM_ABSOLUTE_INDEX(h2mod->get_player_datum_index_from_controller_index(0)))] = 0;
 }
 
 void GunGamePreSpawnHandler::onClient() {

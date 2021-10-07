@@ -1,17 +1,15 @@
 
 #include "Players.h"
 
-#include "H2MOD.h"
-
 /*
 	- TO NOTE:
 	- This functions work only after the game has started (game life cycle is in_game or after map has been loaded).
 	- If you need to do something in the pregame lobby, use the functions available in Network Session (H2MOD/Modules/Networking/NetworkSession)
 */
 
-s_datum_array* Player::getArray()
+s_data_array* Player::getArray()
 {
-	return *Memory::GetAddress<s_datum_array**>(0x4A8260, 0x4D64C4);
+	return *Memory::GetAddress<s_data_array**>(0x4A8260, 0x4D64C4);
 }
 
 bool Player::indexValid(int playerIndex)
@@ -25,7 +23,7 @@ Player* Player::getPlayer(int playerIndex)
 	{
 		return nullptr;
 	}
-	return (Player*)&getArray()->datum[playerIndex * getArray()->datum_element_size];
+	return (Player*)&getArray()->data[playerIndex * getArray()->datum_element_size];
 }
 
 e_object_team Player::getTeam(int playerIndex)
@@ -76,10 +74,10 @@ wchar_t* Player::getName(int playerIndex)
 datum Player::getPlayerUnitDatumIndex(int playerIndex)
 {
 	if (!indexValid(playerIndex))
-		return datum::Null;
+		return DATUM_NONE;
 
-	if (getPlayer(playerIndex)->controlled_unit_index.IsNull())
-		return datum::Null;
+	if (DATUM_IS_NONE(getPlayer(playerIndex)->controlled_unit_index))
+		return DATUM_NONE;
 		
 	return getPlayer(playerIndex)->controlled_unit_index;
 }
@@ -88,14 +86,14 @@ XUID Player::getIdentifier(int playerIndex)
 {
 	if (!indexValid(playerIndex))
 	{
-		return datum::Null;
+		return XUID(0ll);
 	}
 
 	return getPlayer(playerIndex)->identifier;
 }
 
 PlayerIterator::PlayerIterator() 
-	: DatumIterator(Player::getArray())
+	: s_data_iterator(Player::getArray())
 {
 
 }
@@ -107,7 +105,7 @@ bool PlayerIterator::get_next_active_player()
 	{
 		do
 		{
-			if (!(m_current_player->flags & FLAG(Player::player_inactive)))
+			if (!(m_current_player->flags & FLAG(Player::flags::player_inactive)))
 				break;
 
 			m_current_player = get_next_datum();
@@ -131,4 +129,9 @@ int PlayerIterator::get_current_player_index()
 wchar_t* PlayerIterator::get_current_player_name()
 {
 	return m_current_player->properties[0].player_name;
+}
+
+XUID PlayerIterator::get_current_player_id()
+{
+	return Player::getIdentifier(this->get_current_player_index());
 }

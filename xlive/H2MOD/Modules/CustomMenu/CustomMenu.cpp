@@ -1,4 +1,3 @@
-#include "stdafx.h"
 
 #include "H2MOD\Modules\CustomMenu\CustomMenu.h"
 #include "H2MOD\Modules\OnScreenDebug\OnScreenDebug.h"
@@ -13,6 +12,12 @@
 #include "H2MOD\Modules\Config\Config.h"
 #include "H2MOD\Modules\UI\XboxLiveTaskProgress.h"
 #include "H2MOD/GUI/imgui_integration/imgui_handler.h"
+
+#include "H2MOD/Tags/TagInterface.h"
+#include "H2MOD/Modules/AdvLobbySettings/AdvLobbySettings.h"
+#include "H2MOD/Modules/Networking/Networking.h"
+
+#include "Util\Hooks\Hook.h"
 
 #include "c_screen_with_menu.h"
 
@@ -3540,51 +3545,52 @@ void xbox_live_task_progress_callback(DWORD a1)
 
 		if (master_login_code < 0)
 		{
-			if (master_login_code == ERROR_CODE_CURL_SOCKET_FAILED 
-				|| master_login_code == ERROR_CODE_CURL_HANDLE 
-				|| master_login_code == ERROR_CODE_ACCOUNT_DATA
-				|| master_login_code == ERROR_CODE_INVALID_PARAM) {
-				//internal error
+			switch (master_login_code)
+			{
+			case ERROR_CODE_CURL_SOCKET_FAILED:
+			case ERROR_CODE_CURL_HANDLE:
+			case ERROR_CODE_ACCOUNT_DATA:
+			case ERROR_CODE_INVALID_PARAM:
 				GSCustomMenuCall_Error_Inner(CMLabelMenuId_Error, 0xFFFFF014, 0xFFFFF015);
 				return;
-			}
-			else if (master_login_code == ERROR_CODE_CURL_EASY_PERF) {
+
+			case ERROR_CODE_CURL_EASY_PERF:
 				GSCustomMenuCall_Error_Inner(CMLabelMenuId_Error, 0xFFFFF030, 0xFFFFF031);
 				return;
-			}
-			else if (master_login_code == ERROR_CODE_INVALID_VERSION) {
+
+			case ERROR_CODE_INVALID_VERSION:
 				GSCustomMenuCall_Update_Note();
 				return;
-			}
-			else if (master_login_code == ERROR_CODE_INVALID_LOGIN_TOKEN) {
+
+			case ERROR_CODE_INVALID_LOGIN_TOKEN:
 				GSCustomMenuCall_Invalid_Login_Token();
 				return;
-			}
-			else if (master_login_code == ERROR_CODE_INVALID_LOGIN_ID) {
+
+			case ERROR_CODE_INVALID_LOGIN_ID:
 				GSCustomMenuCall_Error_Inner(CMLabelMenuId_Error, 0xFFFFF008, 0xFFFFF009);
 				return;
-			}
-			else if (master_login_code == ERROR_CODE_INVALID_PASSWORD) {
+
+			case ERROR_CODE_INVALID_PASSWORD:
 				GSCustomMenuCall_Error_Inner(CMLabelMenuId_Error, 0xFFFFF00A, 0xFFFFF00B);
 				return;
-			}
-			else if (master_login_code == ERROR_CODE_MACHINE_BANNED) {
+
+			case ERROR_CODE_MACHINE_BANNED:
 				GSCustomMenuCall_Error_Inner(CMLabelMenuId_Error, 0xFFFFF00C, 0xFFFFF00D);
 				return;
-			}
-			else if (master_login_code == ERROR_CODE_ACCOUNT_BANNED) {
+
+			case ERROR_CODE_ACCOUNT_BANNED:
 				GSCustomMenuCall_Error_Inner(CMLabelMenuId_Error, 0xFFFFF00E, 0xFFFFF00F);
 				return;
-			}
-			else if (master_login_code == ERROR_CODE_ACCOUNT_DISABLED) {
+
+			case ERROR_CODE_ACCOUNT_DISABLED:
 				GSCustomMenuCall_Error_Inner(CMLabelMenuId_Error, 0xFFFFF010, 0xFFFFF011);
 				return;
-			}
-			else if (master_login_code == ERROR_CODE_MACHINE_SERIAL_INSUFFICIENT) {
+
+			case ERROR_CODE_MACHINE_SERIAL_INSUFFICIENT:
 				GSCustomMenuCall_Error_Inner(CMLabelMenuId_Error, 0xFFFFF018, 0xFFFFF019);
 				return;
-			}
-			else {
+
+			default:
 				//unknown error!
 				GSCustomMenuCall_Error_Inner(CMLabelMenuId_Error, 0xFFFFF012, 0xFFFFF013);
 				return;
@@ -3993,7 +3999,7 @@ void CMSetupVFTables_Guide() {
 int __cdecl CustomMenu_Guide(int a1) {
 	char* guide_desc_base = H2CustomLanguageGetLabel(CMLabelMenuId_Guide, 0xFFFFFFF2);
 	char* guide_description = (char*)malloc(strlen(guide_desc_base) + 50);
-	sprintf(guide_description, guide_desc_base, GetVKeyCodeString (H2Config_hotkeyIdGuide).c_str());
+	sprintf(guide_description, guide_desc_base, GetVKeyCodeString(H2Config_hotkeyIdGuide).c_str());
 	add_cartographer_label(CMLabelMenuId_Guide, 0xFFFFFFF1, guide_description, true);
 	free(guide_description);
 	return CustomMenu_CallHead(a1, menu_vftable_1_Guide, menu_vftable_2_Guide, (DWORD)&CMButtonHandler_Guide, 4, 272);

@@ -41,7 +41,7 @@ DWORD WINAPI XStorageUploadFromMemory(DWORD dwUserIndex, const WCHAR *wszServerP
 	{
 		pOverlapped->InternalLow = ERROR_SUCCESS;
 		pOverlapped->InternalHigh = dwBufferSize;
-		pOverlapped->dwExtendedError = HRESULT_FROM_WIN32(ERROR_SUCCESS);
+		pOverlapped->dwExtendedError = 0;
 
 		Check_Overlapped(pOverlapped);
 
@@ -190,9 +190,9 @@ DWORD WINAPI XStorageDownloadToMemory(DWORD dwUserIndex,
 
 	if (pXOverlapped)
 	{
-		pXOverlapped->InternalHigh = size;
 		pXOverlapped->InternalLow = ERROR_SUCCESS;
-		pXOverlapped->dwExtendedError = HRESULT_FROM_WIN32(ERROR_SUCCESS);
+		pXOverlapped->dwExtendedError = 0;
+		pXOverlapped->InternalHigh = size;
 
 		Check_Overlapped(pXOverlapped);
 
@@ -213,9 +213,9 @@ DWORD WINAPI XStorageDelete(DWORD dwUserIndex, const WCHAR *wszServerPath, XOVER
 	if (pXOverlapped) {
 		//asynchronous
 
-		pXOverlapped->InternalHigh = 0;
 		pXOverlapped->InternalLow = ERROR_SUCCESS;
-		pXOverlapped->dwExtendedError = HRESULT_FROM_WIN32(ERROR_SUCCESS);
+		pXOverlapped->dwExtendedError = 0;
+		pXOverlapped->InternalHigh = 0;
 
 		Check_Overlapped(pXOverlapped);
 

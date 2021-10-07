@@ -1,9 +1,11 @@
 #pragma once
 
+#include "Blam/Cache/DataTypes/BlamDataTypes.h"
+
 class VariantPlayer
 {
 public:
-	XUID GetXUID(datum _datum, bool player);
+	XUID GetXUID(datum object_index, bool player);
 	datum GetPlayerDatum(datum unit_datum);
 	datum GetPlayerDatum(XUID xuid);
 	datum GetUnitDatum(datum player_datum);

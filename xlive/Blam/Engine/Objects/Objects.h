@@ -1,7 +1,8 @@
 ﻿#pragma once
 
-#include "Blam\Maths\Maths.h"
-#include "Blam\Cache\DataTypes.h"
+#include "Blam\Math\BlamMath.h"
+
+#include "Blam\Engine\DataArray\DataArray.h"
 
 enum e_object_team : BYTE
 {
@@ -85,7 +86,8 @@ enum e_biped_physics_mode : BYTE
 	mode_melee
 };
 
-struct object_base_definition
+#pragma pack(push, 1)
+struct s_object_base_definition
 {
 	datum tag_definition_index;
 	DWORD object_flags;
@@ -114,7 +116,9 @@ struct object_base_definition
 	BYTE netgame_equipment_index;
 	DWORD gap_6;
 	datum havok_component_datum;
-	BYTE gap_B8[44];
+	BYTE gap_B8[0x1A];
+	BYTE model_variant_id;
+	BYTE gap_D6[17];
 	float body_max_vitality;
 	float shield_max_vitality;
 	float body_current_vitality;
@@ -125,9 +129,10 @@ struct object_base_definition
 	WORD field_10A;
 	BYTE gap_10C[32];
 };
-CHECK_STRUCT_SIZE(object_base_definition, 0x12C);
+#pragma pack(pop)
+CHECK_STRUCT_SIZE(s_object_base_definition, 0x12C);
 
-struct s_biped_object_definition : object_base_definition
+struct s_biped_object_definition : s_object_base_definition
 {
 	BYTE ObjectsAttach;//0x12C
 	BYTE unk_11[3];//0x12D
@@ -163,14 +168,17 @@ struct s_biped_object_definition : object_base_definition
 
 	e_biped_physics_mode unitState;//0x3F4
 	BYTE unk_18[0x21C];
+	
+	// NEW DATA
+	int variant_index;
 };
-static_assert(sizeof(s_biped_object_definition) == 0x480, "Invalid s_biped_object_definition size");
+CHECK_STRUCT_SIZE(s_biped_object_definition, 0x480 + 4);
 
-struct s_weapon_object_definition : object_base_definition
+struct s_weapon_object_definition : s_object_base_definition
 {
-	char gap[0x25C - sizeof(object_base_definition)];
+	char gap[0x25C - sizeof(s_object_base_definition)];
 };
-static_assert(sizeof(s_weapon_object_definition) == 0x25C, "Invalid s_weapon_object_definition size");
+CHECK_STRUCT_SIZE(s_weapon_object_definition, 0x25C);
 
 struct s_object_header {
 	__int16 datum_salt; //0x00
@@ -180,4 +188,31 @@ struct s_object_header {
 	__int16 unk_size;  //0x06
 	char* object; //0x08 - 
 };
-static_assert(sizeof(s_object_header) == 0xC, "Invalid s_object_header size");
+CHECK_STRUCT_SIZE(s_object_header, 0xC);
+
+static s_data_array* get_objects_header()
+{
+	return *Memory::GetAddress<s_data_array**>(0x4E461C, 0x50C8EC);
+};
+
+// Gets the header of the object, containing some details
+static s_object_header* get_objects_header(datum object_index)
+{
+	auto objects_header = get_objects_header();
+	return (s_object_header*)(&objects_header->data[objects_header->datum_element_size * DATUM_ABSOLUTE_INDEX(object_index)]);
+}
+
+// Get the object fast, with no validation from datum index
+template<typename T = s_object_base_definition>
+static T* object_get_fast_unsafe(datum object_index)
+{
+	return (T*)get_objects_header(object_index)->object;
+}
+
+// Gets the object and verifies the type, returns NULL if object doesn't match object type flags
+template<typename T = s_object_base_definition>
+static T* object_try_and_get_and_verify_type(datum object_index, int object_type_flags)
+{
+	auto p_object_try_and_get_and_verify_type = Memory::GetAddress<char*(__cdecl*)(datum, int)>(0x1304E3, 0x11F3A6);
+	return (T*)p_object_try_and_get_and_verify_type(object_index, object_type_flags);
+}

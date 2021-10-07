@@ -41,16 +41,6 @@ float compute_something(float v1, float v2)
 	return ((v1 - get_melee_acceleration(v2)) * 3.0f) / 2.0f;
 }
 
-static s_object_header* get_objects_header(datum object_index)
-{
-	/*
-		Gets the header of the object, containing some details
-	*/
-
-	auto objects_header = *Memory::GetAddress<s_datum_array**>(0x4E461C, 0x50C8EC);
-	return (s_object_header*)(&objects_header->datum[objects_header->datum_element_size * object_index.ToAbsoluteIndex()]);
-}
-
 __declspec(naked) void melee_force_decelerate_fixup()
 {
 	// xmm0 - output value
@@ -177,7 +167,7 @@ void __cdecl biped_dash_hook(datum object_index, datum target_player, char weapo
 
 	p_biped_dash(object_index, target_player, weapon_is_sword);
 
-	BYTE* object_data = (BYTE*)get_objects_header(object_index)->object;
+	BYTE* object_data = (BYTE*)object_get_fast_unsafe(object_index);
 
 	// check if we actually entered melee mode, otherwise don't update the data
 	if (*(BYTE*)(object_data + 1012) == 6)
@@ -197,7 +187,7 @@ void __cdecl biped_dash_hook(datum object_index, datum target_player, char weapo
 
 int __cdecl biped_dash_time_to_target(datum biped_index)
 {
-	BYTE* object_data = (BYTE*)get_objects_header(biped_index)->object;
+	BYTE* object_data = (BYTE*)object_get_fast_unsafe(biped_index);
 
 	// check if we actually entered melee mode, otherwise don't update the data
 	if (*(BYTE*)(object_data + 1012) == 6)
@@ -205,7 +195,7 @@ int __cdecl biped_dash_time_to_target(datum biped_index)
 
 	}
 
-	return -1;
+	return NONE;
 }
 
 float __cdecl get_max_melee_lunge_speed_per_tick(float target_distance, char weapon_is_sword)
@@ -282,8 +272,8 @@ void c_character_physics_mode_melee_datum::melee_deceleration_fixup
 		int added_ticks = (this->m_maximum_counter - 6) - (this->m_weapon_is_sword ? 7 : 1);
 	}*/
 
-	real_vector3d distance_vector = this->m_target_point - *object_origin;
-	float remaining_distance_from_player_position = distance_vector.magnitude();
+	real_vector3d target_vector = this->m_target_point - *object_origin;
+	float remaining_distance_from_player_position = target_vector.magnitude();
 	float max_speed_per_tick = get_max_melee_lunge_speed_per_tick(m_distance, m_weapon_is_sword);
 
 	float current_velocity_and_aiming_vector_dot_product = m_aiming_direction.dot_product(*current_velocity);

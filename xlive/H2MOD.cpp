@@ -8,8 +8,6 @@
 #include "H2MOD/Modules/Networking/Memory/bitstream.h"
 #include "H2MOD/Modules/OnScreenDebug/OnscreenDebug.h"
 #include "H2MOD/Modules/Tweaks/Tweaks.h"
-#include "H2MOD/Variants/GunGame/GunGame.h"
-#include "H2MOD/Variants/H2X/H2X.h"
 #include "H2MOD/Tags/MetaLoader/tag_loader.h"
 #include "H2MOD/Modules/MapManager/MapManager.h"
 #include "H2MOD/Modules/Stats/StatsHandler.h"
@@ -25,6 +23,8 @@
 #include "H2MOD/Modules/MainMenu/MapSlots.h"
 #include "H2MOD/Modules/GamePhysics/Patches/MeleeFix.h"
 #include "H2MOD/Modules/SpecialEvents/SpecialEvents.h"
+#include "H2MOD/Modules/AdvLobbySettings/AdvLobbySettings.h"
+#include "Util/Hooks/Hook.h"
 
 #include "H2MOD/Engine/Engine.h"
 #include "H2MOD/Modules/Config/Config.h"
@@ -34,8 +34,10 @@
 
 #include "Blam/Engine/Game/DamageData.h"
 #include "Blam/Engine/FileSystem/FiloInterface.h"
-#include "Blam/Engine/Objects/GameStateObjects.h"
 #include "Blam/Cache/TagGroups/multiplayer_globals_definition.hpp"
+
+#include <float.h>
+#pragma fenv_access (on)
 
 H2MOD* h2mod = new H2MOD();
 GunGame* gunGame = new GunGame();
@@ -44,10 +46,10 @@ Infection* infectionHandler = new Infection();
 FireFight* fireFightHandler = new FireFight();
 HeadHunter* headHunterHandler = new HeadHunter();
 VariantPlayer* variant_player = new VariantPlayer();
+AdvLobbySettings* advLobbySettings = new AdvLobbySettings();
 StatsHandler* stats_handler; 
 
 extern int H2GetInstanceId();
-std::unordered_map<int, int> object_to_variant;
 
 bool b_H2X = false;
 bool b_GunGame = false;
@@ -55,6 +57,9 @@ bool b_FireFight = false;
 bool b_XboxTick = false;
 bool b_Infection = false;
 bool b_HeadHunter = false;
+
+// TODO: remove these
+s_data_array* game_state_actors = nullptr;
 
 std::unordered_map<wchar_t*, bool&> GametypesMap
 {
@@ -71,20 +76,14 @@ std::unordered_map<wchar_t*, bool&> GametypesMap
 int GAME_BUILD = 11122;
 int EXECUTABLE_VERSION = 4;
 
-//Currently not used in code base
-int get_player_index_from_datum(datum unit_datum)
-{
-	return ((s_biped_object_definition*)s_game_state_objects::getObject(unit_datum))->PlayerDatum.ToAbsoluteIndex();
-}
-
 #pragma region engine calls
 
 // Used to get damage on any object
-typedef void(__cdecl p_object_cause_damage)(Blam::Engine::Game::damage_data* damage_data, int damaged_object_indexes, __int16 a4, __int16 a5, __int16 a6, int a7);
+typedef void(__cdecl p_object_cause_damage)(s_damage_data* damage_data, int damaged_object_indexes, __int16 a4, __int16 a5, __int16 a6, int a7);
 p_object_cause_damage* c_object_cause_damage;
 
 // Engine call to set damage applied on an object by a projectile
-void __cdecl projectile_collision_object_cause_damage(Blam::Engine::Game::damage_data* damage_data, int damaged_object_indexes, __int16 a4, __int16 a5, __int16 a6, int a7)
+void __cdecl projectile_collision_object_cause_damage(s_damage_data* damage_data, int damaged_object_indexes, __int16 a4, __int16 a5, __int16 a6, int a7)
 {
 	// Hook on call to prevent guardian glitching on Infection gametype
 	if (b_Infection) {
@@ -94,7 +93,7 @@ void __cdecl projectile_collision_object_cause_damage(Blam::Engine::Game::damage
 				"{} {} {} {} {} {} {} {}",
 				damage_data->flags,
 				IntToString<int>(damage_data->damage_tag_index, std::hex),
-				IntToString<int>(damage_data->creator_datum.ToInt(), std::hex),
+				IntToString<int>(damage_data->creator_datum, std::hex),
 				IntToString<int>(damage_data->field_10, std::hex), //TODO reverse what field_10 is
 				IntToString<int>(damage_data->field_14, std::hex),
 				IntToString<int>(damage_data->field_18, std::hex),
@@ -132,18 +131,6 @@ bool __cdecl call_add_object_to_sync(datum gamestate_object_datum)
 	return p_add_object_to_sync(gamestate_object_datum);
 }
 
-/* We should really make this stuff into a struct/class, and access it that way it'd be much cleaner... */
-int get_actor_datum_from_unit_datum(int unit_datum)
-{
-	char* unit_ptr = Engine::Objects::try_and_get_data_with_type(unit_datum, FLAG(e_object_type::biped));
-	if (unit_ptr)
-	{
-		return *(int*)(unit_ptr + 0x130);
-	}
-
-	return NONE;
-}
-
 /* This looks at the actors table to get the character datum which is assigned to the specific actor. */
 int get_char_datum_from_actor(int actor_datum)
 {
@@ -159,7 +146,7 @@ int get_char_datum_from_actor(int actor_datum)
 /*This is to get the datum of the last player who damaged the datum/unit provided */
 int get_damage_owner(int damaged_unit_index)
 {
-	char* damaged_player_ptr = Engine::Objects::try_and_get_data_with_type(damaged_unit_index, FLAG(e_object_type::biped) | FLAG(e_object_type::vehicle));
+	char* damaged_player_ptr = (char*)object_try_and_get_and_verify_type(damaged_unit_index, FLAG(e_object_type::biped) | FLAG(e_object_type::vehicle));
 	if (damaged_player_ptr)
 	{
 		return *(int*)(damaged_player_ptr + 0xC8); // player_ptr/unit_ptr + 0xC8 = damaging player this works on vehicles/AI and such too.
@@ -183,127 +170,6 @@ int __cdecl call_fill_creation_data_from_object_index(int object_index, void* cr
 
 	return p_fill_creation_data_from_object_index(object_index, creation_data);
 }
-
-signed int __cdecl object_new_hook(ObjectPlacementData* new_object)
-{
-	int variant_index = *(int*)((char*)new_object + 0xC);
-	int result = Engine::Objects::call_object_new(new_object);
-
-	//unsigned __int16 object_index = result & 0xFFFF;
-
-	if (result != NONE)
-		object_to_variant[result] = variant_index;
-
-	//wchar_t DebugText[255] = { 0 };
-	//SecureZeroMemory(DebugText, sizeof(DebugText));
-	//wsprintf(DebugText, L"AI object_new hook - object_index: %08X - variant_index: %08X - datum: %08X", result, variant_index);
-
-	//LOG_TRACE_GAME_N("AI object_new hook - object_index: %08X - variant_index: %08X - datum: %08X", result, variant_index);
-
-	//addDebugText(DebugText);
-
-	return result;
-}
-
-typedef void(__stdcall *tc_simulation_unit_entity_definition_creation_encode)(void* thisptr, int creation_data_size, void* creation_data, int a3, bitstream* stream);
-tc_simulation_unit_entity_definition_creation_encode pc_simulation_unit_entity_definition_encode;
-
-void __stdcall c_simulation_unit_entity_definition_creation_encode(void *thisptr, int creation_data_size, void* creation_data, int a3, bitstream* stream)
-{
-	//LOG_TRACE_GAME_N("c_simulation_unit_entity_definition_creation_encode()\r\nthisptr: %08X, creation_data_size: %i, creation_data: %08X, a3: %i, packet: %08X", thisptr, creation_data_size, creation_data, a3, packet);
-	int object_permutation_index = *(int*)((char*)creation_data + 0x24);
-	if (object_permutation_index != NONE)
-	{
-		//LOG_TRACE_GAME_N("creation_data+0x24: %08X", object_permutation_index);
-
-		stream->data_encode_bool("object-permutation-exists", 1);
-		stream->data_encode_integer("object-permutation-index", object_permutation_index, 32);
-		//LOG_TRACE_GAME_N("c_simulation_unit_entity_encode - object-permutation-exists packet: %08X, *packet: %08X", packet, *(int*)packet);
-
-	}
-	else
-		stream->data_encode_bool("object-permutation-exists", 0);
-
-	pc_simulation_unit_entity_definition_encode(thisptr, creation_data_size, creation_data, a3, stream);
-}
-
-
-typedef bool(__stdcall *tc_simulation_unit_entity_definition_creation_decode)(void* thisptr, int creation_data_size, void* creation_data, bitstream* stream);
-tc_simulation_unit_entity_definition_creation_decode pc_simulation_unit_entity_definition_decode;
-
-bool __stdcall c_simulation_unit_entity_definition_creation_decode(void *thisptr, int creation_data_size, void* creation_data, bitstream* stream)
-{
-	//LOG_TRACE_GAME_N("c_simulation_unit_entity_definition_creation_decode()\r\nthisptr: %08X, creation_data_size: %i, creation_data: %08X, packet: %08X", thisptr, creation_data_size, creation_data, packet);
-
-	if (stream->data_decode_bool("object-permutation-exists"))
-	{
-		//LOG_TRACE_GAME_N("c_simulation_unit_entity_decode - object-permutation-exists packet: %08X, *packet: %08X", packet, *(int*)packet);
-		int object_permutation_index = stream->data_decode_integer("object-permutation-index", 32);
-		*(int*)((char*)creation_data + 0x24) = object_permutation_index;
-
-		//LOG_TRACE_GAME_N("object_permutation_index: %08X", object_permutation_index);
-	}
-	else
-		*(int*)((char*)creation_data + 0x24) = NONE;
-
-	return pc_simulation_unit_entity_definition_decode(thisptr, creation_data_size, creation_data, stream);
-}
-
-void __stdcall set_unit_creation_data_hook(unsigned int object_index, void* object_creation_data)
-{
-	typedef void(__stdcall *tset_unit_creation_data)(unsigned int object_index, void* object_creation_data);
-	Memory::GetAddress<tset_unit_creation_data>(0x1F24ED, 0x1DD586)(object_index, object_creation_data);
-
-	if (object_to_variant.find(object_index) != object_to_variant.end())
-	{
-		//We should have allocated an additional 4 bytes above 0x24 so we'll write our in between 0x24 and 0x28
-		*(int*)((char*)object_creation_data + 0x24) = object_to_variant[object_index];
-
-		/*wchar_t DebugText[255] = { 0 };
-		SecureZeroMemory(DebugText, sizeof(DebugText));
-		wsprintf(DebugText, L"AI unit_creation_data_setup hook - object_index: %08X - variant_index: %08X", object_index, object_to_variant[object_index]);
-
-		LOG_TRACE_GAME_N("set_unit_creation_data_hook - object_index: %08X, variant_index: %08X", object_index, object_to_variant[object_index]);
-		addDebugText(DebugText);*/
-	}
-	else
-		*(int*)((char*)object_creation_data + 0x24) = NONE;
-}
-
-typedef bool(__cdecl *tset_unit_color_data)(int, unsigned __int16, int a3);
-tset_unit_color_data pset_unit_color_data;
-
-bool __cdecl set_unit_color_data_hook(int a1, unsigned __int16 a2, int a3)
-{
-	int object_creation_data = a1 - 0x10;
-	int object_permutation_index = *(int*)((char*)object_creation_data + 0x24);
-
-	LOG_TRACE_GAME("set_unit_color_data_hook - {:x}", object_permutation_index);
-
-	if (object_permutation_index == NONE)
-		return pset_unit_color_data(a1, a2, a3);
-
-	return 0;
-}
-
-bool __stdcall create_unit_hook(void* pCreationData, int a2, int a3, void* pObject)
-{
-	typedef bool(__stdcall *tcreate_unit_hook)(void*, int, int, void*);
-
-	if (*(int*)((char*)pCreationData + 0x24) != NONE)
-	{
-		//wchar_t DebugText[255] = { 0 };
-		//SecureZeroMemory(DebugText, sizeof(DebugText));
-		//wsprintf(DebugText, L"create_unit_hook - variant type: %08X - ", *(int*)((char*)pCreationData + 0x24));
-
-		//addDebugText(DebugText);
-
-		*(int*)((char*)pObject + 0xC) = *(int*)((char*)pCreationData + 0x24);
-	}
-
-	return Memory::GetAddress<tcreate_unit_hook>(0x1F32DB, 0x1DE374)(pCreationData, a2, a3, pObject);
-}
-
 
 void H2MOD::leave_session()
 {
@@ -382,11 +248,10 @@ real_point3d* H2MOD::get_player_unit_coords(int playerIndex) {
 
 BYTE* H2MOD::get_player_unit_from_player_index(int playerIndex) {
 	datum unit_datum = Player::getPlayerUnitDatumIndex(playerIndex);
-	if (unit_datum.IsNull())
+	if (DATUM_IS_NONE(unit_datum))
 		return nullptr;
 
-	DatumIterator<s_object_header> objectsIt(game_state_objects_header);
-	return (BYTE*)objectsIt.get_data_at_index(unit_datum.ToAbsoluteIndex())->object;
+	return (BYTE*)object_get_fast_unsafe(unit_datum);
 }
 
 void call_give_player_weapon(int playerIndex, datum weaponId, bool bReset)
@@ -394,9 +259,9 @@ void call_give_player_weapon(int playerIndex, datum weaponId, bool bReset)
 	//LOG_TRACE_GAME("GivePlayerWeapon(PlayerIndex: %08X, WeaponId: %08X)", PlayerIndex, WeaponId);
 
 	datum unit_datum = Player::getPlayerUnitDatumIndex(playerIndex);
-	if (unit_datum != NONE)
+	if (!DATUM_IS_NONE(unit_datum))
 	{
-		ObjectPlacementData nObject;
+		s_object_placement_data nObject;
 
 		Engine::Objects::create_new_placement_data(&nObject, weaponId, unit_datum, 0);
 
@@ -411,7 +276,7 @@ void call_give_player_weapon(int playerIndex, datum weaponId, bool bReset)
 
 wchar_t* H2MOD::get_local_player_name(int local_player_index)
 {
-	return Player::getName(this->get_player_datum_index_from_controller_index(local_player_index).ToAbsoluteIndex());
+	return Player::getName(DATUM_ABSOLUTE_INDEX(this->get_player_datum_index_from_controller_index(local_player_index)));
 }
 
 int H2MOD::get_player_index_from_unit_datum_index(datum unit_datum_index)
@@ -420,7 +285,7 @@ int H2MOD::get_player_index_from_unit_datum_index(datum unit_datum_index)
 	while (playersIt.get_next_active_player())
 	{
 		datum unit_datum_index_check = playersIt.get_current_player_data()->controlled_unit_index;
-		LOG_TRACE_FUNC("Checking datum: {0:x} - index: {1} against datum: {2:x}", unit_datum_index_check.ToInt(), playersIt.get_current_player_index(), unit_datum_index.ToInt());
+		LOG_TRACE_FUNC("Checking datum: {0:x} - index: {1} against datum: {2:x}", unit_datum_index_check, playersIt.get_current_player_index(), unit_datum_index);
 
 		if (unit_datum_index == unit_datum_index_check)
 			return playersIt.get_current_player_index();
@@ -431,8 +296,8 @@ int H2MOD::get_player_index_from_unit_datum_index(datum unit_datum_index)
 BYTE H2MOD::get_unit_team_index(datum unit_datum_index)
 {
 	BYTE team_index = NONE;
-	char* unit_object = Engine::Objects::try_and_get_data_with_type(unit_datum_index, FLAG(e_object_type::biped));
-	if (unit_object)
+	char* unit_object = (char*)object_try_and_get_and_verify_type(unit_datum_index, FLAG(e_object_type::biped));
+	if (unit_object != NULL)
 	{
 		team_index = *(BYTE*)(unit_object + 0x13C);
 	}
@@ -477,8 +342,8 @@ void H2MOD::set_player_unit_grenades_count(int playerIndex, e_grenades type, BYT
 	datum unit_datum_index = Player::getPlayerUnitDatumIndex(playerIndex);
 	datum grenade_eqip_tag_datum_index = tags::find_tag(blam_tag::tag_group_type::equipment, grenadeEquipamentTagName[type]);
 
-	char* unit_object = Engine::Objects::try_and_get_data_with_type(unit_datum_index, FLAG(e_object_type::biped));
-	if (unit_object)
+	char* unit_object = (char*)object_try_and_get_and_verify_type(unit_datum_index, FLAG(e_object_type::biped));
+	if (unit_object != NULL)
 	{
 		if (resetEquipment)
 			Engine::Unit::remove_equipment(unit_datum_index);
@@ -521,7 +386,7 @@ void H2MOD::disable_sounds(int sound_flags)
 	{
 		datum multiplayerGlobalsTagIndex = tags::find_tag(blam_tag::tag_group_type::multiplayerglobals, multiplayerGlobalsTag);
 
-		if (!multiplayerGlobalsTagIndex.IsNull())
+		if (!DATUM_IS_NONE(multiplayerGlobalsTagIndex))
 		{
 			s_multiplayer_globals_group_definition* multiplayerGlobalsTag = tags::get_tag<blam_tag::tag_group_type::multiplayerglobals, s_multiplayer_globals_group_definition>(multiplayerGlobalsTagIndex);
 
@@ -552,7 +417,7 @@ void H2MOD::disable_sounds(int sound_flags)
 							// disable all sounds from english to chinese
 							for (int j = 0; j < 8; j++)
 							{
-								(&general_event->sound)[j].TagIndex = datum::Null;
+								(&general_event->sound)[j].TagIndex = DATUM_NONE;
 							}
 						}
 					}
@@ -731,14 +596,13 @@ int OnAutoPickUpHandler(datum player_datum, datum object_datum)
 
 void get_object_table_memory()
 {
-	game_state_actors = *Memory::GetAddress<s_datum_array**>(0xA965DC, 0x9A1C5C);
-	game_state_objects_header = *Memory::GetAddress<s_datum_array**>(0x4E461C, 0x50C8EC);
+	game_state_actors = *Memory::GetAddress<s_data_array**>(0xA965DC, 0x9A1C5C);
 }
 
-typedef bool(__cdecl *map_cache_load)(Blam::EngineDefinitions::game_engine_settings* map_load_settings);
+typedef bool(__cdecl *map_cache_load)(s_game_engine_settings* map_load_settings);
 map_cache_load p_map_cache_load;
 
-bool __cdecl OnMapLoad(Blam::EngineDefinitions::game_engine_settings* engine_settings)
+bool __cdecl OnMapLoad(s_game_engine_settings* engine_settings)
 {
 
 	//Set the light suppressor flag to false
@@ -752,8 +616,6 @@ bool __cdecl OnMapLoad(Blam::EngineDefinitions::game_engine_settings* engine_set
 	bool result = p_map_cache_load(engine_settings);
 	if (result == false) // verify if the game didn't fail to load the map
 		return false;
-	// clear all the object variant data
-	object_to_variant.clear();
 
 	// set the engine type
 	h2mod->SetCurrentEngineType(engine_settings->map_type);
@@ -893,17 +755,17 @@ bool __cdecl OnPlayerSpawn(datum playerDatumIndex)
 
 	if(b_HeadHunter)
 	{
-		headHunterHandler->preSpawnPlayer->SetPlayerIndex(playerDatumIndex.ToAbsoluteIndex());
+		headHunterHandler->preSpawnPlayer->SetPlayerIndex(DATUM_ABSOLUTE_INDEX(playerDatumIndex));
 		headHunterHandler->preSpawnPlayer->execute();
 	}
 
 	if (b_Infection) {
-		infectionHandler->preSpawnPlayer->setPlayerIndex(playerDatumIndex.ToAbsoluteIndex());
+		infectionHandler->preSpawnPlayer->setPlayerIndex(DATUM_ABSOLUTE_INDEX(playerDatumIndex));
 		infectionHandler->preSpawnPlayer->execute();
 	}
 
 	if (b_GunGame) {
-		gunGame->preSpawnPlayer->setPlayerIndex(playerDatumIndex.ToAbsoluteIndex());
+		gunGame->preSpawnPlayer->setPlayerIndex(DATUM_ABSOLUTE_INDEX(playerDatumIndex));
 		gunGame->preSpawnPlayer->execute();
 	}
 
@@ -911,17 +773,17 @@ bool __cdecl OnPlayerSpawn(datum playerDatumIndex)
 
 	if(b_HeadHunter)
 	{
-		headHunterHandler->spawnPlayer->SetPlayerIndex(playerDatumIndex.ToAbsoluteIndex());
+		headHunterHandler->spawnPlayer->SetPlayerIndex(DATUM_ABSOLUTE_INDEX(playerDatumIndex));
 		headHunterHandler->spawnPlayer->execute();
 	}
 
 	if (b_Infection) {
-		infectionHandler->spawnPlayer->setPlayerIndex(playerDatumIndex.ToAbsoluteIndex());
+		infectionHandler->spawnPlayer->setPlayerIndex(DATUM_ABSOLUTE_INDEX(playerDatumIndex));
 		infectionHandler->spawnPlayer->execute();
 	}
 
 	if (b_GunGame) {
-		gunGame->spawnPlayer->setPlayerIndex(playerDatumIndex.ToAbsoluteIndex());
+		gunGame->spawnPlayer->setPlayerIndex(DATUM_ABSOLUTE_INDEX(playerDatumIndex));
 		gunGame->spawnPlayer->execute();
 	}
 
@@ -969,7 +831,7 @@ change_team p_change_local_team;
 void __cdecl changeTeam(int localPlayerIndex, int teamIndex) 
 {
 	network_session* session = NetworkSession::getCurrentNetworkSession();
-	if ((session->parameters.field_8 == 4 && Engine::get_game_life_cycle() == life_cycle_pre_game)
+	if ((session->parameters.session_mode == 4 && Engine::get_game_life_cycle() == life_cycle_pre_game)
 		|| (StrStrIW(NetworkSession::getGameVariantName(), L"rvb") != NULL && teamIndex > 1)) {
 		//rvb mode enabled, don't change teams
 		return;
@@ -1160,9 +1022,9 @@ void __cdecl GetGameVersion(DWORD *executable_version, DWORD *build_version, DWO
 
 void GivePlayerWeaponDatum(datum unit_datum, datum weapon_datum)
 {
-	if (unit_datum != NONE)
+	if (!DATUM_IS_NONE(unit_datum))
 	{
-		ObjectPlacementData nObject;
+		s_object_placement_data nObject;
 
 		Engine::Objects::create_new_placement_data(&nObject, weapon_datum, unit_datum, 0);
 
@@ -1180,10 +1042,9 @@ float get_device_acceleration_scale(datum device_datum)
 {
 	DWORD tag_data = (DWORD)tags::get_tag_data();
 	DWORD tag_instances = (DWORD)tags::get_tag_instances();
-	BYTE* game_state_objects_header_table = (BYTE*)game_state_objects_header->datum;
 
-	int device_gamestate_offset = device_datum.Index + device_datum.Index * 2;
-	DWORD device_gamestate_datum_pointer = *(DWORD*)(game_state_objects_header_table + device_gamestate_offset * 4 + 8);
+	int device_gamestate_offset = DATUM_ABSOLUTE_INDEX(device_datum) + DATUM_ABSOLUTE_INDEX(device_datum) * 2;
+	DWORD device_gamestate_datum_pointer = *(DWORD*)((BYTE*)get_objects_header()->data + device_gamestate_offset * 4 + 8);
 	DWORD device_control_datum = *(DWORD*)((BYTE*)device_gamestate_datum_pointer);
 
 	__int16 device_control_index = device_control_datum & 0xFFFF;
@@ -1270,31 +1131,9 @@ signed int __cdecl get_next_hill_index(int previousHill)
 	return previousHill + 1;
 }
 
-void H2MOD::ApplyUnitHooks()
+void H2MOD::ApplyFirefightHooks()
 {
-	// increase the size of the unit entity creation definition packet
-	WriteValue<DWORD>(Memory::GetAddress(0x1F8028, 0x1E1D8E) + 1, 48);
-
-	//This encodes the unit creation packet, only gets executed on host.
-	pc_simulation_unit_entity_definition_encode = (tc_simulation_unit_entity_definition_creation_encode)DetourClassFunc(Memory::GetAddress<BYTE*>(0x1F8503, 0x1E2269), (BYTE*)c_simulation_unit_entity_definition_creation_encode, 10);
-
-	//This decodes the unit creation packet, only gets executed on client.
-	pc_simulation_unit_entity_definition_decode = (tc_simulation_unit_entity_definition_creation_decode)DetourClassFunc(Memory::GetAddress<BYTE*>(0x1F8557, 0x1E22BD), (BYTE*)c_simulation_unit_entity_definition_creation_decode, 11);
-
 	pdevice_touch = (tdevice_touch)DetourFunc(Memory::GetAddress<BYTE*>(0x163420, 0x158EE3), (BYTE*)device_touch, 10);
-
-	//Only patch the object_new call on host during AI_Place function, no reason to hook all object_new calls.
-	PatchCall(Memory::GetAddress(0x318DEC, 0x2C3B56), object_new_hook);
-
-	//We update creation data here which is used later on to add data to the packet
-	PatchCall(Memory::GetAddress(0x1F807A, 0x1E1DE0), set_unit_creation_data_hook);
-
-	// Hooks a call within the creat_unit property on the client side in order to set their permutation index before spawn.
-	PatchCall(Memory::GetAddress(0x1F9E6C, 0x1E3BD4), create_unit_hook);
-
-	// Hooks the part of the unit spawn from simulation that handles setting their color data in order to ensure AI do not have their color overridden
-	PatchCall(Memory::GetAddress(0x1F9E34, 0x1E3B9C), set_unit_color_data_hook);
-	pset_unit_color_data = Memory::GetAddress<tset_unit_color_data>(0x6E5C3, 0x6D1BF);
 }
 
 
@@ -1534,6 +1373,11 @@ void H2MOD::RegisterEvents()
 //	return c_sub_81A676(a1, a2, a3, 4, a5, a6, a7, a8, a9, a10);
 //}
 
+// unlocks all single player maps
+int __cdecl get_last_single_player_level_id_unlocked_from_profile()
+{
+	return 805; // return the id of the last level
+}
 
 void H2MOD::ApplyHooks() {
 	/* Should store all offsets in a central location and swap the variables based on h2server/halo2.exe*/
@@ -1580,7 +1424,7 @@ void H2MOD::ApplyHooks() {
 	PatchWinAPICall(Memory::GetAddress(0x9AF9E, 0x352538), CryptUnprotectDataHook);
 	PatchCall(Memory::GetAddress(0x9B09F, 0x85F73), filo_write__encrypted_data_hook);
 
-	ApplyUnitHooks();
+	ApplyFirefightHooks();
 	mapManager->applyHooks();
 
 	ProjectileFix::ApplyPatches();
@@ -1652,7 +1496,8 @@ void H2MOD::ApplyHooks() {
 		PlayerControl::ApplyHooks();
 		c_set_screen_bounds = Memory::GetAddress<p_set_screen_bounds*>(0x264979);
 		//PatchCall(GetAddress(0x25E1E5), set_screen_bounds);
-
+		
+		PatchCall(Memory::GetAddressRelative(0x6422C8), get_last_single_player_level_id_unlocked_from_profile);
 	}
 	else {
 
@@ -1696,11 +1541,13 @@ void H2MOD::Initialize()
 	TagFixes::Initalize();
 	MapSlots::Initialize();
 	HaloScript::Initialize();
-	LOG_TRACE_GAME("H2MOD - Initialized v0.5a");
-	LOG_TRACE_GAME("H2MOD - BASE ADDR {:x}", Memory::baseAddress);
+	LOG_TRACE_GAME("H2MOD - Initialized {}", DLL_VERSION_STR);
+	LOG_TRACE_GAME("H2MOD - Image base address: 0x{:X}", Memory::baseAddress);
 	//WriteValue(GetAddress(0xC25EA + 8), 100);
 	h2mod->ApplyHooks();
 	h2mod->RegisterEvents();
+
+	Engine::Objects::apply_biped_object_definition_patches();
 }
 
 void H2MOD::Deinitialize() {

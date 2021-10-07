@@ -3,7 +3,7 @@
 #include "H2MOD/Modules/Config/Config.h"
 #include "H2MOD/GUI/GUI.h"
 
-bool ras_layer_overrides[25];
+bool ras_layer_overrides[RenderHooks::end];
 bool geo_render_overrides[24];
 namespace RenderHooks
 {
@@ -49,7 +49,7 @@ namespace RenderHooks
 		0x2265E2
 	};
 
-	byte* reset_screen;
+	bool* reset_screen;
 
 	typedef bool(__cdecl p_initialize_rasterizer_layer)(e_layer_type type, unsigned int width, unsigned int height, bool fmt, int a5);
 	p_initialize_rasterizer_layer* c_initialize_rasterizer_layer;
@@ -134,6 +134,7 @@ namespace RenderHooks
 				}
 				break;
 		}
+
 		return width;
 	}
 	int getHeight(e_layer_type e, unsigned int height)
@@ -208,21 +209,24 @@ namespace RenderHooks
 					return window_height * 2;
 				}
 				break;
+			default:
+				break;
 		}
 		return height;
 	}
 
 	bool __cdecl h_initialize_rasterizer_layer(e_layer_type type, unsigned int width, unsigned int height, bool fmt, int a5)
 	{
-		oWidth = getWidth(type, width);
-		oHeight = getHeight(type, height);
+		int texture_width = getWidth(type, width);
+		int texture_height = getHeight(type, height);
+
 		if (ras_layer_overrides[(int)type - 1])
 		{
-			oWidth = 128;
-			oHeight = 128;
+			texture_width = 128;
+			texture_height = 128;
 		}
-		LOG_TRACE_GAME(L"[Render Hooks] init_rasterizer_layer: {} {} {} {} {}", type, oWidth, oHeight, fmt, a5);
-		return c_initialize_rasterizer_layer(type, oWidth, oHeight, fmt, a5);
+		LOG_TRACE_GAME(L"[Render Hooks] init_rasterizer_layer: {} {} {} {} {}", type, texture_width, texture_height, fmt, a5);
+		return c_initialize_rasterizer_layer(type, texture_width, texture_height, fmt, a5);
 	}
 
 	void __cdecl h_render_geometry(e_render_geometry_type type)
@@ -234,7 +238,7 @@ namespace RenderHooks
 
 	void ResetDevice()
 	{
-		*reset_screen = 1;
+		*reset_screen = true;
 	}
 
 	void ApplyHooks()
@@ -255,7 +259,7 @@ namespace RenderHooks
 
 	void Initialize()
 	{
-		reset_screen = Memory::GetAddress<byte*>(0xA3E4D4);
+		reset_screen = Memory::GetAddress<bool*>(0xA3E4D4);
 		ApplyHooks();
 	}
 }

@@ -1,16 +1,16 @@
 #pragma once
-#include "Blam\Maths\Maths.h"
-#include "Blam\Cache\DataTypes.h"
+#include "Blam\Cache\DataTypes\BlamDataTypes.h"
+#include "Blam\Math\BlamMath.h"
 
-//0xC4
-struct ObjectPlacementData //To Do
+// TODO:
+struct s_object_placement_data
 {
 	datum object_datum;//0
 	DWORD unk_0;//0x4
 	WORD unk_10;//0x8;
 	BYTE unk_11;//0xA
 	BYTE unk_12;//0xB
-	DWORD variant_index;//0xC
+	int variant_index;//0xC
 	DWORD unk_14;//0x10
 	BYTE unk_15;//0x14
 	BYTE unk_16;//0x15
@@ -39,4 +39,4 @@ struct ObjectPlacementData //To Do
 	BYTE unk_25[3];//0xBD
 	DWORD unk_26;//0xC0		
 };
-static_assert(sizeof(ObjectPlacementData) == 0xC4, "Invalid ObjectPlacementData size");
+CHECK_STRUCT_SIZE(s_object_placement_data, 0xC4);

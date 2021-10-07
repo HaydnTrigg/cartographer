@@ -106,9 +106,9 @@ bool tags::load_tag_debug_name()
 	return true;
 }
 
-std::string tags::get_tag_name(datum tag)
+std::string tags::get_tag_name(datum tag_index)
 {
-	auto ilter = tag_datum_name_map.find(tag.Index);
+	auto ilter = tag_datum_name_map.find(DATUM_ABSOLUTE_INDEX(tag_index));
 	if (ilter != tag_datum_name_map.end())
 		return ilter->second;
 	LOG_INFO_FUNC("Tag name not found?, this shouldn't happen.");
@@ -126,7 +126,7 @@ datum tags::find_tag(blam_tag type, const std::string& name)
 				return index_to_datum(it->first);
 		}
 	}
-	return datum::Null;
+	return DATUM_NONE;
 }
 
 std::map<datum, std::string> tags::find_tags(blam_tag type)

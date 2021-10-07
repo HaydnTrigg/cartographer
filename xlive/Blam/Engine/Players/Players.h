@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Blam/Common/Common.h"
 #include "Blam/Engine/DataArray/DataArray.h"
 #include "Blam/Engine/Objects/Objects.h"
 
@@ -157,7 +156,7 @@ struct Player
 		Severe = 3
 	};
 
-	enum flags
+	enum flags : int
 	{
 		player_inactive = 9,
 	};
@@ -251,7 +250,7 @@ struct Player
 	- This functions work only after game has started, if you need to do something in the pregame lobby, use the functions available in Network Session (H2MOD/Modules/Networking/NetworkSession)
 	*/
 
-	static s_datum_array* getArray();
+	static s_data_array* getArray();
 	static bool indexValid(int playerIndex);
 	static Player* getPlayer(int playerIndex);
 	static e_object_team getTeam(int playerIndex);
@@ -265,7 +264,7 @@ struct Player
 CHECK_STRUCT_SIZE(Player, 0x204);
 #pragma pack(pop)
 
-class PlayerIterator : public DatumIterator<Player>
+class PlayerIterator : public s_data_iterator<Player>
 {
 public:
 
@@ -273,12 +272,13 @@ public:
 
 	bool get_next_active_player();
 
-
 	Player* get_current_player_data();
 
 	int get_current_player_index();
 
 	wchar_t* get_current_player_name();
+
+	XUID get_current_player_id();
 
 private:
 	Player* m_current_player = nullptr;
