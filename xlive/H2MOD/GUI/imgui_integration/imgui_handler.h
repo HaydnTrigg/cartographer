@@ -184,7 +184,6 @@ namespace ImGuiHandler
 			tex_L3,
 			shadow_title,
 			water_title,
-			screenfx_title,
 			upnp_title,
 			upnp_tooltip,
 			melee_fix_title,
