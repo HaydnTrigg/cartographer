@@ -1,67 +1,37 @@
 #include "stdafx.h"
 
 #include "TagFixes.h"
-#include "Blam\Cache\TagGroups\shader_definition.hpp"
+#include "Blam/Cache/TagGroups/shader_definition.hpp"
 #include "Blam/Cache/TagGroups/light_definition.h"
 #include "Blam/Cache/TagGroups/biped_definition.hpp"
+#include "Blam/Cache/TagGroups/shader_template_definition.hpp"
 #include "H2MOD.h"
 #include "H2MOD\Tags\TagInterface.h"
 #include "Util\Hooks\Hook.h"
 #include "H2MOD\Modules\Shell\Config.h"
+#include "H2MOD\Tags\MetaLoader\tag_loader.h"
 
 namespace TagFixes
 {
 	namespace
 	{
-		void fix_shader_template_nvidia(const std::string &template_name, const std::string &bitmap_name, size_t bitmap_idx)
+		void fix_shader_template_nvidia()
 		{
-			datum bitmap_to_fix = tags::find_tag(blam_tag::tag_group_type::bitmap, bitmap_name);
-			datum borked_template = tags::find_tag(blam_tag::tag_group_type::shadertemplate, template_name);
-			LOG_DEBUG_FUNC("bitmap {0}, borked_template {1}", bitmap_to_fix, borked_template);
-			if (DATUM_IS_NONE(bitmap_to_fix) || DATUM_IS_NONE(borked_template))
-				return;
-			LOG_DEBUG_FUNC("Fixing: template {}, bitmap {}", template_name, bitmap_name);
-			auto shaders = tags::find_tags(blam_tag::tag_group_type::shader);
-			for(auto &shader_item : shaders)
+			
+			auto alpha_test_new_datum = tag_loader::Get_tag_datum("shaders\\shader_templates\\opaque\\tex_bump_alpha_test_single_pass_new", blam_tag::tag_group_type::shadertemplate, "new_shaders");
+			auto alpha_test_new_pass_datum = tag_loader::Get_tag_datum("shaders\\shader_passes\\lightmap\\lightmap_tex_detail_alpha_test_new", blam_tag::tag_group_type::shaderpass, "new_shaders");
+			auto alpha_test_datum = tags::find_tag(blam_tag::tag_group_type::shadertemplate, "shaders\\shader_templates\\opaque\\tex_bump_alpha_test_single_pass");
+
+			if (alpha_test_new_datum != DATUM_INDEX_NONE && alpha_test_datum != DATUM_INDEX_NONE)
 			{
-				auto shader = tags::get_tag<blam_tag::tag_group_type::shader, byte>(shader_item.first);
-				if(shader != nullptr)
-				{
-					tag_reference* shader_template = reinterpret_cast<tag_reference*>(shader);
-					if(shader_template->TagIndex == borked_template)
-					{
-						auto *shader_post = reinterpret_cast<tags::tag_data_block*>(shader + 0x20);
-						if(shader_post->block_count > 0)
-						{
-							auto shader_post_data = tags::get_tag_data() + shader_post->block_data_offset;
-							auto shader_post_bitmap = reinterpret_cast<tags::tag_data_block*>(shader_post_data + 0x4);
-							if(shader_post_bitmap->block_count >= bitmap_idx + 1)
-							{
-								auto bitmap_data = tags::get_tag_data() + (shader_post_bitmap->block_data_offset + (bitmap_idx * 0xC));
-								datum* bitmap = reinterpret_cast<datum*>(bitmap_data);
-								if(*bitmap == bitmap_to_fix)
-									*bitmap = DATUM_INDEX_NONE;
-							}
-						}
-					}
-				}
+				auto alpha_test = tags::get_tag<blam_tag::tag_group_type::shadertemplate, shader_template_group_definition>(alpha_test_datum);
+
+				tag_loader::Load_tag(alpha_test_new_datum, true, "new_shaders");
+				tag_loader::Push_Back();
+
+				alpha_test->postprocessDefinition[0]->passes[0]->pass.TagIndex = tag_loader::ResolveNewDatum(alpha_test_new_pass_datum);
+				alpha_test->postprocessDefinition[0]->passes[6]->pass.TagIndex = tag_loader::ResolveNewDatum(alpha_test_new_pass_datum);
 			}
-		}
-		void fix_shaders_nvidia()
-		{
-			if (Memory::IsDedicatedServer()) return;
-
-			fix_shader_template_nvidia(
-				"shaders\\shader_templates\\opaque\\tex_bump_alpha_test_single_pass",
-				"shaders\\default_bitmaps\\bitmaps\\alpha_white",
-				4
-			);
-
-			fix_shader_template_nvidia(
-				"shaders\\shader_templates\\opaque\\tex_bump_alpha_test",
-				"shaders\\default_bitmaps\\bitmaps\\gray_50_percent",
-				1
-			);
 		}
 		void fix_dynamic_lights()
 		{
@@ -95,51 +65,45 @@ namespace TagFixes
 		{
 			//Fix the Master Chief FP Arms Shader
 			auto fp_shader_datum = tags::find_tag(blam_tag::tag_group_type::shader, "objects\\characters\\masterchief\\fp\\shaders\\fp_arms");
-			BYTE* fp_shader_tag_data = tags::get_tag<blam_tag::tag_group_type::shader, BYTE>(fp_shader_datum);
-			if (fp_shader_tag_data != nullptr)
-				*(float*)(fp_shader_tag_data + 0x44) = 1.0f;
+			if (fp_shader_datum != DATUM_INDEX_NONE)
+			{
+				auto fp_shader = tags::get_tag<blam_tag::tag_group_type::shader, shader_definition>(fp_shader_datum);
+				fp_shader->lightmapSpecularBrightness = 1.0f;
+			}
 
 			//Fix the Visor(s)
 			auto tex_bump_env_datum = tags::find_tag(blam_tag::tag_group_type::shadertemplate, "shaders\\shader_templates\\opaque\\tex_bump_env");
 
 			//Fix the Visor
 			auto visor_shader_datum = tags::find_tag(blam_tag::tag_group_type::shader, "objects\\characters\\masterchief\\shaders\\masterchief_visor");
-			BYTE* visor_shader_tag_data = tags::get_tag<blam_tag::tag_group_type::shader, BYTE>(visor_shader_datum);
-
-			if (visor_shader_tag_data != nullptr)
-				*(unsigned long*)(visor_shader_tag_data + 0x4) = tex_bump_env_datum;
-			if (visor_shader_tag_data != nullptr)
+			if (visor_shader_datum != DATUM_INDEX_NONE)
 			{
-				auto *visor_pp = reinterpret_cast<tags::tag_data_block*>(visor_shader_tag_data + 0x20);
-				if (visor_pp->block_count > 0 && visor_pp->block_data_offset != -1)
-				{
-					auto visor_pp_data = tags::get_tag_data() + visor_pp->block_data_offset;
-					*(unsigned long*)(visor_pp_data) = tex_bump_env_datum;
-				}
-			}
-
-			auto pilot_visor_shader_datum = tags::find_tag(blam_tag::tag_group_type::shader, "objects\\characters\\marine\\shaders\\helmet_pilot_visor");
-			auto pilot_visor_tag = tags::get_tag < blam_tag::tag_group_type::shader, shader_definition>(pilot_visor_shader_datum);
-			if(pilot_visor_tag != nullptr)
-			{
-				pilot_visor_tag->postprocessDefinition[0]->shaderTemplateIndex.TagIndex = tex_bump_env_datum;
+				auto visor_shader = tags::get_tag_fast<shader_definition>(visor_shader_datum);
+				visor_shader->postprocessDefinition[0]->shaderTemplateIndex = tex_bump_env_datum;
 			}
 
 			//Fix the Grunt Shaders
 			auto grunt_arm_shader_datum = tags::find_tag(blam_tag::tag_group_type::shader, "objects\\characters\\grunt\\shaders\\grunt_arms");
-			BYTE* grunt_arm_shader_tag_data = tags::get_tag<blam_tag::tag_group_type::shader, BYTE>(grunt_arm_shader_datum);
-			if (grunt_arm_shader_tag_data != nullptr)
-				*(float*)(grunt_arm_shader_tag_data + 0x44) = 1;
+			if (grunt_arm_shader_datum != DATUM_INDEX_NONE)
+			{
+				auto grunt_arm_shader = tags::get_tag_fast<shader_definition>(grunt_arm_shader_datum);
+				grunt_arm_shader->lightmapSpecularBrightness = 1.0f;
+			}
 
 			auto grunt_backpack_shader_datum = tags::find_tag(blam_tag::tag_group_type::shader, "objects\\characters\\grunt\\shaders\\grunt_backpack");
-			BYTE* grunt_backpack_shader_tag_data = tags::get_tag<blam_tag::tag_group_type::shader, BYTE>(grunt_backpack_shader_datum);
-			if (grunt_backpack_shader_tag_data != nullptr)
-				*(float*)(grunt_backpack_shader_tag_data + 0x44) = 1;
+			if (grunt_backpack_shader_datum != DATUM_INDEX_NONE)
+			{
+				auto grunt_backpack_shader = tags::get_tag_fast<shader_definition>(grunt_backpack_shader_datum);
+				grunt_backpack_shader->lightmapSpecularBrightness = 1.0f;
+			}
 
 			auto grunt_torso_shader_datum = tags::find_tag(blam_tag::tag_group_type::shader, "objects\\characters\\grunt\\shaders\\grunt_torso");
-			BYTE* grunt_torso_shader_tag_data = tags::get_tag<blam_tag::tag_group_type::shader, BYTE>(grunt_torso_shader_datum);
-			if (grunt_torso_shader_tag_data != nullptr)
-				*(float*)(grunt_torso_shader_tag_data + 0x44) = 1.0f;
+			if (grunt_torso_shader_datum != DATUM_INDEX_NONE)
+			{
+				auto grunt_torso_shader = tags::get_tag_fast<shader_definition>(grunt_torso_shader_datum);
+				grunt_torso_shader->lightmapSpecularBrightness = 1.0f;
+			}
+
 		}
 
 		void font_table_fix()
@@ -195,7 +159,9 @@ namespace TagFixes
 	void OnMapLoad()
 	{
 		if (!Memory::IsDedicatedServer()) {
-			fix_shaders_nvidia();
+			if (h2mod->GetEngineType() != e_engine_type::_main_menu) {
+				fix_shader_template_nvidia();
+			}
 			ShaderSpecularFix();
 			fix_dynamic_lights();
 			font_table_fix();
