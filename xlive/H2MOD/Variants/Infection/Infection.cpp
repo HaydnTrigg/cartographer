@@ -256,6 +256,32 @@ void Infection::Initialize()
 {
 	LOG_TRACE_GAME("{} - infection initialization!");
 
+	// Remove unwanted items in infection
+	if (h2mod->GetEngineType() == _multiplayer)
+	{
+		auto itemcollections = tags::find_tags(blam_tag::tag_group_type::itemcollection);
+		for each (auto itemcollection in itemcollections)
+		{
+			std::string item_name = tags::get_tag_name(itemcollection.first);
+			if (strstr(item_name.c_str(), "multiplayer\\powerups") != nullptr ||
+				item_name == "multiplayer\\single_weapons\\frag_grenades" ||
+				item_name == "multiplayer\\single_weapons\\plasma_grenades")
+			{
+				auto itmc = tags::get_tag_fast<s_item_collection_group_definition>(itemcollection.first);
+
+				// Can't make equipment null otherwise it'll crash, dosent spawn anything anyways so it's fine
+				if (itmc->item_permutations[0]->item.TagGroup == blam_tag::tag_group_type::equipment)
+				{
+					itmc->item_permutations[0]->item.TagIndex = tags::find_tag(blam_tag::tag_group_type::equipment, "objects\powerups\shotgun_ammo\shotgun_ammo");
+				}
+				else
+				{
+					itmc->item_permutations[0]->item.TagIndex = NULL;
+				}
+			}
+		}
+	}
+
 	if (!Memory::IsDedicatedServer())
 		Infection::InitClient();
 
@@ -293,29 +319,6 @@ CustomVariantId Infection::GetVariantId()
 
 void Infection::OnMapLoad(ExecTime execTime, s_game_options* gameOptions)
 {
-	// Remove unwanted items in infection
-	auto itemcollections = tags::find_tags(blam_tag::tag_group_type::itemcollection);
-	for each (auto itemcollection in itemcollections)
-	{
-		std::string item_name = tags::get_tag_name(itemcollection.first);
-		if (strstr(item_name.c_str(), "multiplayer\\powerups") != nullptr ||
-			item_name == "multiplayer\\single_weapons\\frag_grenades" ||
-			item_name == "multiplayer\\single_weapons\\plasma_grenades")
-		{
-			auto itmc = tags::get_tag_fast<s_item_collection_group_definition>(itemcollection.first);
-
-			// Can't make equipment null otherwise it'll crash, dosent spawn anything anyways so it's fine
-			if (itmc->item_permutations[0]->item.TagGroup == blam_tag::tag_group_type::equipment)
-			{
-				itmc->item_permutations[0]->item.TagIndex = tags::find_tag(blam_tag::tag_group_type::equipment, "objects\powerups\shotgun_ammo\shotgun_ammo");
-			}
-			else
-			{
-				itmc->item_permutations[0]->item.TagIndex = NULL;
-			}
-		}
-	}
-
 	switch (execTime)
 	{
 	case ExecTime::_preEventExec:

@@ -11,7 +11,14 @@
 #include "H2MOD\Modules\Input\PlayerControl.h"
 #include "H2MOD\Modules\RenderHooks\RenderHooks.h"
 #include "H2MOD\Modules\RunLoop\RunLoop.h"
-#include "H2MOD/Modules/SpecialEvents/SpecialEvents.h"
+#include "H2MOD\Modules\SpecialEvents\SpecialEvents.h"
+
+#ifndef NDEBUG
+#include "H2MOD\Modules\ObserverMode\ObserverMode.h"
+#include "H2MOD\Modules\DirectorHooks\DirectorHooks.h"
+#include "H2MOD\Utils\Utils.h"
+#endif
+
 #include "Util\Hooks\Hook.h"
 
 #include "imgui.h"
@@ -36,7 +43,6 @@ namespace ImGuiHandler {
 			bool g_init = false;
 			int g_language_code = -1;
 
-			
 			const char* button_items[] = { "Dpad Up","Dpad Down","Dpad Left","Dpad Right","Start","Back","Left Thumb","Right Thumb","Left Bumper","Right Bumper","A","B","X","Y" };
 			const char* action_items[] = { "Dpad Up","Dpad Down","Dpad Left","Dpad Right","Start","Back","Crouch","Zoom","Flashlight","Switch Grenades","Jump","Melee","Reload","Switch Weapons" };
 			const WORD button_values[] = { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 4096, 8192, 16384, 32768 };
@@ -960,9 +966,10 @@ namespace ImGuiHandler {
 				GameSettings();
 
 				
-#if DISPLAY_DEV_TESTING_MENU
+#ifndef NDEBUG
 				if (ImGui::CollapsingHeader("Dev Testing"))
 				{
+					/*
 					if(ImGui::CollapsingHeader("Misc"))
 					{
 						if(ImGui::Button("Log Player Unit Objects"))
@@ -978,6 +985,7 @@ namespace ImGuiHandler {
 							}
 						}
 					}
+					*/
 					if(ImGui::CollapsingHeader("Director Mode"))
 					{
 						if(ImGui::Button("Game"))
@@ -1032,6 +1040,36 @@ namespace ImGuiHandler {
 							ImGui::NextColumn();
 						}
 						ImGui::Columns(1);
+					}
+					static int event_type = H2Config_forced_event;
+					if (ImGui::CollapsingHeader("Events"))
+					{
+						if (ImGui::RadioButton("None", &event_type, SpecialEvents::e_event_type::_no_event))
+						{ 
+							H2Config_forced_event = (int)SpecialEvents::e_event_type::_no_event;
+							SaveH2Config();
+						} ImGui::SameLine();
+						if (ImGui::RadioButton("Christmas", &event_type, SpecialEvents::e_event_type::_christmas))
+						{ 
+							H2Config_forced_event = (int)SpecialEvents::e_event_type::_christmas;
+							SaveH2Config();
+						} ImGui::SameLine();
+						if (ImGui::RadioButton("St Paddys", &event_type, SpecialEvents::e_event_type::_st_paddys))
+						{ 
+							H2Config_forced_event = (int)SpecialEvents::e_event_type::_st_paddys;
+							SaveH2Config();
+						} ImGui::SameLine();
+						if (ImGui::RadioButton("Mook Madness", &event_type, SpecialEvents::e_event_type::_mook_maddness))
+						{ 
+							H2Config_forced_event = (int)SpecialEvents::e_event_type::_mook_maddness;
+							SaveH2Config();
+						}
+
+						if (ImGui::RadioButton("Halloween", &event_type, SpecialEvents::e_event_type::_halloween))
+						{ 
+							H2Config_forced_event = (int)SpecialEvents::e_event_type::_halloween; 
+							SaveH2Config();
+						} ImGui::SameLine();
 					}
 				}
 #endif

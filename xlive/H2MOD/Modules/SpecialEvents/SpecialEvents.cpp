@@ -105,14 +105,20 @@ namespace SpecialEvents
 		if (H2Config_no_events)
 			return _no_event;
 
+#ifndef NDEBUG
+		if (H2Config_forced_event != _no_event)
+			return (e_event_type)H2Config_forced_event;
+#endif
+
 		if (CheckIfEventTime(L"3-17"))
 			return _st_paddys;
 
 		if (CheckIfEventTime(L"12-24") || CheckIfEventTime(L"12-30") || CheckIfEventTime(L"1-4"))
 			return _christmas;
 
-		if (CheckIfEventTime(L"4-12"))
-			return _mook_maddness;
+		// One time event
+		/*if (CheckIfEventTime(L"4-12"))
+			return _mook_maddness;*/
 
 		if (CheckIfEventTime(L"10-20") || CheckIfEventTime(L"10-27") || CheckIfEventTime2(L"10-31"))
 			return _halloween;
@@ -337,101 +343,89 @@ namespace SpecialEvents
 	{
 		if (h2mod->GetEngineType() == e_engine_type::_multiplayer)
 		{
-			if (tag_loader::Map_exists("carto_shared"))
+			paddy_hat_datum = tag_loader::Get_tag_datum("objects\\multi\\stpat_hat\\stpat_hat", blam_tag::tag_group_type::scenery, "carto_shared");
+			paddy_beard_datum = tag_loader::Get_tag_datum("objects\\multi\\stpat_hat\\beard\\beard", blam_tag::tag_group_type::scenery, "carto_shared");
+			paddy_pot_datum = tag_loader::Get_tag_datum("scenarios\\objects\\multi\\carto_shared\\pot_of_gold\\pot_of_gold", blam_tag::tag_group_type::scenery, "carto_shared");
+			if (!DATUM_IS_NONE(paddy_hat_datum) && !DATUM_IS_NONE(paddy_beard_datum) && !DATUM_IS_NONE(paddy_pot_datum))
 			{
-				paddy_hat_datum = tag_loader::Get_tag_datum("objects\\multi\\stpat_hat\\stpat_hat", blam_tag::tag_group_type::scenery, "carto_shared");
-				paddy_beard_datum = tag_loader::Get_tag_datum("objects\\multi\\stpat_hat\\beard\\beard", blam_tag::tag_group_type::scenery, "carto_shared");
-				paddy_pot_datum = tag_loader::Get_tag_datum("scenarios\\objects\\multi\\carto_shared\\pot_of_gold\\pot_of_gold", blam_tag::tag_group_type::scenery, "carto_shared");
-				if (!DATUM_IS_NONE(paddy_hat_datum) && !DATUM_IS_NONE(paddy_beard_datum) && !DATUM_IS_NONE(paddy_pot_datum))
-				{
-					tag_loader::Load_tag(paddy_hat_datum, true, "carto_shared");
-					tag_loader::Load_tag(paddy_beard_datum, true, "carto_shared");
-					tag_loader::Load_tag(paddy_pot_datum, true, "carto_shared");
-					tag_loader::Push_Back();
-					auto hlmt_chief_datum = tags::find_tag(blam_tag::tag_group_type::model, "objects\\characters\\masterchief\\masterchief");
-					if (hlmt_chief_datum != DATUM_INDEX_NONE) {
-						auto hlmt_chief = tags::get_tag<blam_tag::tag_group_type::model, s_model_group_definition>(hlmt_chief_datum);
-						auto b = hlmt_chief->variants[0];
-						auto hat = MetaExtender::add_tag_block2<s_model_group_definition::s_variants_block::s_objects_block>((unsigned long)std::addressof(b->objects));
-						hat->parent_marker = string_id(HaloString::HS_HEAD);
-						hat->child_object.TagGroup = blam_tag::tag_group_type::scenery;
-						hat->child_object.TagIndex = tag_loader::ResolveNewDatum(paddy_hat_datum);
-						auto beard = MetaExtender::add_tag_block2<s_model_group_definition::s_variants_block::s_objects_block>((unsigned long)std::addressof(b->objects));
-						beard->parent_marker = string_id(HaloString::HS_HEAD);
-						beard->child_object.TagGroup = blam_tag::tag_group_type::scenery;
-						beard->child_object.TagIndex = tag_loader::ResolveNewDatum(paddy_beard_datum);
+				tag_loader::Load_tag(paddy_hat_datum, true, "carto_shared");
+				tag_loader::Load_tag(paddy_beard_datum, true, "carto_shared");
+				tag_loader::Load_tag(paddy_pot_datum, true, "carto_shared");
+				tag_loader::Push_Back();
+				auto hlmt_chief_datum = tags::find_tag(blam_tag::tag_group_type::model, "objects\\characters\\masterchief\\masterchief");
+				if (hlmt_chief_datum != DATUM_INDEX_NONE) {
+					auto hlmt_chief = tags::get_tag<blam_tag::tag_group_type::model, s_model_group_definition>(hlmt_chief_datum);
+					auto b = hlmt_chief->variants[0];
+					auto hat = MetaExtender::add_tag_block2<s_model_group_definition::s_variants_block::s_objects_block>((unsigned long)std::addressof(b->objects));
+					hat->parent_marker = string_id(HaloString::HS_HEAD);
+					hat->child_object.TagGroup = blam_tag::tag_group_type::scenery;
+					hat->child_object.TagIndex = tag_loader::ResolveNewDatum(paddy_hat_datum);
+					auto beard = MetaExtender::add_tag_block2<s_model_group_definition::s_variants_block::s_objects_block>((unsigned long)std::addressof(b->objects));
+					beard->parent_marker = string_id(HaloString::HS_HEAD);
+					beard->child_object.TagGroup = blam_tag::tag_group_type::scenery;
+					beard->child_object.TagIndex = tag_loader::ResolveNewDatum(paddy_beard_datum);
 
-					}
-					auto hlmt_chief_mp_datum = tags::find_tag(blam_tag::tag_group_type::model, "objects\\characters\\masterchief\\masterchief_mp");
-					if (hlmt_chief_mp_datum != DATUM_INDEX_NONE) {
-						auto hlmt_chief_mp = tags::get_tag<blam_tag::tag_group_type::model, s_model_group_definition>(hlmt_chief_mp_datum);
-						auto b = hlmt_chief_mp->variants[0];
-						auto hat = MetaExtender::add_tag_block2<s_model_group_definition::s_variants_block::s_objects_block>((unsigned long)std::addressof(b->objects));
-						hat->parent_marker = string_id(HaloString::HS_HEAD);
-						hat->child_object.TagGroup = blam_tag::tag_group_type::scenery;
-						hat->child_object.TagIndex = tag_loader::ResolveNewDatum(paddy_hat_datum);
-						auto beard = MetaExtender::add_tag_block2<s_model_group_definition::s_variants_block::s_objects_block>((unsigned long)std::addressof(b->objects));
-						beard->parent_marker = string_id(HaloString::HS_HEAD);
-						beard->child_object.TagGroup = blam_tag::tag_group_type::scenery;
-						beard->child_object.TagIndex = tag_loader::ResolveNewDatum(paddy_beard_datum);
-					}
-					auto hlmt_elite_datum = tags::find_tag(blam_tag::tag_group_type::model, "objects\\characters\\elite\\elite_mp");
-					if (hlmt_elite_datum != DATUM_INDEX_NONE)
-					{
-						auto hlmt_eliete = tags::get_tag<blam_tag::tag_group_type::model, s_model_group_definition>(hlmt_elite_datum);
-						auto b = hlmt_eliete->variants[0];
-						auto a = MetaExtender::add_tag_block2<s_model_group_definition::s_variants_block::s_objects_block>((unsigned long)std::addressof(b->objects));
-						a->parent_marker = new_elite_head_marker;
-						a->child_object.TagGroup = blam_tag::tag_group_type::scenery;
-						a->child_object.TagIndex = tag_loader::ResolveNewDatum(paddy_hat_datum);
-						auto beard = MetaExtender::add_tag_block2<s_model_group_definition::s_variants_block::s_objects_block>((unsigned long)std::addressof(b->objects));
-						beard->parent_marker = new_elite_head_marker;
-						beard->child_object.TagGroup = blam_tag::tag_group_type::scenery;
-						beard->child_object.TagIndex = tag_loader::ResolveNewDatum(paddy_beard_datum);
-					}
-				
-
-					auto paddy_pot = tags::get_tag<blam_tag::tag_group_type::scenery, s_scenery_group_definition>(tag_loader::ResolveNewDatum(paddy_pot_datum), true);
-					auto paddy_pot_model_datum = paddy_pot->objectTag.model.TagIndex;
-					auto paddy_pot_model = tags::get_tag<blam_tag::tag_group_type::model, s_model_group_definition>(paddy_pot_model_datum, true);
-
-					auto ball_model_datum = tags::find_tag(blam_tag::tag_group_type::model, "objects\\weapons\\multiplayer\\ball\\ball");
-					auto ball_model = tags::get_tag<blam_tag::tag_group_type::model, s_model_group_definition>(ball_model_datum);
-					ball_model->render_model.TagIndex = paddy_pot_model->render_model.TagIndex;
-
-					auto bomb_model_datum = tags::find_tag(blam_tag::tag_group_type::model, "objects\\weapons\\multiplayer\\assault_bomb\\assault_bomb");
-					auto bomb_model = tags::get_tag<blam_tag::tag_group_type::model, s_model_group_definition>(bomb_model_datum);
-					bomb_model->render_model.TagIndex = paddy_pot_model->render_model.TagIndex;
-
-					auto paddy_pot_render = tags::get_tag<blam_tag::tag_group_type::rendermodel, s_render_model_group_definition>(paddy_pot_model->render_model.TagIndex, true);
-					auto pot_node = paddy_pot_render->nodes[0];
-					pot_node->default_rotation_k = -0.75;
-					pot_node->inverse_position_y = 0.07;
-					pot_node->inverse_position_z = -0.1;
-
-					auto ball_weapon_datum = tags::find_tag(blam_tag::tag_group_type::weapon, "objects\\weapons\\multiplayer\\ball\\ball");
-					auto ball_weapon = tags::get_tag<blam_tag::tag_group_type::weapon, s_weapon_group_definition>(ball_weapon_datum);
-
-					//Bounding Radius and Sweetener size
-					ball_weapon->bounding_radius = 0.3f;
-					ball_weapon->sweetener_size = s_weapon_group_definition::e_sweetener_size::medium;
-
-					auto bomb_weapon_datum = tags::find_tag(blam_tag::tag_group_type::weapon, "objects\\weapons\\multiplayer\\assault_bomb\\assault_bomb");
-					auto bomb_weapon = tags::get_tag<blam_tag::tag_group_type::weapon, s_weapon_group_definition>(bomb_weapon_datum);
-
-					//Bounding Radius and Sweetener size
-					bomb_weapon->bounding_radius = 0.3f;
-					bomb_weapon->sweetener_size = s_weapon_group_definition::e_sweetener_size::medium;
 				}
-			}
-			else
-			{
-				if (NetworkSession::GetCurrentNetworkSession()->local_peer_index != NetworkSession::GetCurrentNetworkSession()->session_host_peer_index)
-				{
-					*Memory::GetAddress<int*>(0x46DCF1) = 1;
-					ImGuiHandler::ImMessageBox::SetMessage("Error: Cartographer Shared map content is missing. Try updating your game from the mainmenu.\r\n\r\nBy going to Cartographer > Update.\r\n\r\nIf that doesn't work reach out to us in #help on discord.");
-					ImGuiHandler::ToggleWindow(ImGuiHandler::ImMessageBox::windowName);
+				auto hlmt_chief_mp_datum = tags::find_tag(blam_tag::tag_group_type::model, "objects\\characters\\masterchief\\masterchief_mp");
+				if (hlmt_chief_mp_datum != DATUM_INDEX_NONE) {
+					auto hlmt_chief_mp = tags::get_tag<blam_tag::tag_group_type::model, s_model_group_definition>(hlmt_chief_mp_datum);
+					auto b = hlmt_chief_mp->variants[0];
+					auto hat = MetaExtender::add_tag_block2<s_model_group_definition::s_variants_block::s_objects_block>((unsigned long)std::addressof(b->objects));
+					hat->parent_marker = string_id(HaloString::HS_HEAD);
+					hat->child_object.TagGroup = blam_tag::tag_group_type::scenery;
+					hat->child_object.TagIndex = tag_loader::ResolveNewDatum(paddy_hat_datum);
+					auto beard = MetaExtender::add_tag_block2<s_model_group_definition::s_variants_block::s_objects_block>((unsigned long)std::addressof(b->objects));
+					beard->parent_marker = string_id(HaloString::HS_HEAD);
+					beard->child_object.TagGroup = blam_tag::tag_group_type::scenery;
+					beard->child_object.TagIndex = tag_loader::ResolveNewDatum(paddy_beard_datum);
 				}
+				auto hlmt_elite_datum = tags::find_tag(blam_tag::tag_group_type::model, "objects\\characters\\elite\\elite_mp");
+				if (hlmt_elite_datum != DATUM_INDEX_NONE)
+				{
+					auto hlmt_eliete = tags::get_tag<blam_tag::tag_group_type::model, s_model_group_definition>(hlmt_elite_datum);
+					auto b = hlmt_eliete->variants[0];
+					auto a = MetaExtender::add_tag_block2<s_model_group_definition::s_variants_block::s_objects_block>((unsigned long)std::addressof(b->objects));
+					a->parent_marker = new_elite_head_marker;
+					a->child_object.TagGroup = blam_tag::tag_group_type::scenery;
+					a->child_object.TagIndex = tag_loader::ResolveNewDatum(paddy_hat_datum);
+					auto beard = MetaExtender::add_tag_block2<s_model_group_definition::s_variants_block::s_objects_block>((unsigned long)std::addressof(b->objects));
+					beard->parent_marker = new_elite_head_marker;
+					beard->child_object.TagGroup = blam_tag::tag_group_type::scenery;
+					beard->child_object.TagIndex = tag_loader::ResolveNewDatum(paddy_beard_datum);
+				}
+
+
+				auto paddy_pot = tags::get_tag<blam_tag::tag_group_type::scenery, s_scenery_group_definition>(tag_loader::ResolveNewDatum(paddy_pot_datum), true);
+				auto paddy_pot_model_datum = paddy_pot->objectTag.model.TagIndex;
+				auto paddy_pot_model = tags::get_tag<blam_tag::tag_group_type::model, s_model_group_definition>(paddy_pot_model_datum, true);
+
+				auto ball_model_datum = tags::find_tag(blam_tag::tag_group_type::model, "objects\\weapons\\multiplayer\\ball\\ball");
+				auto ball_model = tags::get_tag<blam_tag::tag_group_type::model, s_model_group_definition>(ball_model_datum);
+				ball_model->render_model.TagIndex = paddy_pot_model->render_model.TagIndex;
+
+				auto bomb_model_datum = tags::find_tag(blam_tag::tag_group_type::model, "objects\\weapons\\multiplayer\\assault_bomb\\assault_bomb");
+				auto bomb_model = tags::get_tag<blam_tag::tag_group_type::model, s_model_group_definition>(bomb_model_datum);
+				bomb_model->render_model.TagIndex = paddy_pot_model->render_model.TagIndex;
+
+				auto paddy_pot_render = tags::get_tag<blam_tag::tag_group_type::rendermodel, s_render_model_group_definition>(paddy_pot_model->render_model.TagIndex, true);
+				auto pot_node = paddy_pot_render->nodes[0];
+				pot_node->default_rotation_k = -0.75;
+				pot_node->inverse_position_y = 0.07;
+				pot_node->inverse_position_z = -0.1;
+
+				auto ball_weapon_datum = tags::find_tag(blam_tag::tag_group_type::weapon, "objects\\weapons\\multiplayer\\ball\\ball");
+				auto ball_weapon = tags::get_tag<blam_tag::tag_group_type::weapon, s_weapon_group_definition>(ball_weapon_datum);
+
+				//Bounding Radius and Sweetener size
+				ball_weapon->bounding_radius = 0.3f;
+				ball_weapon->sweetener_size = s_weapon_group_definition::e_sweetener_size::medium;
+
+				auto bomb_weapon_datum = tags::find_tag(blam_tag::tag_group_type::weapon, "objects\\weapons\\multiplayer\\assault_bomb\\assault_bomb");
+				auto bomb_weapon = tags::get_tag<blam_tag::tag_group_type::weapon, s_weapon_group_definition>(bomb_weapon_datum);
+
+				//Bounding Radius and Sweetener size
+				bomb_weapon->bounding_radius = 0.3f;
+				bomb_weapon->sweetener_size = s_weapon_group_definition::e_sweetener_size::medium;
 			}
 		}
 	}
@@ -440,39 +434,27 @@ namespace SpecialEvents
 	{
 		if (h2mod->GetEngineType() == e_engine_type::_multiplayer)
 		{
-			if (tag_loader::Map_exists("carto_shared"))
+			mook_ball_datum = tag_loader::Get_tag_datum("scenarios\\objects\\multi\\carto_shared\\basketball\\basketball", blam_tag::tag_group_type::weapon, "carto_shared");
+			if (!DATUM_IS_NONE(mook_ball_datum))
 			{
-				mook_ball_datum = tag_loader::Get_tag_datum("scenarios\\objects\\multi\\carto_shared\\basketball\\basketball", blam_tag::tag_group_type::weapon, "carto_shared");
-				if (!DATUM_IS_NONE(mook_ball_datum))
-				{
-					tag_loader::Load_tag(mook_ball_datum, true, "carto_shared");
-					tag_loader::Push_Back();
+				tag_loader::Load_tag(mook_ball_datum, true, "carto_shared");
+				tag_loader::Push_Back();
 
-					auto mook_ball = tags::get_tag<blam_tag::tag_group_type::weapon, s_weapon_group_definition>(tag_loader::ResolveNewDatum(mook_ball_datum), true);
+				auto mook_ball = tags::get_tag<blam_tag::tag_group_type::weapon, s_weapon_group_definition>(tag_loader::ResolveNewDatum(mook_ball_datum), true);
 
-					auto ball_model_datum = tags::find_tag(blam_tag::tag_group_type::weapon, "objects\\weapons\\multiplayer\\ball\\ball");
-					auto ball_model = tags::get_tag<blam_tag::tag_group_type::weapon, s_weapon_group_definition>(ball_model_datum);
+				auto ball_model_datum = tags::find_tag(blam_tag::tag_group_type::weapon, "objects\\weapons\\multiplayer\\ball\\ball");
+				auto ball_model = tags::get_tag<blam_tag::tag_group_type::weapon, s_weapon_group_definition>(ball_model_datum);
 
-					ball_model->model.TagIndex = mook_ball->model.TagIndex;
-					ball_model->first_person[0]->first_person_model.TagIndex = mook_ball->first_person[0]->first_person_model.TagIndex;
-					ball_model->first_person[1]->first_person_model.TagIndex = mook_ball->first_person[1]->first_person_model.TagIndex;
+				ball_model->model.TagIndex = mook_ball->model.TagIndex;
+				ball_model->first_person[0]->first_person_model.TagIndex = mook_ball->first_person[0]->first_person_model.TagIndex;
+				ball_model->first_person[1]->first_person_model.TagIndex = mook_ball->first_person[1]->first_person_model.TagIndex;
 
-					auto bomb_model_datum = tags::find_tag(blam_tag::tag_group_type::weapon, "objects\\weapons\\multiplayer\\assault_bomb\\assault_bomb");
-					auto bomb_model = tags::get_tag<blam_tag::tag_group_type::weapon, s_weapon_group_definition>(bomb_model_datum);
+				auto bomb_model_datum = tags::find_tag(blam_tag::tag_group_type::weapon, "objects\\weapons\\multiplayer\\assault_bomb\\assault_bomb");
+				auto bomb_model = tags::get_tag<blam_tag::tag_group_type::weapon, s_weapon_group_definition>(bomb_model_datum);
 
-					bomb_model->model.TagIndex = mook_ball->model.TagIndex;
-					bomb_model->first_person[0]->first_person_model.TagIndex = mook_ball->first_person[0]->first_person_model.TagIndex;
-					bomb_model->first_person[1]->first_person_model.TagIndex = mook_ball->first_person[1]->first_person_model.TagIndex;
-				}
-			}
-			else
-			{
-				if (NetworkSession::GetCurrentNetworkSession()->local_peer_index != NetworkSession::GetCurrentNetworkSession()->session_host_peer_index)
-				{
-					*Memory::GetAddress<int*>(0x46DCF1) = 1;
-					ImGuiHandler::ImMessageBox::SetMessage("Error: Cartographer Shared map content is missing. Try updating your game from the mainmenu.\r\n\r\nBy going to Cartographer > Update.\r\n\r\nIf that doesn't work reach out to us in #help on discord.");
-					ImGuiHandler::ToggleWindow(ImGuiHandler::ImMessageBox::windowName);
-				}
+				bomb_model->model.TagIndex = mook_ball->model.TagIndex;
+				bomb_model->first_person[0]->first_person_model.TagIndex = mook_ball->first_person[0]->first_person_model.TagIndex;
+				bomb_model->first_person[1]->first_person_model.TagIndex = mook_ball->first_person[1]->first_person_model.TagIndex;
 			}
 		}
 	}
@@ -725,88 +707,76 @@ namespace SpecialEvents
 	{
 		if (h2mod->GetEngineType() == _multiplayer)
 		{
-			if (tag_loader::Map_exists("carto_shared"))
+			char* mapName = Memory::GetAddress<char*>(0x47CF0C);
+			if (strcmp(mapName, "coagulation") == 0)
 			{
-				char* mapName = Memory::GetAddress<char*>(0x47CF0C);
-				if (strcmp(mapName, "coagulation") == 0)
-				{
-					lbitm_datum = tag_loader::Get_tag_datum("scenarios\\multi\\halo\\coagulation\\coagulation_coagulation_lightmap_truecolor_bitmaps", blam_tag::tag_group_type::bitmap, "carto_shared");
-					sky_datum = tag_loader::Get_tag_datum("scenarios\\skies\\multi\\halo\\coagulation\\coagulation_night", blam_tag::tag_group_type::sky, "carto_shared");
-					candle_datum = tag_loader::Get_tag_datum("scenarios\\objects\\multi\\carto_shared\\jack_o_lantern\\candle\\candle", blam_tag::tag_group_type::scenery, "carto_shared");
-					candle_fire_datum = tag_loader::Get_tag_datum("scenarios\\objects\\multi\\carto_shared\\jack_o_lantern\\candle\\candle_fire", blam_tag::tag_group_type::scenery, "carto_shared");
-					pump_datum = tag_loader::Get_tag_datum("scenarios\\objects\\multi\\carto_shared\\jack_o_lantern\\jack_o_lantern", blam_tag::tag_group_type::scenery, "carto_shared");
-					large_candle_datum = tag_loader::Get_tag_datum("scenarios\\objects\\multi\\carto_shared\\jack_o_lantern\\candle\\candle_big_light", blam_tag::tag_group_type::scenery, "carto_shared");
-					tag_loader::Load_tag(pump_datum, true, "carto_shared");
-					tag_loader::Load_tag(candle_datum, true, "carto_shared");
-					tag_loader::Load_tag(lbitm_datum, true, "carto_shared");
-					tag_loader::Load_tag(sky_datum, true, "carto_shared");
-					tag_loader::Load_tag(large_candle_datum, true, "carto_shared");
-					tag_loader::Push_Back();
-				}
-				if (strcmp(mapName, "lockout") == 0)
-				{
-					candle_datum = tag_loader::Get_tag_datum("scenarios\\objects\\multi\\carto_shared\\jack_o_lantern\\candle\\candle", blam_tag::tag_group_type::scenery, "carto_shared");
-					candle_fire_datum = tag_loader::Get_tag_datum("scenarios\\objects\\multi\\carto_shared\\jack_o_lantern\\candle\\candle_fire", blam_tag::tag_group_type::scenery, "carto_shared");
-					pump_datum = tag_loader::Get_tag_datum("scenarios\\objects\\multi\\carto_shared\\jack_o_lantern\\jack_o_lantern", blam_tag::tag_group_type::scenery, "carto_shared");
-					tag_loader::Load_tag(pump_datum, true, "carto_shared");
-					tag_loader::Load_tag(candle_datum, true, "carto_shared");
-					tag_loader::Push_Back();
-				}
-
-				auto scen = tags::get_tag_fast<s_scenario_group_definition>(tags::get_tags_header()->scenario_datum);
-				auto sbps = tags::get_tag_fast< s_scenario_structure_bsp_group_definition>(scen->structure_bsps[0]->structure_bsp.TagIndex);
-				if (strcmp(mapName, "coagulation") == 0)
-				{
-					candle_datum = tag_loader::ResolveNewDatum(candle_datum);
-					candle_fire_datum = tag_loader::ResolveNewDatum(candle_fire_datum);
-					pump_datum = tag_loader::ResolveNewDatum(pump_datum);
-					large_candle_datum = tag_loader::ResolveNewDatum(large_candle_datum);
-					LOG_INFO_GAME("{:x}", candle_datum);
-					LOG_INFO_GAME("{:x}", candle_fire_datum);
-					LOG_INFO_GAME("{:x}", pump_datum);
-					LOG_INFO_GAME("{:x}", large_candle_datum);
-
-					if (!DATUM_IS_NONE(sky_datum))
-					{
-						auto sky = tags::get_tag<blam_tag::tag_group_type::sky, char*>(tag_loader::ResolveNewDatum(sky_datum), true);
-						auto render_model_ref = reinterpret_cast<tag_reference*>(sky);
-						auto render_model = tags::get_tag<blam_tag::tag_group_type::rendermodel, s_render_model_group_definition>(render_model_ref->TagIndex, true);
-						scen->skies[0]->sky.TagIndex = tag_loader::ResolveNewDatum(sky_datum);
-					}
-					auto ltmp_datum = tags::find_tag(blam_tag::tag_group_type::scenariostructurelightmap, "scenarios\\multi\\halo\\coagulation\\coagulation_coagulation_lightmap");
-					if (!DATUM_IS_NONE(ltmp_datum) && !DATUM_IS_NONE(tag_loader::ResolveNewDatum(lbitm_datum))) 
-					{
-						auto ltmp = tags::get_tag_fast<s_scenario_structure_lightmap_group_definition>(ltmp_datum);
-						ltmp->lightmap_groups[0]->bitmap_group.TagIndex = tag_loader::ResolveNewDatum(lbitm_datum);
-						sbps->decorators_block.size = 0;
-						sbps->decorators_block.data = 0;
-					}
-
-
-					if (!DATUM_IS_NONE(candle_datum) && !DATUM_IS_NONE(pump_datum) && !DATUM_IS_NONE(large_candle_datum))
-						EventHandler::register_callback(halloween_game_life_cycle_update, EventType::gamelifecycle_change, EventExecutionType::execute_after, true);
-				}
-				if (strcmp(mapName, "lockout") == 0)
-				{
-					candle_datum = tag_loader::ResolveNewDatum(candle_datum);
-					candle_fire_datum = tag_loader::ResolveNewDatum(candle_fire_datum);
-					pump_datum = tag_loader::ResolveNewDatum(pump_datum);
-					LOG_INFO_GAME("{:x}", candle_datum);
-					LOG_INFO_GAME("{:x}", candle_fire_datum);
-					LOG_INFO_GAME("{:x}", pump_datum);
-
-					if (!DATUM_IS_NONE(candle_datum) && !DATUM_IS_NONE(pump_datum))
-						EventHandler::register_callback(halloween_game_life_cycle_update, EventType::gamelifecycle_change, EventExecutionType::execute_after, true);
-				}
+				lbitm_datum = tag_loader::Get_tag_datum("scenarios\\multi\\halo\\coagulation\\coagulation_coagulation_lightmap_truecolor_bitmaps", blam_tag::tag_group_type::bitmap, "carto_shared");
+				sky_datum = tag_loader::Get_tag_datum("scenarios\\skies\\multi\\halo\\coagulation\\coagulation_night", blam_tag::tag_group_type::sky, "carto_shared");
+				candle_datum = tag_loader::Get_tag_datum("scenarios\\objects\\multi\\carto_shared\\jack_o_lantern\\candle\\candle", blam_tag::tag_group_type::scenery, "carto_shared");
+				candle_fire_datum = tag_loader::Get_tag_datum("scenarios\\objects\\multi\\carto_shared\\jack_o_lantern\\candle\\candle_fire", blam_tag::tag_group_type::scenery, "carto_shared");
+				pump_datum = tag_loader::Get_tag_datum("scenarios\\objects\\multi\\carto_shared\\jack_o_lantern\\jack_o_lantern", blam_tag::tag_group_type::scenery, "carto_shared");
+				large_candle_datum = tag_loader::Get_tag_datum("scenarios\\objects\\multi\\carto_shared\\jack_o_lantern\\candle\\candle_big_light", blam_tag::tag_group_type::scenery, "carto_shared");
+				tag_loader::Load_tag(pump_datum, true, "carto_shared");
+				tag_loader::Load_tag(candle_datum, true, "carto_shared");
+				tag_loader::Load_tag(lbitm_datum, true, "carto_shared");
+				tag_loader::Load_tag(sky_datum, true, "carto_shared");
+				tag_loader::Load_tag(large_candle_datum, true, "carto_shared");
+				tag_loader::Push_Back();
 			}
-			else
+			if (strcmp(mapName, "lockout") == 0)
 			{
-				if (NetworkSession::GetCurrentNetworkSession()->local_peer_index != NetworkSession::GetCurrentNetworkSession()->session_host_peer_index)
+				candle_datum = tag_loader::Get_tag_datum("scenarios\\objects\\multi\\carto_shared\\jack_o_lantern\\candle\\candle", blam_tag::tag_group_type::scenery, "carto_shared");
+				candle_fire_datum = tag_loader::Get_tag_datum("scenarios\\objects\\multi\\carto_shared\\jack_o_lantern\\candle\\candle_fire", blam_tag::tag_group_type::scenery, "carto_shared");
+				pump_datum = tag_loader::Get_tag_datum("scenarios\\objects\\multi\\carto_shared\\jack_o_lantern\\jack_o_lantern", blam_tag::tag_group_type::scenery, "carto_shared");
+				tag_loader::Load_tag(pump_datum, true, "carto_shared");
+				tag_loader::Load_tag(candle_datum, true, "carto_shared");
+				tag_loader::Push_Back();
+			}
+
+			auto scen = tags::get_tag_fast<s_scenario_group_definition>(tags::get_tags_header()->scenario_datum);
+			auto sbps = tags::get_tag_fast< s_scenario_structure_bsp_group_definition>(scen->structure_bsps[0]->structure_bsp.TagIndex);
+			if (strcmp(mapName, "coagulation") == 0)
+			{
+				candle_datum = tag_loader::ResolveNewDatum(candle_datum);
+				candle_fire_datum = tag_loader::ResolveNewDatum(candle_fire_datum);
+				pump_datum = tag_loader::ResolveNewDatum(pump_datum);
+				large_candle_datum = tag_loader::ResolveNewDatum(large_candle_datum);
+				LOG_INFO_GAME("{:x}", candle_datum);
+				LOG_INFO_GAME("{:x}", candle_fire_datum);
+				LOG_INFO_GAME("{:x}", pump_datum);
+				LOG_INFO_GAME("{:x}", large_candle_datum);
+
+				if (!DATUM_IS_NONE(sky_datum))
 				{
-					*Memory::GetAddress<int*>(0x46DCF1) = 1;
-					ImGuiHandler::ImMessageBox::SetMessage("Error: Cartographer Shared map content is missing. Try updating your game from the mainmenu.\r\n\r\nBy going to Cartographer > Update.\r\n\r\nIf that doesn't work reach out to us in #help on discord.");
-					ImGuiHandler::ToggleWindow(ImGuiHandler::ImMessageBox::windowName);
+					auto sky = tags::get_tag<blam_tag::tag_group_type::sky, char*>(tag_loader::ResolveNewDatum(sky_datum), true);
+					auto render_model_ref = reinterpret_cast<tag_reference*>(sky);
+					auto render_model = tags::get_tag<blam_tag::tag_group_type::rendermodel, s_render_model_group_definition>(render_model_ref->TagIndex, true);
+					scen->skies[0]->sky.TagIndex = tag_loader::ResolveNewDatum(sky_datum);
 				}
+				auto ltmp_datum = tags::find_tag(blam_tag::tag_group_type::scenariostructurelightmap, "scenarios\\multi\\halo\\coagulation\\coagulation_coagulation_lightmap");
+				if (!DATUM_IS_NONE(ltmp_datum) && !DATUM_IS_NONE(tag_loader::ResolveNewDatum(lbitm_datum)))
+				{
+					auto ltmp = tags::get_tag_fast<s_scenario_structure_lightmap_group_definition>(ltmp_datum);
+					ltmp->lightmap_groups[0]->bitmap_group.TagIndex = tag_loader::ResolveNewDatum(lbitm_datum);
+					sbps->decorators_block.size = 0;
+					sbps->decorators_block.data = 0;
+				}
+
+
+				if (!DATUM_IS_NONE(candle_datum) && !DATUM_IS_NONE(pump_datum) && !DATUM_IS_NONE(large_candle_datum))
+					EventHandler::register_callback(halloween_game_life_cycle_update, EventType::gamelifecycle_change, EventExecutionType::execute_after, true);
+			}
+			if (strcmp(mapName, "lockout") == 0)
+			{
+				candle_datum = tag_loader::ResolveNewDatum(candle_datum);
+				candle_fire_datum = tag_loader::ResolveNewDatum(candle_fire_datum);
+				pump_datum = tag_loader::ResolveNewDatum(pump_datum);
+				LOG_INFO_GAME("{:x}", candle_datum);
+				LOG_INFO_GAME("{:x}", candle_fire_datum);
+				LOG_INFO_GAME("{:x}", pump_datum);
+
+				if (!DATUM_IS_NONE(candle_datum) && !DATUM_IS_NONE(pump_datum))
+					EventHandler::register_callback(halloween_game_life_cycle_update, EventType::gamelifecycle_change, EventExecutionType::execute_after, true);
 			}
 		}
 	}
@@ -841,46 +811,58 @@ namespace SpecialEvents
 
 	void Initialize()
 	{
-		ApplyHooks();
-		tags::on_map_load(AddNewMarkers);
-		switch (getCurrentEvent())
+		if (tag_loader::Map_exists("carto_shared"))
 		{
-		case _christmas:
-			if (H2Config_event_music) {
-				auto playSound = [=]()
-				{
-					using namespace std::chrono_literals;
-					static bool flop = false;
-					while (true)
+			ApplyHooks();
+			tags::on_map_load(AddNewMarkers);
+			switch (getCurrentEvent())
+			{
+			case _christmas:
+				if (H2Config_event_music) {
+					auto playSound = [=]()
 					{
-						std::this_thread::sleep_for(1000ms);
-						if (h2mod->GetEngineType() == _main_menu && H2Config_event_music)
+						using namespace std::chrono_literals;
+						static bool flop = false;
+						while (true)
 						{
-							if (!flop) {
-								flop = true;
-								PlaySound(L"sounds/feliz_navidad.wav", NULL, SND_FILENAME | SND_LOOP | SND_ASYNC | SND_NODEFAULT);
+							std::this_thread::sleep_for(1000ms);
+							if (h2mod->GetEngineType() == _main_menu && H2Config_event_music)
+							{
+								if (!flop) {
+									flop = true;
+									PlaySound(L"sounds/feliz_navidad.wav", NULL, SND_FILENAME | SND_LOOP | SND_ASYNC | SND_NODEFAULT);
+								}
+							}
+							else {
+								flop = false;
+								PlaySound(NULL, 0, 0);
 							}
 						}
-						else {
-							flop = false;
-							PlaySound(NULL, 0, 0);
-						}
-					}
 
-				};
-				std::thread(playSound).detach();
+					};
+					std::thread(playSound).detach();
+				}
+				tags::on_map_load(ChristmasOnMapLoad);
+				break;
+			case _st_paddys:
+				tags::on_map_load(PaddysOnMapLoad);
+				break;
+			case _mook_maddness:
+				tags::on_map_load(MookMaddnessOnMapLoad);
+				break;
+			case _halloween:
+				tags::on_map_load(HalloweenOnMapLoad);
+				break;
 			}
-			tags::on_map_load(ChristmasOnMapLoad);
-			break;
-		case _st_paddys:
-			tags::on_map_load(PaddysOnMapLoad);
-			break;
-		case _mook_maddness:
-			tags::on_map_load(MookMaddnessOnMapLoad);
-			break;
-		case _halloween:
-			tags::on_map_load(HalloweenOnMapLoad);
-			break;
+		}
+		else
+		{
+			if (NetworkSession::GetCurrentNetworkSession()->local_peer_index != NetworkSession::GetCurrentNetworkSession()->session_host_peer_index)
+			{
+				*Memory::GetAddress<int*>(0x46DCF1) = 1;
+				ImGuiHandler::ImMessageBox::SetMessage("Error: Cartographer Shared map content is missing. Try updating your game from the mainmenu.\r\n\r\nBy going to Cartographer > Update.\r\n\r\nIf that doesn't work reach out to us in #help on discord.");
+				ImGuiHandler::ToggleWindow(ImGuiHandler::ImMessageBox::windowName);
+			}
 		}
 	}
 }

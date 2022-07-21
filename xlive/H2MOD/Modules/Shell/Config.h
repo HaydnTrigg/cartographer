@@ -124,20 +124,6 @@ extern int H2Config_minimum_player_start;
 
 extern float H2Config_raw_mouse_scale;
 extern float H2Config_crosshair_scale;
-extern point2d H2Config_BATRIF;
-extern point2d H2Config_SMG;
-extern point2d H2Config_CRBN;
-extern point2d H2Config_BEAMRIF;
-extern point2d H2Config_MAG;
-extern point2d H2Config_PLASRIF;
-extern point2d H2Config_SHTGN;
-extern point2d H2Config_SNIP;
-extern point2d H2Config_SWRD;
-extern point2d H2Config_ROCKLAUN;
-extern point2d H2Config_PLASPI;
-extern point2d H2Config_BRUTESHOT;
-extern point2d H2Config_NEED;
-extern point2d H2Config_SENTBEAM;
 extern ControllerInput::CustomControllerLayout H2Config_CustomLayout;
 
 extern e_override_texture_resolution H2Config_Override_Shadows;
@@ -148,3 +134,8 @@ extern bool H2Config_melee_fix;
 extern bool H2Config_no_events;
 extern bool H2Config_spooky_boy;
 extern bool H2Config_event_music;
+
+#ifndef NDEBUG
+extern int H2Config_forced_event;
+#endif
+

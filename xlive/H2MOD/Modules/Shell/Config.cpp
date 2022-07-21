@@ -82,21 +82,6 @@ bool H2Config_anti_cheat_enabled = true;
 
 float H2Config_crosshair_scale = 1.0f;
 float H2Config_raw_mouse_scale = 25.0f;
-//weapon crosshair sizes
-point2d	H2Config_BATRIF = { 1 , 1 };
-point2d	H2Config_SMG = { 1 , 1 };
-point2d	H2Config_CRBN = { 1 , 1 };
-point2d	H2Config_BEAMRIF = { 1 , 1 };
-point2d	H2Config_MAG = { 1 , 1 };
-point2d	H2Config_PLASRIF = { 1 , 1 };
-point2d	H2Config_SHTGN = { 1 , 1 };
-point2d	H2Config_SNIP = { 1 , 1 };
-point2d	H2Config_SWRD = { 1 , 1 };
-point2d	H2Config_ROCKLAUN = { 1 , 1 };
-point2d	H2Config_PLASPI = { 1 , 1 };
-point2d	H2Config_BRUTESHOT = { 1 , 1 };
-point2d	H2Config_NEED = { 1 , 1 };
-point2d	H2Config_SENTBEAM = { 1 , 1 };
 
 e_override_texture_resolution H2Config_Override_Shadows;
 e_override_texture_resolution H2Config_Override_Water;
@@ -108,6 +93,9 @@ bool H2Config_melee_fix = true;
 bool H2Config_no_events = false;
 bool H2Config_spooky_boy = true;
 bool H2Config_event_music = true;
+#ifndef NDEBUG
+int H2Config_forced_event = 0;
+#endif
 
 int H2Config_hotkeyIdHelp = VK_F2;
 int H2Config_hotkeyIdAlignWindow = VK_F7;
@@ -532,6 +520,10 @@ void SaveH2Config() {
 
 			ini.SetBoolValue(H2ConfigVersionSection.c_str(), "skeleton_biped", H2Config_spooky_boy);
 			ini.SetBoolValue(H2ConfigVersionSection.c_str(), "event_music", H2Config_event_music);
+
+#ifndef NDEBUG
+			ini.SetLongValue(H2ConfigVersionSection.c_str(), "forced_event", H2Config_forced_event);
+#endif
 		}
 
 		ini.SetBoolValue(H2ConfigVersionSection.c_str(), "enable_xdelay", H2Config_xDelay);
@@ -851,6 +843,9 @@ void ReadH2Config() {
 				H2Config_no_events = ini.GetBoolValue(H2ConfigVersionSection.c_str(), "no_events", H2Config_no_events);
 				H2Config_spooky_boy = ini.GetBoolValue(H2ConfigVersionSection.c_str(), "skeleton_biped", H2Config_spooky_boy);
 				H2Config_event_music = ini.GetBoolValue(H2ConfigVersionSection.c_str(), "event_music", H2Config_event_music);
+#ifndef NDEBUG
+				H2Config_forced_event = ini.GetLongValue(H2ConfigVersionSection.c_str(), "forced_event", H2Config_forced_event);
+#endif
 			}
 
 			// dedicated server only
