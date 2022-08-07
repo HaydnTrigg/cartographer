@@ -7,6 +7,7 @@
 
 #include "H2MOD\Modules\Accounts\AccountLogin.h"
 #include "H2MOD\Modules\Accounts\Accounts.h"
+#include "H2MOD\Modules\CustomMenu\DisplayMode\c_display_mode_menu.h"
 #include "H2MOD\Modules\Networking\Networking.h"
 #include "H2MOD\Modules\OnScreenDebug\OnscreenDebug.h"
 #include "H2MOD\Modules\Tweaks\Tweaks.h"
@@ -341,6 +342,7 @@ void InitH2Startup() {
 	}
 	else {
 		addDebugText("Process is Client");
+		display_mode_patches();
 	}
 
 	if (ArgList != NULL)

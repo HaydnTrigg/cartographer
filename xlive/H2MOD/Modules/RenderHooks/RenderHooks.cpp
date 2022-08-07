@@ -164,6 +164,13 @@ namespace RenderHooks
 		}
 	}
 
+	//rasterizer_near_clip_distance <real>
+	//Changed from game default of 0.06 to 0.0601
+	inline void SunflareFix()
+	{
+		WriteValue<float>(Memory::GetAddress(0x468150), 0.0601f);
+	}
+
 	void ResetDevice()
 	{
 		*reset_screen = true;
@@ -171,6 +178,8 @@ namespace RenderHooks
 
 	void ApplyHooks()
 	{
+		SunflareFix();
+
 		//p_initialize_rasterizer_layer = (p_initialize_rasterizer_layer)DetourFunc(Memory::GetAddress<BYTE*>(0x28024C), (BYTE*)initialize_rasterizer_layer_hook, 7);
 		//p_render_geometry = (render_geometry_t)DetourFunc(Memory::GetAddress<BYTE*>(0x1A155C), (BYTE*)render_geometry_hook, 13);
 		p_initialize_rasterizer_layer = Memory::GetAddress<initialize_rasterizer_layer_t*>(0x28024C);

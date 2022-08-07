@@ -2,30 +2,24 @@
 
 #include "SpecialEvents.h"
 
-#include "Blam/Engine/Game/GameTimeGlobals.h"
+#define _USE_MATH_DEFINES
+#include "Blam\Cache\TagGroups\biped_definition.hpp"
 #include "Blam\Cache\TagGroups\model_definition.hpp"
 #include "Blam\Cache\TagGroups\render_model_definition.hpp"
 #include "Blam\Cache\TagGroups\scenario_definition.hpp"
 #include "Blam\Cache\TagGroups\scenario_lightmap_definition.hpp"
-#include "Blam\Engine\Networking\NetworkMessageTypeCollection.h"
 #include "Blam\Cache\TagGroups\scenario_structure_bsp_definition.hpp"
 #include "Blam\Cache\TagGroups\scenery_definition.hpp"
 #include "Blam\Cache\TagGroups\shader_definition.hpp"
 #include "Blam\Cache\TagGroups\weapon_definition.hpp"
-#include "Blam\Engine\Game\GameGlobals.h"
+#include "Blam\Engine\Networking\NetworkMessageTypeCollection.h"
 #include "Blam\Enums\HaloStrings.h"
 #include "H2MOD\Engine\Engine.h"
 #include "H2MOD\GUI\imgui_integration\imgui_handler.h"
 #include "H2MOD\Modules\Shell\Config.h"
 #include "H2MOD\Modules\EventHandler\EventHandler.hpp"
-#include "H2MOD\Modules\PlayerRepresentation\PlayerRepresentation.h"
 #include "H2MOD\Tags\MetaExtender.h"
 #include "H2MOD\Tags\MetaLoader\tag_loader.h"
-#include <math.h>
-
-#include "Blam/Cache/TagGroups/biped_definition.hpp"
-#include "Blam/Cache/TagGroups/unit_definition.hpp"
-#define _USE_MATH_DEFINES
 
 namespace SpecialEvents
 {
@@ -109,7 +103,6 @@ namespace SpecialEvents
 		if (H2Config_forced_event != _no_event)
 			return (e_event_type)H2Config_forced_event;
 #endif
-
 		if (CheckIfEventTime(L"3-17"))
 			return _st_paddys;
 

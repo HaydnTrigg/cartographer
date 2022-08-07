@@ -2,19 +2,20 @@
 
 #include "RunLoop.h"
 #include "Blam\Engine\Game\GameTimeGlobals.h"
-#include "H2MOD\Modules\Shell\Shell.h"
-#include "H2MOD\Modules\Shell\Config.h"
-#include "H2MOD\GUI\GUI.h"
 #include "H2MOD\Engine\Engine.h"
-#include "H2MOD\Modules\Shell\Startup\Startup.h"
-#include "H2MOD\Modules\Stats\StatsHandler.h"
+#include "H2MOD\GUI\GUI.h"
 #include "H2MOD\Modules\CustomMenu\CustomMenu.h"
+#include "H2MOD\Modules\CustomMenu\DisplayMode\c_display_mode_menu.h"
 #include "H2MOD\Modules\EventHandler\EventHandler.hpp"
 #include "H2MOD\Modules\Input\ControllerInput.h"
 #include "H2MOD\Modules\MainLoopPatches\OriginalFPSLimiter\OriginalFPSLimiter.h"
 #include "H2MOD\Modules\MainLoopPatches\UncappedFPS2\UncappedFPS2.h"
 #include "H2MOD\Modules\MapManager\MapManager.h"
 #include "H2MOD\Modules\OnScreenDebug\OnscreenDebug.h"
+#include "H2MOD\Modules\Shell\Config.h"
+#include "H2MOD\Modules\Shell\Shell.h"
+#include "H2MOD\Modules\Shell\Startup\Startup.h"
+#include "H2MOD\Modules\Stats\StatsHandler.h"
 
 #include "H2MOD\Utils\Utils.h"
 #include "XLive\xnet\IpManagement\XnIp.h"
@@ -163,8 +164,9 @@ void GSMainLoop() {
 			GetDWORDRegKey(hKeyVideoSettings, L"DisplayMode", &Display_Mode);
 			RegCloseKey(hKeyVideoSettings);
 		}
-		if (Display_Mode) {
-			SetWindowLong(H2hWnd, GWL_STYLE, GetWindowLong(H2hWnd, GWL_STYLE) | WS_SIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU);
+		if (Display_Mode == 2)
+		{
+			SetBorderlessWindowed();
 		}
 
 		if (H2GetInstanceId() > 1) {

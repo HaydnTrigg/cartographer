@@ -676,6 +676,7 @@ static void overrideCoreH2Labels() {
 		add_custom_label(lang, 0x00000ae5, 0x06000234, "Cartographer");
 		add_custom_label(lang, 0x00000ae5, 0x0f001ae6, "Jump right into a game of Halo 2");
 		add_custom_label(lang, 0x00000ae5, 0x11001b2f, "Online Stats");
+		add_custom_label(lang, 0x00000c37, 0x130008ac, "Borderless Windowed");
 	}
 } 
 

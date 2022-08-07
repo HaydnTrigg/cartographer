@@ -16,7 +16,6 @@ static BYTE enableKeyboard3[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 RECT rectScreenOriginal;
 
 
-
 //Leveraging this call to unset the controller state
 typedef void(__cdecl sub_B524F7_t)(signed int a1);
 sub_B524F7_t* p_sub_B524F7;
@@ -107,8 +106,6 @@ void hotkeyFuncHelp() {
 	addDebugText("------------------------------");
 	addDebugText("Options:");
 	addDebugText("%s - Print and show this help text.", GetVKeyCodeString(H2Config_hotkeyIdHelp).c_str());
-	addDebugText("%s - Align/Correct window positioning (into Borderless).", GetVKeyCodeString(H2Config_hotkeyIdAlignWindow).c_str());
-	addDebugText("%s - Toggle Windowed/Borderless mode.", GetVKeyCodeString(H2Config_hotkeyIdWindowMode).c_str());
 	addDebugText("%s - Toggles hiding the in-game chat menu.", GetVKeyCodeString(H2Config_hotkeyIdToggleHideIngameChat).c_str());
 	addDebugText("%s - Toggles hiding the Console Menu.", GetVKeyCodeString(H2Config_hotkeyIdConsole).c_str());
 	addDebugText("------------------------------");
@@ -118,100 +115,6 @@ void hotkeyFuncHelp() {
 		ImGuiHandler::ToggleWindow(Console::windowName);
 	}
 	GetMainConsoleInstance()->SelectTab(_console_tab_logs);
-}
-
-//TODO:REFACTOR
-void setBorderless(int originX, int originY, int width, int height) {
-	SetWindowLong(H2hWnd, GWL_STYLE, GetWindowLong(H2hWnd, GWL_STYLE) & ~(WS_THICKFRAME | WS_BORDER | WS_DLGFRAME));// | WS_SIZEBOX
-	//SetWindowLong(halo2hWnd, GWL_STYLE, GetWindowLong(halo2hWnd, GWL_EXSTYLE) & ~(WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE));
-
-	SetWindowPos(H2hWnd, NULL, originX, originY, width, height, 0);// SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
-
-}
-//TODO:REFACTOR
-void setWindowed(int originX, int originY, int width, int height) {
-	SetWindowLong(H2hWnd, GWL_STYLE, GetWindowLong(H2hWnd, GWL_STYLE) | WS_THICKFRAME | WS_BORDER | WS_DLGFRAME);
-	SetWindowPos(H2hWnd, NULL, originX, originY, width, height, SWP_FRAMECHANGED);
-}
-//TODO: REFACTOR Content
-void hotkeyFuncAlignWindow() {
-	if (H2IsDediServer) {
-		return;
-	}
-	if (!pDevice || !H2hWnd) {
-		return;
-	}
-	HMONITOR monitor = MonitorFromWindow(H2hWnd, MONITOR_DEFAULTTONEAREST);
-	MONITORINFO info;
-	info.cbSize = sizeof(MONITORINFO);
-	GetMonitorInfo(monitor, &info);
-	int monitor_width = info.rcMonitor.right - info.rcMonitor.left;
-	int monitor_height = info.rcMonitor.bottom - info.rcMonitor.top;
-	int interval_width = monitor_width / 2;
-	int interval_height = monitor_height / 2;
-	D3DVIEWPORT9 pViewport;
-	pDevice->GetViewport(&pViewport);
-	int width = interval_width * round(pViewport.Width / (double)interval_width);
-	int height = interval_height * round(pViewport.Height / (double)interval_height);
-	RECT gameWindowRect;
-	GetWindowRect(H2hWnd, &gameWindowRect);
-	int monitorXOffset = gameWindowRect.left - info.rcMonitor.left;
-	int monitorYOffset = gameWindowRect.top - info.rcMonitor.top;
-	int padX = interval_width * round(monitorXOffset / (double)interval_width);
-	int padY = interval_height * round(monitorYOffset / (double)interval_height);
-	int posX = info.rcMonitor.left + padX;
-	int posY = info.rcMonitor.top + padY;
-
-	setBorderless(posX, posY, width, height);
-}
-//TODO: REFACTOR Content
-void hotkeyFuncWindowMode() {
-	if (H2IsDediServer) {
-		return;
-	}
-	if (!pDevice || !H2hWnd) {
-		return;
-	}
-	/*wchar_t title[255];
-	wsprintf(title, L"Confirm Window Mode for Player %d", getPlayerNumber());
-	int msgboxID = MessageBox(halo2hWnd,
-	L"Go to Borderless Mode?\nNo = Windowed mode.\nWarning: Clicking the same option that is currently active can have weird side effects.",
-	title,
-	MB_ICONEXCLAMATION | MB_YESNOCANCEL
-	);*/
-	//if (msgboxID == IDYES) {}
-	if (GetWindowLong(H2hWnd, GWL_STYLE) & (WS_THICKFRAME | WS_BORDER | WS_DLGFRAME)) {
-		RECT rectScreen;
-		GetWindowRect(H2hWnd, &rectScreen);
-		D3DVIEWPORT9 pViewport;
-		pDevice->GetViewport(&pViewport);
-		int width = pViewport.Width;
-		int height = pViewport.Height;
-		long borderPadX = 0;
-		long borderPadY = 0;
-		int excessY = GetSystemMetrics(SM_CYCAPTION);
-
-		WINDOWPLACEMENT place3;
-		GetWindowPlacement(H2hWnd, &place3);
-		if ((place3.flags & WPF_RESTORETOMAXIMIZED) == WPF_RESTORETOMAXIMIZED) {
-			WINDOWPLACEMENT place2;
-			GetWindowPlacement(H2hWnd, &place2);
-			place2.showCmd = (place2.showCmd | SW_SHOWNOACTIVATE) & ~SW_MAXIMIZE;
-			SetWindowPlacement(H2hWnd, &place2);
-			borderPadX = GetSystemMetrics(SM_CXSIZEFRAME);
-			borderPadY = GetSystemMetrics(SM_CYSIZEFRAME);
-		}
-		GetWindowRect(H2hWnd, &rectScreenOriginal);
-
-		setBorderless(rectScreen.left + borderPadX, rectScreen.top + borderPadY, width, height + excessY);
-
-	}
-	else {
-		//else if (msgboxID == IDNO) {
-		long width = rectScreenOriginal.right - rectScreenOriginal.left;// -GetSystemMetrics(SM_CXSIZEFRAME) - GetSystemMetrics(SM_CXSIZEFRAME);
-		long height = rectScreenOriginal.bottom - rectScreenOriginal.top;// -GetSystemMetrics(SM_CYSIZEFRAME) - GetSystemMetrics(SM_CYSIZEFRAME);
-		setWindowed(rectScreenOriginal.left, rectScreenOriginal.top, width, height);
-	}
 }
 
 void hotkeyFuncToggleHideIngameChat() {
@@ -247,11 +150,7 @@ void KeyboardInput::Initialize()
 	ToggleKeyboardInput();
 	addDebugText("Registering Hotkeys");
 	KeyboardInput::RegisterHotkey(&H2Config_hotkeyIdHelp, hotkeyFuncHelp);
-	KeyboardInput::RegisterHotkey(&H2Config_hotkeyIdAlignWindow, hotkeyFuncAlignWindow);
-	KeyboardInput::RegisterHotkey(&H2Config_hotkeyIdWindowMode, hotkeyFuncWindowMode);
 	KeyboardInput::RegisterHotkey(&H2Config_hotkeyIdGuide, hotkeyFuncGuide);
 	KeyboardInput::RegisterHotkey(&H2Config_hotkeyIdConsole, hotkeyFuncConsole);
 	// KeyboardInput::RegisterHotkey(&pause, hotkeyFuncDebug);
 }
-
-

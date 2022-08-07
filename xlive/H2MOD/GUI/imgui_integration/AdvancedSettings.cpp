@@ -3,7 +3,9 @@
 #include "Blam\Engine\Memory\bitstream.h"
 #include "Blam\Engine\IceCreamFlavor\IceCreamFlavor.h"
 #include "Blam\Engine\Networking\NetworkMessageTypeCollection.h"
-#include "H2MOD\Modules\Shell\Config.h"
+#include "H2MOD\Modules\CustomMenu\CustomMenu.h"
+#include "H2MOD\Modules\CustomMenu\CustomMenuGlobals.h"
+#include "H2MOD\Modules\CustomMenu\DisplayMode\c_display_mode_menu.h"
 #include "H2MOD\Modules\CustomMenu\CustomLanguage.h"
 #include "H2MOD\Modules\GamePhysics\Patches\MeleeFix.h"
 #include "H2MOD\Modules\HudElements\HudElements.h"
@@ -11,6 +13,7 @@
 #include "H2MOD\Modules\Input\PlayerControl.h"
 #include "H2MOD\Modules\RenderHooks\RenderHooks.h"
 #include "H2MOD\Modules\RunLoop\RunLoop.h"
+#include "H2MOD\Modules\Shell\Config.h"
 #include "H2MOD\Modules\SpecialEvents\SpecialEvents.h"
 
 #ifndef NDEBUG
@@ -690,8 +693,10 @@ namespace ImGuiHandler {
 						//XDelay
 						TextVerticalPad(GetString(disable_x_delay));
 						ImGui::SameLine(ImGui::GetColumnWidth() - 35);
-						ImGui::Checkbox("##XDelay", &H2Config_xDelay);
-
+						if (ImGui::Checkbox("##XDelay", &H2Config_xDelay))
+						{
+							H2Tweaks::RefreshTogglexDelay();
+						}
 						ImGui::Columns(1);
 						ImGui::Separator();
 						bool* skulls = ice_cream_flavor_state();
@@ -986,6 +991,7 @@ namespace ImGuiHandler {
 						}
 					}
 					*/
+					ImGui::Indent();
 					if(ImGui::CollapsingHeader("Director Mode"))
 					{
 						if(ImGui::Button("Game"))
@@ -1047,29 +1053,35 @@ namespace ImGuiHandler {
 						if (ImGui::RadioButton("None", &event_type, SpecialEvents::e_event_type::_no_event))
 						{ 
 							H2Config_forced_event = (int)SpecialEvents::e_event_type::_no_event;
-							SaveH2Config();
 						} ImGui::SameLine();
 						if (ImGui::RadioButton("Christmas", &event_type, SpecialEvents::e_event_type::_christmas))
 						{ 
 							H2Config_forced_event = (int)SpecialEvents::e_event_type::_christmas;
-							SaveH2Config();
 						} ImGui::SameLine();
 						if (ImGui::RadioButton("St Paddys", &event_type, SpecialEvents::e_event_type::_st_paddys))
 						{ 
 							H2Config_forced_event = (int)SpecialEvents::e_event_type::_st_paddys;
-							SaveH2Config();
 						} ImGui::SameLine();
 						if (ImGui::RadioButton("Mook Madness", &event_type, SpecialEvents::e_event_type::_mook_maddness))
 						{ 
 							H2Config_forced_event = (int)SpecialEvents::e_event_type::_mook_maddness;
-							SaveH2Config();
 						}
 
 						if (ImGui::RadioButton("Halloween", &event_type, SpecialEvents::e_event_type::_halloween))
 						{ 
 							H2Config_forced_event = (int)SpecialEvents::e_event_type::_halloween; 
-							SaveH2Config();
-						} ImGui::SameLine();
+						}
+					}
+					if (ImGui::CollapsingHeader("WGIT Testing"))
+					{
+						if (ImGui::Button("Display Mode"))
+						{
+							CallWgit(c_display_mode_list_menu::open);
+						}
+						if (ImGui::Button("Custom Languages"))
+						{
+							GSCustomMenuCall_Language();
+						}
 					}
 				}
 #endif
@@ -1188,7 +1200,7 @@ namespace ImGuiHandler {
 			string_table[0][e_advanced_string::host_campagin_settings] = "Host & Campaign Settings";
 			string_table[0][e_advanced_string::anti_cheat] = "Anti-Cheat";
 			string_table[0][e_advanced_string::anti_cheat_tooltip] = "Allows you to disable the Anti-Cheat for your lobby.";
-			string_table[0][e_advanced_string::disable_x_delay] = "Disable X to Delay";
+			string_table[0][e_advanced_string::disable_x_delay] = "Enable X to Delay";
 			string_table[0][e_advanced_string::skull_anger] = "Anger";
 			string_table[0][e_advanced_string::skull_anger_tooltip] = "Enemies and allies fire their weapons faster and more frequently.";
 			string_table[0][e_advanced_string::skull_assassins] = "Assassins";

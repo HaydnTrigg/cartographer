@@ -1,22 +1,23 @@
 #include "stdafx.h"
 
 #include "H2MOD.h"
-#include "Blam\Enums\HaloStrings.h"
 #include "Blam\Cache\TagGroups\biped_definition.hpp"
 #include "Blam\Cache\TagGroups\globals_definition.hpp"
 #include "Blam\Cache\TagGroups\model_definition.hpp"
-#include "Blam\Engine\Memory\bitstream.h"
+#include "Blam\Cache\TagGroups\multiplayer_globals_definition.hpp"
+#include "Blam\Engine\Game\DamageData.h"
 #include "Blam\Engine\Game\GameGlobals.h"
 #include "Blam\Engine\Game\GameTimeGlobals.h"
-#include "Blam\FileSystem\FiloInterface.h"
-#include "Blam\Engine\Game\DamageData.h"
-#include "Blam\Engine\Networking\NetworkMessageTypeCollection.h"
-#include "Blam\Cache\TagGroups\multiplayer_globals_definition.hpp"
+#include "Blam\Engine\Memory\bitstream.h"
 #include "Blam\Engine\IceCreamFlavor\IceCreamFlavor.h"
+#include "Blam\Engine\Networking\NetworkMessageTypeCollection.h"
+#include "Blam\Enums\HaloStrings.h"
+#include "Blam\FileSystem\FiloInterface.h"
 #include "H2MOD\Discord\DiscordInterface.h"
 #include "H2MOD\Engine\Engine.h"
 #include "H2MOD\EngineHooks\EngineHooks.h"
 #include "H2MOD\GUI\GUI.h"
+#include "H2MOD\GUI\imgui_integration\imgui_handler.h"
 #include "H2MOD\Modules\Shell\Config.h"
 #include "H2MOD\Modules\CustomVariantSettings\CustomVariantSettings.h"
 #include "H2MOD\Modules\DirectorHooks\DirectorHooks.h"
@@ -43,9 +44,6 @@
 #include "H2MOD\Tags\MetaExtender.h"
 #include "H2MOD\Tags\MetaLoader\tag_loader.h"
 #include "Util\Hooks\Hook.h"
-#include "H2MOD\GUI\imgui_integration\imgui_handler.h"
-
-#include <float.h>
 
 #if (!defined(_M_FP_FAST)) || !_M_FP_FAST
 #pragma fenv_access (on)
@@ -1124,18 +1122,6 @@ void H2MOD::ApplyHooks() {
 
 		LOG_INFO_GAME("{} - applying client hooks", __FUNCTION__);
 		/* These hooks are only built for the client, don't enable them on the server! */
-
-		//Shader display hook
-		//c_test_hook = Memory::GetAddress<p_test_hook*>(0x1A2AEE);
-		//PatchCall(Memory::GetAddress(0x1a10de), test_shader_hook);
-		//PatchCall(Memory::GetAddress(0x1a1324), test_hook);
-		//PatchCall(Memory::GetAddress(0x1A2FF6), test_shader_hook);
-		//PatchCall(Memory::GetAddress(0x1a316B), test_hook);
-
-		//Shader LOD Bias stuff
-		//c_sub_81A676 = Memory::GetAddress<p_sub_81A676*>(0x19A676);
-		//PatchCall(Memory::GetAddress(0x19AD71), sub_81A676);
-		//PatchCall(Memory::GetAddress(0x19ADBC), sub_81A676);
 
 		// DETOUR_ATTACH(p_load_wgit, Memory::GetAddress<load_wgit_t>(0x2106A2), OnWgitLoad);
 

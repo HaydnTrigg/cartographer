@@ -707,14 +707,6 @@ void RefreshToggleIngameKeyboardControls() {
 		WriteBytes(H2BaseAddr + 0x2FA67, enableKeyboard3, 6);
 	}
 }
-
-void RefreshTogglexDelay() {
-	BYTE xDelayJMP[] = { 0x74 };
-	if (!H2Config_xDelay)
-		xDelayJMP[0] = 0xEB;
-	WriteBytes(H2BaseAddr + (H2IsDediServer ? 0x1a1316 : 0x1c9d8e), xDelayJMP, 1);
-}
-
 #pragma endregion
 
 #pragma region CM_Credits
@@ -2062,6 +2054,13 @@ void InitCustomMenu() {
 	add_cartographer_label(CMLabelMenuId_Guide, 3, "Credits");
 	add_cartographer_label(CMLabelMenuId_Guide, 4, "Update");
 
+
+	add_cartographer_label(CMLabelMenuId_DisplayMode, 0xFFFFFFF0, "Display Mode");
+	add_cartographer_label(CMLabelMenuId_DisplayMode, 0xFFFFFFF1, "Let the game dominate your entire screen or a window. "
+		"Either way, it'll dominate.");
+	add_cartographer_label(CMLabelMenuId_DisplayMode, 0xFFFF0000, "Full Screen");
+	add_cartographer_label(CMLabelMenuId_DisplayMode, 0xFFFF0001, "Windowed");
+	add_cartographer_label(CMLabelMenuId_DisplayMode, 0xFFFF0002, "Borderless Windowed");
 
 #pragma endregion
 

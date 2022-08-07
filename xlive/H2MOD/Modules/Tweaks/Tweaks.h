@@ -14,6 +14,6 @@ namespace H2Tweaks {
 	void toggleAiMp(bool toggle);
 	void toggleUncappedCampaignCinematics(bool toggle);
 	void setHz();
-	void SunflareFix();
 	void WarpFix(bool enable);
+	void RefreshTogglexDelay();
 }

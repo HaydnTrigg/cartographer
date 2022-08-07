@@ -3,17 +3,15 @@
 #include "imgui.h"
 #include "backends\imgui_impl_dx9.h"
 #include "backends\imgui_impl_win32.h"
+#include "GUI.h"
 #include "imgui_integration\imgui_handler.h"
 
-#include "GUI.h"
 #include "H2MOD\Modules\Achievements\Achievements.h"
-#include "H2MOD\Modules\Shell\Config.h"
 #include "H2MOD\Modules\Input\KeyboardInput.h"
-#include "H2MOD\Modules\Input\PlayerControl.h"
 #include "H2MOD\Modules\Networking\Networking.h"
 #include "H2MOD\Modules\OnScreenDebug\OnscreenDebug.h"
+#include "H2MOD\Modules\Shell\Config.h"
 
-#include "Util\Hooks\Hook.h"
 
 extern void InitInstance();
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -585,4 +583,3 @@ int WINAPI XLiveRender()
 	}
 	return 0;
 }
-

@@ -2,21 +2,22 @@
 
 #include "Tweaks.h"
 #include "Blam\Engine\Game\GameTimeGlobals.h"
-#include "Blam\FileSystem\FiloInterface.h"
 #include "Blam\Engine\Networking\NetworkMessageTypeCollection.h"
+#include "Blam\FileSystem\FiloInterface.h"
 #include "H2MOD\Modules\Accounts\AccountLogin.h"
-#include "H2MOD\Modules\Shell\Config.h"
 #include "H2MOD\Modules\CustomMenu\CustomMenu.h"
 #include "H2MOD\Modules\CustomResolutions\CustomResolutions.h"
 #include "H2MOD\Modules\HudElements\HudElements.h"
+#include "H2MOD\Modules\MapManager\MapManager.h"
 #include "H2MOD\Modules\OnScreenDebug\OnscreenDebug.h"
+#include "H2MOD\Modules\Shell\Config.h"
+#include "H2MOD\Modules\Shell\Startup\Startup.h"
 #include "H2MOD\Modules\UI\XboxLiveTaskProgress.h"
-#include "H2MOD\Utils\Utils.h"
 #include "H2MOD\Tags\TagInterface.h"
+#include "H2MOD\Utils\Utils.h"
 #include "H2MOD\Variants\VariantMPGameEngine.h"
 #include "Util\Hooks\Hook.h"
 #include "XLive\xnet\IpManagement\XnIp.h"
-#include "H2MOD\Modules\MapManager\MapManager.h"
 
 #pragma region Done_Tweaks
 
@@ -269,7 +270,7 @@ BOOL __stdcall isDebuggerPresent() {
 void InitH2Tweaks() {
 	addDebugText("Begin Startup Tweaks.");
 	
-	RefreshTogglexDelay();
+	H2Tweaks::RefreshTogglexDelay();
 
 	//TODO(Num005) crashes dedis
 	//custom_game_engines::init();
@@ -325,8 +326,6 @@ void InitH2Tweaks() {
 		PatchCall(Memory::GetAddress(0x21754C), &sub_20E1D8_boot);
 
 		HudElements::Init();
-
-		H2Tweaks::SunflareFix();
 
 		// patch to show game details menu in NETWORK serverlist too
 		//NopFill(Memory::GetAddress(0x219D6D), 2);
@@ -448,16 +447,6 @@ void H2Tweaks::toggleAiMp(bool toggle) {
 	WriteValue<BYTE>(Memory::GetAddress(0x30E684, 0x2B93F4), toggle ? JMP_OP_CODE : JNZ_OP_CODE);
 }
 
-void H2Tweaks::SunflareFix()
-{
-	if (Memory::IsDedicatedServer())
-		return;
-
-	//rasterizer_near_clip_distance <real>
-	//Changed from game default of 0.06 to 0.0601
-	WriteValue<float>(Memory::GetAddress(0x468150), 0.0601f);
-}
-
 void H2Tweaks::WarpFix(bool enable)
 {
 	if (Memory::IsDedicatedServer())
@@ -474,4 +463,12 @@ void H2Tweaks::WarpFix(bool enable)
 		WriteValue<float>(Memory::GetAddress(0x4F958C), 2.5f);
 		WriteValue<float>(Memory::GetAddress(0x4F9594), 7.5f);
 	}	
+}
+
+void H2Tweaks::RefreshTogglexDelay() 
+{
+	BYTE xDelayJMP[] = { 0x74 };
+	if (!H2Config_xDelay)
+		xDelayJMP[0] = 0xEB;
+	WriteBytes(H2BaseAddr + (H2IsDediServer ? 0x1a1316 : 0x1c9d8e), xDelayJMP, 1);
 }
