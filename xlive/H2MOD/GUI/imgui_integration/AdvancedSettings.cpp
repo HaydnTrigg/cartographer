@@ -5,6 +5,7 @@
 #include "Blam\Engine\Networking\NetworkMessageTypeCollection.h"
 #include "H2MOD\Modules\CustomMenu\CustomMenu.h"
 #include "H2MOD\Modules\CustomMenu\CustomMenuGlobals.h"
+#include "H2MOD\Modules\CustomMenu\CampaignModifiers\c_campaign_modifiers_menu.h"
 #include "H2MOD\Modules\CustomMenu\DisplayMode\c_display_mode_menu.h"
 #include "H2MOD\Modules\CustomMenu\CustomLanguage.h"
 #include "H2MOD\Modules\GamePhysics\Patches\MeleeFix.h"
@@ -1081,6 +1082,10 @@ namespace ImGuiHandler {
 						if (ImGui::Button("Custom Languages"))
 						{
 							GSCustomMenuCall_Language();
+						}
+						if (ImGui::Button("Campaign Modifiers"))
+						{
+							CallWgit(c_campaign_modifiers_list_menu::open);
 						}
 					}
 				}

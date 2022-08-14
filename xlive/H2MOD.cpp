@@ -19,6 +19,8 @@
 #include "H2MOD\GUI\GUI.h"
 #include "H2MOD\GUI\imgui_integration\imgui_handler.h"
 #include "H2MOD\Modules\Shell\Config.h"
+#include "H2MOD\Modules\CampaignModifiers\CampaignModifiers.h"
+#include "H2MOD\Modules\CustomMenu\CampaignModifiers\c_campaign_modifiers_menu.h"
 #include "H2MOD\Modules\CustomVariantSettings\CustomVariantSettings.h"
 #include "H2MOD\Modules\DirectorHooks\DirectorHooks.h"
 #include "H2MOD\Modules\EventHandler\EventHandler.hpp"
@@ -547,7 +549,9 @@ bool __cdecl OnMapLoad(s_game_options* options)
 		UIRankPatch();
 		H2Tweaks::toggleAiMp(false);
 		H2Tweaks::toggleUncappedCampaignCinematics(false);
+		CampaignModifiers::MainMenuPatches();
 		MetaExtender::free_tag_blocks();
+		options->tickrate = XboxTick::setTickRate(false);
 	}
 	else
 	{
@@ -606,8 +610,8 @@ bool __cdecl OnMapLoad(s_game_options* options)
 		{
 			//if anyone wants to run code on map load single player
 			addDebugText("Engine type: Singleplayer");
-			//H2X::Initialize(true);
 			H2Tweaks::toggleUncappedCampaignCinematics(true);
+			CampaignModifiers::c_campaign_modifiers::ApplyEngineModifiers(options);
 		}
 
 		resetAfterMatch = true;
@@ -1051,14 +1055,7 @@ void H2MOD::RegisterEvents()
 #endif
 }
 
-//Shader LOD Bias stuff
-//typedef int(__cdecl p_sub_81A676)(int a1, int a2, float a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10);
-//p_sub_81A676* c_sub_81A676;
-//
-//int __cdecl sub_81A676(int a1, int a2, float a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10)
-//{
-//	return c_sub_81A676(a1, a2, a3, 4, a5, a6, a7, a8, a9, a10);
-//}
+
 
 // unlocks all single player maps
 int __cdecl get_last_single_player_level_id_unlocked_from_profile()
@@ -1162,6 +1159,9 @@ void H2MOD::ApplyHooks() {
 		// PatchCall(GetAddress(0x25E1E5), set_screen_bounds);
 		
 		PatchCall(Memory::GetAddressRelative(0x6422C8), get_last_single_player_level_id_unlocked_from_profile);
+
+		// Change campaign load level screen to use a different event handler
+		WritePointer(Memory::GetAddress(0x3CF584), c_load_level_event_handler);
 	}
 	else {
 		LOG_INFO_GAME("{} - applying dedicated server hooks", __FUNCTION__);
@@ -1217,6 +1217,7 @@ void H2MOD::Initialize()
 	HaloScript::Initialize();
 	player_representation::initialize();
 	KantTesting::Initialize();
+	CampaignModifiers::Initialize();
 	h2mod->ApplyHooks();
 	h2mod->RegisterEvents();
 

@@ -2056,12 +2056,21 @@ void InitCustomMenu() {
 
 
 	add_cartographer_label(CMLabelMenuId_DisplayMode, 0xFFFFFFF0, "Display Mode");
-	add_cartographer_label(CMLabelMenuId_DisplayMode, 0xFFFFFFF1, "Let the game dominate your entire screen or a window. "
-		"Either way, it'll dominate.");
+	add_cartographer_label(CMLabelMenuId_DisplayMode, 0xFFFFFFF1, "Let the game dominate your entire screen or a window. Either way, it'll dominate.");
 	add_cartographer_label(CMLabelMenuId_DisplayMode, 0xFFFF0000, "Full Screen");
 	add_cartographer_label(CMLabelMenuId_DisplayMode, 0xFFFF0001, "Windowed");
 	add_cartographer_label(CMLabelMenuId_DisplayMode, 0xFFFF0002, "Borderless Windowed");
 
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFFFFF0, "Campaign Modifiers");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFFFFF1, "test");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0000, "Modifier 1");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0001, "Modifier 2");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0002, "Modifier 3");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0003, "Modifier 4");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0004, "Modifier 5");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0005, "Modifier 6");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0006, "Modifier 7");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0007, "Modifier 8");
 #pragma endregion
 
 	if (H2IsDediServer)

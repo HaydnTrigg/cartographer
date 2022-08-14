@@ -149,6 +149,8 @@
     <ClCompile Include="H2MOD\Modules\WeaponOffsets\WeaponOffsets.cpp" />
     <ClCompile Include="H2MOD\Modules\WeaponOffsets\WeaponOffsetConfig.cpp" />
     <ClCompile Include="H2MOD\Modules\CustomMenu\DisplayMode\c_display_mode_menu.cpp" />
+    <ClCompile Include="H2MOD\Modules\CustomMenu\CampaignModifiers\c_campaign_modifiers_menu.cpp" />
+    <ClCompile Include="H2MOD\Modules\CampaignModifiers\CampaignModifiers.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdparty\discord\discord_register.h" />
@@ -483,6 +485,8 @@
     <ClInclude Include="H2MOD\Modules\Config\WeaponOffsetConfig\WeaponOffsetConfig.h" />
     <ClInclude Include="Blam\Cache\TagGroups\bitmap_definition.hpp" />
     <ClInclude Include="H2MOD\Modules\CustomMenu\DisplayMode\c_display_mode_menu.h" />
+    <ClInclude Include="H2MOD\Modules\CustomMenu\CampaignModifiers\c_campaign_modifiers_menu.h" />
+    <ClInclude Include="H2MOD\Modules\CampaignModifiers\CampaignModifiers.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc" />

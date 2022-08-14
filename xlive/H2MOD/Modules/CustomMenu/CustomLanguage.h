@@ -21,6 +21,7 @@ static const int CMLabelMenuId_AdvLobbySettings = 0xFF000016;
 static const int CMLabelMenuId_Credits = 0xFF000006;
 static const int CMLabelMenuId_Update = 0xFF000011;
 static const int CMLabelMenuId_DisplayMode = 0xFF0000012;
+static const int CMLabelMenuId_CampaignModifiers = 0xFF0000013;
 
 void InitCustomLanguage();
 void DeinitCustomLanguage();
