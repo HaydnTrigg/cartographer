@@ -345,6 +345,12 @@ namespace SpecialEvents
 				tag_loader::Load_tag(paddy_beard_datum, true, "carto_shared");
 				tag_loader::Load_tag(paddy_pot_datum, true, "carto_shared");
 				tag_loader::Push_Back();
+
+				
+				auto paddy_pot = tags::get_tag<blam_tag::tag_group_type::scenery, s_scenery_group_definition>(tag_loader::ResolveNewDatum(paddy_pot_datum), true);
+				auto paddy_pot_model_datum = paddy_pot->objectTag.model.TagIndex;
+				auto paddy_pot_model = tags::get_tag<blam_tag::tag_group_type::model, s_model_group_definition>(paddy_pot_model_datum, true);
+				
 				auto hlmt_chief_datum = tags::find_tag(blam_tag::tag_group_type::model, "objects\\characters\\masterchief\\masterchief");
 				if (hlmt_chief_datum != DATUM_INDEX_NONE) {
 					auto hlmt_chief = tags::get_tag<blam_tag::tag_group_type::model, s_model_group_definition>(hlmt_chief_datum);
@@ -357,7 +363,6 @@ namespace SpecialEvents
 					beard->parent_marker = string_id(HaloString::HS_HEAD);
 					beard->child_object.TagGroup = blam_tag::tag_group_type::scenery;
 					beard->child_object.TagIndex = tag_loader::ResolveNewDatum(paddy_beard_datum);
-
 				}
 				auto hlmt_chief_mp_datum = tags::find_tag(blam_tag::tag_group_type::model, "objects\\characters\\masterchief\\masterchief_mp");
 				if (hlmt_chief_mp_datum != DATUM_INDEX_NONE) {
@@ -386,39 +391,40 @@ namespace SpecialEvents
 					beard->child_object.TagGroup = blam_tag::tag_group_type::scenery;
 					beard->child_object.TagIndex = tag_loader::ResolveNewDatum(paddy_beard_datum);
 				}
+				auto ball_weapon_datum = tags::find_tag(blam_tag::tag_group_type::weapon, "objects\\weapons\\multiplayer\\ball\\head_sp");
+				if (ball_weapon_datum != DATUM_INDEX_NONE)
+				{
+					auto ball_weapon = tags::get_tag<blam_tag::tag_group_type::weapon, s_weapon_group_definition>(ball_weapon_datum);
 
+					auto ball_model_datum = tags::find_tag(blam_tag::tag_group_type::model, "objects\\weapons\\multiplayer\\ball\\ball");
+					auto ball_model = tags::get_tag<blam_tag::tag_group_type::model, s_model_group_definition>(ball_model_datum);
 
-				auto paddy_pot = tags::get_tag<blam_tag::tag_group_type::scenery, s_scenery_group_definition>(tag_loader::ResolveNewDatum(paddy_pot_datum), true);
-				auto paddy_pot_model_datum = paddy_pot->objectTag.model.TagIndex;
-				auto paddy_pot_model = tags::get_tag<blam_tag::tag_group_type::model, s_model_group_definition>(paddy_pot_model_datum, true);
+					ball_model->render_model.TagIndex = paddy_pot_model->render_model.TagIndex;
 
-				auto ball_model_datum = tags::find_tag(blam_tag::tag_group_type::model, "objects\\weapons\\multiplayer\\ball\\ball");
-				auto ball_model = tags::get_tag<blam_tag::tag_group_type::model, s_model_group_definition>(ball_model_datum);
-				ball_model->render_model.TagIndex = paddy_pot_model->render_model.TagIndex;
-
-				auto bomb_model_datum = tags::find_tag(blam_tag::tag_group_type::model, "objects\\weapons\\multiplayer\\assault_bomb\\assault_bomb");
-				auto bomb_model = tags::get_tag<blam_tag::tag_group_type::model, s_model_group_definition>(bomb_model_datum);
-				bomb_model->render_model.TagIndex = paddy_pot_model->render_model.TagIndex;
-
-				auto paddy_pot_render = tags::get_tag<blam_tag::tag_group_type::rendermodel, s_render_model_group_definition>(paddy_pot_model->render_model.TagIndex, true);
-				auto pot_node = paddy_pot_render->nodes[0];
-				pot_node->default_rotation_k = -0.75;
-				pot_node->inverse_position_y = 0.07;
-				pot_node->inverse_position_z = -0.1;
-
-				auto ball_weapon_datum = tags::find_tag(blam_tag::tag_group_type::weapon, "objects\\weapons\\multiplayer\\ball\\ball");
-				auto ball_weapon = tags::get_tag<blam_tag::tag_group_type::weapon, s_weapon_group_definition>(ball_weapon_datum);
-
-				//Bounding Radius and Sweetener size
-				ball_weapon->bounding_radius = 0.3f;
-				ball_weapon->sweetener_size = s_weapon_group_definition::e_sweetener_size::medium;
-
+					//Bounding Radius and Sweetener size
+					ball_weapon->bounding_radius = 0.3f;
+					ball_weapon->sweetener_size = s_weapon_group_definition::e_sweetener_size::medium;
+				}
+				
 				auto bomb_weapon_datum = tags::find_tag(blam_tag::tag_group_type::weapon, "objects\\weapons\\multiplayer\\assault_bomb\\assault_bomb");
-				auto bomb_weapon = tags::get_tag<blam_tag::tag_group_type::weapon, s_weapon_group_definition>(bomb_weapon_datum);
+				if (bomb_weapon_datum != DATUM_INDEX_NONE)
+				{
+					auto bomb_weapon = tags::get_tag<blam_tag::tag_group_type::weapon, s_weapon_group_definition>(bomb_weapon_datum);
 
-				//Bounding Radius and Sweetener size
-				bomb_weapon->bounding_radius = 0.3f;
-				bomb_weapon->sweetener_size = s_weapon_group_definition::e_sweetener_size::medium;
+					auto bomb_model_datum = tags::find_tag(blam_tag::tag_group_type::model, "objects\\weapons\\multiplayer\\assault_bomb\\assault_bomb");
+					auto bomb_model = tags::get_tag<blam_tag::tag_group_type::model, s_model_group_definition>(bomb_model_datum);
+
+					bomb_model->render_model.TagIndex = paddy_pot_model->render_model.TagIndex;
+					auto paddy_pot_render = tags::get_tag<blam_tag::tag_group_type::rendermodel, s_render_model_group_definition>(paddy_pot_model->render_model.TagIndex, true);
+					auto pot_node = paddy_pot_render->nodes[0];
+					pot_node->default_rotation_k = -0.75;
+					pot_node->inverse_position_y = 0.07;
+					pot_node->inverse_position_z = -0.1;
+
+					//Bounding Radius and Sweetener size
+					bomb_weapon->bounding_radius = 0.3f;
+					bomb_weapon->sweetener_size = s_weapon_group_definition::e_sweetener_size::medium;
+				}
 			}
 		}
 	}
@@ -776,7 +782,8 @@ namespace SpecialEvents
 
 	void AddNewMarkers()
 	{
-		if (h2mod->GetEngineType() == e_engine_type::_multiplayer) {
+		if (h2mod->GetEngineType() == e_engine_type::_multiplayer)
+		{
 			auto mode_elite_datum = tags::find_tag(blam_tag::tag_group_type::rendermodel, "objects\\characters\\elite\\elite_mp");
 			auto mode_elite = tags::get_tag<blam_tag::tag_group_type::rendermodel, s_render_model_group_definition>(mode_elite_datum);
 			auto new_marker_group = MetaExtender::add_tag_block2<s_render_model_group_definition::s_marker_groups_block>((unsigned long)std::addressof(mode_elite->marker_groups));

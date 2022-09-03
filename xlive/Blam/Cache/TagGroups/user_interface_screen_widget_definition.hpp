@@ -1302,5 +1302,5 @@ struct s_user_interface_screen_widget_definition : TagGroup<'wigt'>
 	float refraction_scale_y;//0x64
 	tag_reference mouse_cursor_definition;//0x68
 };
+#pragma pack(pop)
 TAG_GROUP_SIZE_ASSERT(s_user_interface_screen_widget_definition, 0x70);
-

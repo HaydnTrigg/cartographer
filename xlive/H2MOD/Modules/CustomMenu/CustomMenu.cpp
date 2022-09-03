@@ -2063,10 +2063,10 @@ void InitCustomMenu() {
 
 	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFFFFF0, "Campaign Modifiers");
 	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFFFFF1, "test");
-	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0000, "Modifier 1");
-	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0001, "Modifier 2");
-	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0002, "Modifier 3");
-	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0003, "Modifier 4");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0000, "30 Tick");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0001, "Randomizer");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0002, "Jackal Sniper Paradise");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0003, "Big Head Mode");
 	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0004, "Modifier 5");
 	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0005, "Modifier 6");
 	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0006, "Modifier 7");

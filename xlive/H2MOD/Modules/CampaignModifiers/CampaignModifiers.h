@@ -7,10 +7,11 @@ namespace CampaignModifiers
 		campaign_modifier_none = 0 << 0	,
 		campaign_modifier_ogh2 = 1 << 1,
 		campaign_modifier_randomizer = 1 << 2,
-		campaign_modifier_jackal_snipers = 1 << 3
+		campaign_modifier_jackal_snipers = 1 << 3,
+		campaign_modifier_big_head = 1 << 4
 	};
 
-	static class c_campaign_modifiers
+	class c_campaign_modifiers
 	{
 	public:
 		static void ApplyEngineModifiers(s_game_options* options);
@@ -20,5 +21,7 @@ namespace CampaignModifiers
 
 	void MainMenuPatches();
 	void JackalSniperEdits();
+	void RandomizerEdits();
+	void BigHeadEdits();
 	void Initialize();
 }

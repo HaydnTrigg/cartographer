@@ -7,7 +7,19 @@
 #include "Util\Hooks\Hook.h"
 #include "H2MOD\Modules\CampaignModifiers\CampaignModifiers.h"
 
-#define CUSTOM_GAME_MENU_ID 60
+#define GAME_ENGINE_CATEGORY_MENU_ID 60
+
+__int8 _fastcall c_load_level_event_handler(int This, int EDX, s_event_record* a2)
+{
+	typedef byte(__fastcall p_c_screen_widget__handle_event)(int This, int EDX, s_event_record* a2);
+	p_c_screen_widget__handle_event* c_screen_widget__handle_event;
+	c_screen_widget__handle_event = Memory::GetAddress<p_c_screen_widget__handle_event*>(0x20EB2B);
+
+	if (a2->type != 5 || a2->field_8 != 2)
+		return c_screen_widget__handle_event(This, 0, a2);
+	CallWgit(c_campaign_modifiers_list_menu::open);
+	return 0;
+}
 
 static void CampaignModifiersSetupButtons() {
 	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 1, H2CustomLanguageGetLabel(CMLabelMenuId_CampaignModifiers, 0xFFFF0000), true);
@@ -40,7 +52,7 @@ void* __cdecl c_campaign_modifiers_list_menu::open(s_new_ui_screen_parameters* p
 }
 
 c_campaign_modifiers_list_menu::c_campaign_modifiers_list_menu(int _ui_channel, int a4, __int16 _flags) :
-	c_screen_with_menu(CUSTOM_GAME_MENU_ID, _ui_channel, a4, _flags, &this->campaign_modifiers_list, true),
+	c_screen_with_menu(GAME_ENGINE_CATEGORY_MENU_ID, _ui_channel, a4, _flags, &this->campaign_modifiers_list, true),
 	campaign_modifiers_list(_flags)
 {
 }
@@ -71,10 +83,10 @@ c_campaign_modifiers_list::c_campaign_modifiers_list(int _flags) :
 	this->default_selected_button = 0;
 
 	int button_count = 8;
-	s_data_array* display_mode_list_data = allocate_list_data("campaign modifiers list", button_count, 4);
-	this->list_data_array = display_mode_list_data;
+	s_data_array* campaign_modifiers_list_data = allocate_list_data("campaign modifiers list", button_count, 4);
+	this->list_data_array = campaign_modifiers_list_data;
 
-	s_data_array::data_make_valid(display_mode_list_data);
+	s_data_array::data_make_valid(campaign_modifiers_list_data);
 
 	for (int i = 0; i < this->list_data_array->datum_max_elements; i++) {
 		s_data_array::datum_new_in_range(this->list_data_array);
@@ -99,7 +111,7 @@ void c_campaign_modifiers_list::button_handler(int* a2, int* a3)
 
 	bool close_parent_screen = false;
 
-	s_new_ui_screen_parameters new_ui_account_list_screen;
+	s_new_ui_screen_parameters new_ui_account_list_screen = {};
 	new_ui_account_list_screen.data_new(0, 1 << *(int*)(*a2 + 4), parent_screen_ui_channel, 4, c_campaign_modifiers_list_menu::open);
 
 	switch (button_id)
@@ -113,21 +125,12 @@ void c_campaign_modifiers_list::button_handler(int* a2, int* a3)
 	case 2:
 		CampaignModifiers::c_campaign_modifiers::SetModifier(CampaignModifiers::campaign_modifier_jackal_snipers);
 		break;
+	case 3:
+		CampaignModifiers::c_campaign_modifiers::SetModifier(CampaignModifiers::campaign_modifier_big_head);
+		break;
 	}
 
 	if (close_parent_screen)
 		user_interface_back_out_from_channel(parent_screen_ui_channel, parent_screen_idx);
 	return;
-}
-
-__int8 _fastcall c_load_level_event_handler(int This, int EDX, s_event_record* a2)
-{
-	typedef byte(__fastcall p_c_screen_widget__handle_event)(int This, int EDX, s_event_record* a2);
-	p_c_screen_widget__handle_event* c_screen_widget__handle_event;
-	c_screen_widget__handle_event = Memory::GetAddress<p_c_screen_widget__handle_event*>(0x20EB2B);
-
-	if (a2->type != 5 || a2->field_8 != 2)
-		return c_screen_widget__handle_event(This, 0, a2);
-	CallWgit(c_campaign_modifiers_list_menu::open);
-	return 0;
 }
