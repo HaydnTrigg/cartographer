@@ -3,9 +3,12 @@
 #include "H2MOD.h"
 #include "Blam\Cache\DataTypes\BlamTag.h"
 #include "Blam\Cache\DataTypes\StringID.h"
+#include "Blam\Cache\TagGroups\biped_definition.hpp"
 #include "Blam\Cache\TagGroups\character_definition.hpp"
+#include "Blam\Cache\TagGroups\collision_model_definition.hpp"
 #include "Blam\Cache\TagGroups\model_definition.hpp"
 #include "Blam\Cache\TagGroups\projectile_definition.hpp"
+#include "Blam\Cache\TagGroups\physics_model_definition.hpp"
 #include "Blam\Cache\TagGroups\render_model_definition.hpp"
 #include "Blam\Cache\TagGroups\scenario_ai_resource.hpp"
 #include "Blam\Cache\TagGroups\scenario_definition.hpp"
@@ -22,9 +25,7 @@
 
 namespace CampaignModifiers 
 {
-	std::random_device rng;
-	std::mt19937 urng(rng());
-	static e_campaign_modifiers campaign_modifiers = campaign_modifier_big_head;
+	static __int8 campaign_modifiers = campaign_modifier_none;
 
 	void MainMenuPatches()
 	{
@@ -42,6 +43,12 @@ namespace CampaignModifiers
 		{
 			options->tickrate = XboxTick::setTickRate(true);
 		}
+
+		if (campaign_modifiers & campaign_modifier_tiny_chief)
+		{
+			EventHandler::register_callback(TinyPlayerEdits, EventType::player_spawn, EventExecutionType::execute_after);
+		}
+		
 	}
 
 	void c_campaign_modifiers::ApplyMapModifiers()
@@ -65,23 +72,41 @@ namespace CampaignModifiers
 		}
 	}
 
-	void c_campaign_modifiers::SetModifier(e_campaign_modifiers modifier)
+	void c_campaign_modifiers::SetModifier(const __int8 modifier)
 	{
 		switch (modifier)
 		{
-		case CampaignModifiers::campaign_modifier_ogh2:
-			campaign_modifiers = campaign_modifier_ogh2;
+		case campaign_modifier_ogh2:
+			AddOrRemoveModifier(campaign_modifier_ogh2);
 			break;
-		case CampaignModifiers::campaign_modifier_randomizer:
-			campaign_modifiers = campaign_modifier_randomizer;
+		case campaign_modifier_randomizer:
+			AddOrRemoveModifier(campaign_modifier_randomizer);
 			break;
-		case CampaignModifiers::campaign_modifier_jackal_snipers:
-			campaign_modifiers = campaign_modifier_jackal_snipers;
+		case campaign_modifier_jackal_snipers:
+			AddOrRemoveModifier(campaign_modifier_jackal_snipers);
+			break;
+		case campaign_modifier_big_head:
+			AddOrRemoveModifier(campaign_modifier_big_head);
+			break;
+		case campaign_modifier_tiny_chief:
+			AddOrRemoveModifier(campaign_modifier_tiny_chief);
 			break;
 		default:
 			break;
 		}
+	}
 
+	__int8 c_campaign_modifiers::GetModifiers()
+	{
+		return campaign_modifiers;
+	}
+
+	inline void AddOrRemoveModifier(const __int8 modifier)
+	{
+		if (campaign_modifiers & modifier)
+			campaign_modifiers &= ~modifier;
+		else
+			campaign_modifiers ^= modifier;
 	}
 
 	void CampaignModifiers::JackalSniperEdits()
@@ -210,6 +235,79 @@ namespace CampaignModifiers
 				}
 			}
 		}
+	}
+
+	void CampaignModifiers::TinyPlayerEdits(datum playerDatumIdx)
+	{
+		const float scale_multiplier = 0.1;
+
+		int absPlayerIdx = DATUM_INDEX_TO_ABSOLUTE_INDEX(playerDatumIdx);
+		datum playerUnitDatum = s_player::GetPlayerUnitDatumIndex(absPlayerIdx);
+		auto unit_object = object_get_fast_unsafe<s_unit_data_definition>(playerUnitDatum);
+		unit_object->scale *= scale_multiplier;
+
+		datum chief_coll_datum = tags::find_tag(blam_tag::tag_group_type::collisionmodel, "objects\\characters\\masterchief\\masterchief");
+		if (chief_coll_datum != DATUM_INDEX_NONE)
+		{
+			ScaleCollision(chief_coll_datum, scale_multiplier);
+		}
+
+		datum chief_bipd_datum = tags::find_tag(blam_tag::tag_group_type::biped, "objects\\characters\\masterchief\\masterchief");
+		if (chief_bipd_datum != DATUM_INDEX_NONE)
+		{
+			ScaleBiped(chief_bipd_datum, scale_multiplier);
+		}
+
+		datum arby_coll_datum = tags::find_tag(blam_tag::tag_group_type::collisionmodel, "objects\\characters\\dervish\\dervish");
+		if (arby_coll_datum != DATUM_INDEX_NONE)
+		{
+			ScaleCollision(arby_coll_datum, scale_multiplier);
+		}
+
+		datum arby_bipd_datum = tags::find_tag(blam_tag::tag_group_type::biped, "objects\\characters\\dervish\\dervish");
+		if (arby_bipd_datum != DATUM_INDEX_NONE)
+		{
+			ScaleBiped(arby_bipd_datum, scale_multiplier);
+		}
+	}
+
+	void CampaignModifiers::ScaleBiped(const datum bipd_datum, const float scale_multiplier)
+	{
+		auto bipd = tags::get_tag_fast<s_biped_group_definition>(bipd_datum);
+		for (auto& pills : bipd->pill_shapes)
+		{
+			pills.radius *= scale_multiplier;
+			pills.bottom.k *= scale_multiplier;
+			pills.wbottom *= scale_multiplier;
+			pills.top.k *= scale_multiplier;
+			pills.wtop *= scale_multiplier;
+		}
+	}
+
+	void CampaignModifiers::ScaleCollision(const datum coll_datum, const float scale_multiplier)
+	{
+		auto coll = tags::get_tag_fast<s_collision_model_block>(coll_datum);
+		for (auto& regions : coll->regions)
+		{
+			for (auto& bsps : regions.permutations[0]->bsps)
+			{
+				for (auto& planes : bsps.bsp.planes)
+				{
+					planes.plane_distance.normal.i *= scale_multiplier;
+					planes.plane_distance.normal.j *= scale_multiplier;
+					planes.plane_distance.normal.k *= scale_multiplier;
+					planes.plane_distance.distance *= scale_multiplier;
+				}
+
+				for (auto& vertex : bsps.bsp.vertices)
+				{
+					vertex.point.x *= scale_multiplier;
+					vertex.point.y *= scale_multiplier;
+					vertex.point.z *= scale_multiplier;
+				}
+			}
+		}
+
 	}
 
 	void CampaignModifiers::Initialize()

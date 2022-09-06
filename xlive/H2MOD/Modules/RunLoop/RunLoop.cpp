@@ -164,7 +164,12 @@ void GSMainLoop() {
 			GetDWORDRegKey(hKeyVideoSettings, L"DisplayMode", &Display_Mode);
 			RegCloseKey(hKeyVideoSettings);
 		}
-		if (Display_Mode == 2)
+
+		if (Display_Mode == 1 || H2GetInstanceId() > 1)
+		{
+			SetWindowLong(H2hWnd, GWL_STYLE, GetWindowLong(H2hWnd, GWL_STYLE) | WS_SIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU);
+		}
+		else if (Display_Mode == 2)
 		{
 			SetBorderlessWindowed();
 		}

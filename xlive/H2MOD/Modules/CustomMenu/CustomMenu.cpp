@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 
 #include "CustomMenu.h"
 #include "CustomLanguage.h"
@@ -1960,8 +1960,8 @@ void InitCustomMenu() {
 	//	add_cartographer_label(CMLabelMenuId_AdvSettings, 5, "Extra Game Settings");
 
 
-	//	add_cartographer_label(CMLabelMenuId_AdvLobbySettings, 0xFFFFFFF0, "Extra Game Settings");
-	//	add_cartographer_label(CMLabelMenuId_AdvLobbySettings, 0xFFFFFFF1, "Customise the game with some extra features / hacks.");
+	add_cartographer_label(CMLabelMenuId_AdvLobbySettings, 0xFFFFFFF0, "Extra Game Settings");
+	add_cartographer_label(CMLabelMenuId_AdvLobbySettings, 0xFFFFFFF1, "Customise the game with some extra features / hacks.");
 	add_cartographer_label(CMLabelMenuId_AdvLobbySettings, 0xFFFFFFF2, "Enable %s");
 	add_cartographer_label(CMLabelMenuId_AdvLobbySettings, 0xFFFFFFF3, "Disable %s");
 	add_cartographer_label(CMLabelMenuId_AdvLobbySettings, 0xFFFFFFF4, "Show %s");
@@ -2064,13 +2064,21 @@ void InitCustomMenu() {
 	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFFFFF0, "Campaign Modifiers");
 	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFFFFF1, "test");
 	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0000, "30 Tick");
-	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0001, "Randomizer");
-	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0002, "Jackal Sniper Paradise");
-	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0003, "Big Head Mode");
-	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0004, "Modifier 5");
-	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0005, "Modifier 6");
-	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0006, "Modifier 7");
-	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0007, "Modifier 8");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0001, "30 Tick (Selected)");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0002, "Randomizer");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0003, "Randomizer (Selected)");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0004, "Jackal Paradise");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0005, "Jackal Paradise (Selected)");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0006, "Big Head Mode");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0007, "Big Head Mode (Selected)");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0008, "Tiny Player");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0009, "Tiny Player (Selected)");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0010, "Modifier 6");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0011, "Modifier 6 (Selected)");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0012, "Modifier 7");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0013, "Modifier 7 (Selected)");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0014, "Modifier 8");
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 0xFFFF0015, "Modifier 8 (Selected)");
 #pragma endregion
 
 	if (H2IsDediServer)

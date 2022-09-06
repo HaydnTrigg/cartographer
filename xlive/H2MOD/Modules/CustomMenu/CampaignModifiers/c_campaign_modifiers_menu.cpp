@@ -22,14 +22,22 @@ __int8 _fastcall c_load_level_event_handler(int This, int EDX, s_event_record* a
 }
 
 static void CampaignModifiersSetupButtons() {
-	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 1, H2CustomLanguageGetLabel(CMLabelMenuId_CampaignModifiers, 0xFFFF0000), true);
-	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 2, H2CustomLanguageGetLabel(CMLabelMenuId_CampaignModifiers, 0xFFFF0001), true);
-	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 3, H2CustomLanguageGetLabel(CMLabelMenuId_CampaignModifiers, 0xFFFF0002), true);
-	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 4, H2CustomLanguageGetLabel(CMLabelMenuId_CampaignModifiers, 0xFFFF0003), true);
-	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 5, H2CustomLanguageGetLabel(CMLabelMenuId_CampaignModifiers, 0xFFFF0004), true);
-	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 6, H2CustomLanguageGetLabel(CMLabelMenuId_CampaignModifiers, 0xFFFF0005), true);
-	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 7, H2CustomLanguageGetLabel(CMLabelMenuId_CampaignModifiers, 0xFFFF0006), true);
-	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 8, H2CustomLanguageGetLabel(CMLabelMenuId_CampaignModifiers, 0xFFFF0007), true);
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 1, H2CustomLanguageGetLabel(CMLabelMenuId_CampaignModifiers, 
+		0xFFFF0000 + ((CampaignModifiers::c_campaign_modifiers::GetModifiers() & campaign_modifier_ogh2) == campaign_modifier_ogh2)), true);
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 2, H2CustomLanguageGetLabel(CMLabelMenuId_CampaignModifiers, 
+		0xFFFF0002 + ((CampaignModifiers::c_campaign_modifiers::GetModifiers() & campaign_modifier_randomizer) == campaign_modifier_randomizer)), true);
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 3, H2CustomLanguageGetLabel(CMLabelMenuId_CampaignModifiers, 
+		0xFFFF0004 + ((CampaignModifiers::c_campaign_modifiers::GetModifiers() & campaign_modifier_jackal_snipers) == campaign_modifier_jackal_snipers)), true);
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 4, H2CustomLanguageGetLabel(CMLabelMenuId_CampaignModifiers, 
+		0xFFFF0006 + ((CampaignModifiers::c_campaign_modifiers::GetModifiers() & campaign_modifier_big_head) == campaign_modifier_big_head)), true);
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 5, H2CustomLanguageGetLabel(CMLabelMenuId_CampaignModifiers, 
+		0xFFFF0008 + ((CampaignModifiers::c_campaign_modifiers::GetModifiers() & campaign_modifier_tiny_chief) == campaign_modifier_tiny_chief)), true);
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 6, H2CustomLanguageGetLabel(CMLabelMenuId_CampaignModifiers, 
+		0xFFFF0010), true);
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 7, H2CustomLanguageGetLabel(CMLabelMenuId_CampaignModifiers, 
+		0xFFFF0012), true);
+	add_cartographer_label(CMLabelMenuId_CampaignModifiers, 8, H2CustomLanguageGetLabel(CMLabelMenuId_CampaignModifiers, 
+		0xFFFF0014), true);
 }
 
 void* __cdecl c_campaign_modifiers_list_menu::open(s_new_ui_screen_parameters* parameters)
@@ -117,16 +125,24 @@ void c_campaign_modifiers_list::button_handler(int* a2, int* a3)
 	switch (button_id)
 	{
 	case 0:
-		CampaignModifiers::c_campaign_modifiers::SetModifier(CampaignModifiers::campaign_modifier_ogh2);
+		CampaignModifiers::c_campaign_modifiers::SetModifier(campaign_modifier_ogh2);
+		CampaignModifiersSetupButtons();
 		break;
 	case 1:
-		CampaignModifiers::c_campaign_modifiers::SetModifier(CampaignModifiers::campaign_modifier_randomizer);
+		CampaignModifiers::c_campaign_modifiers::SetModifier(campaign_modifier_randomizer);
+		CampaignModifiersSetupButtons();
 		break;
 	case 2:
-		CampaignModifiers::c_campaign_modifiers::SetModifier(CampaignModifiers::campaign_modifier_jackal_snipers);
+		CampaignModifiers::c_campaign_modifiers::SetModifier(campaign_modifier_jackal_snipers);
+		CampaignModifiersSetupButtons();
 		break;
 	case 3:
-		CampaignModifiers::c_campaign_modifiers::SetModifier(CampaignModifiers::campaign_modifier_big_head);
+		CampaignModifiers::c_campaign_modifiers::SetModifier(campaign_modifier_big_head);
+		CampaignModifiersSetupButtons();
+		break;
+	case 4:
+		CampaignModifiers::c_campaign_modifiers::SetModifier(campaign_modifier_tiny_chief);
+		CampaignModifiersSetupButtons();
 		break;
 	}
 

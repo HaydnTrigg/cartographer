@@ -35,6 +35,7 @@
 #include "H2MOD\Modules\KantTesting\KantTesting.h"
 #include "H2MOD\Modules\MainMenu\MapSlots.h"
 #include "H2MOD\Modules\MainMenu\Ranks.h"
+#include "H2MOD\Modules\ObserverMode\ObserverMode.h"
 #include "H2MOD\Modules\OnScreenDebug\OnscreenDebug.h"
 #include "H2MOD\Modules\PlayerRepresentation\PlayerRepresentation.h"
 #include "H2MOD\Modules\PlaylistLoader\PlaylistLoader.h"
@@ -1195,8 +1196,8 @@ void H2MOD::Initialize()
 		RenderHooks::Initialize();
 		DirectorHooks::Initialize();
 		SpecialEvents::Initialize();
+		ObserverMode::Initialize();
 		ImGuiHandler::WeaponOffsets::Initialize();
-		//ObserverMode::Initialize();
 		TEST_N_DEF(PC3);
 		if (H2Config_discord_enable && H2GetInstanceId() == 1) {
 			// Discord init

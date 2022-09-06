@@ -488,6 +488,7 @@
     <ClInclude Include="H2MOD\Modules\CustomMenu\CampaignModifiers\c_campaign_modifiers_menu.h" />
     <ClInclude Include="H2MOD\Modules\CampaignModifiers\CampaignModifiers.h" />
     <ClInclude Include="Blam\Cache\TagGroups\scenario_ai_resource.hpp" />
+    <ClInclude Include="Blam\Cache\TagGroups\collision_model_definition.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc" />

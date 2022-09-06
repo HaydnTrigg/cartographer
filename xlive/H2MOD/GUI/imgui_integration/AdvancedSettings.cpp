@@ -995,6 +995,10 @@ namespace ImGuiHandler {
 					ImGui::Indent();
 					if(ImGui::CollapsingHeader("Director Mode"))
 					{
+						if (ImGui::Button("Set Observer Team"))
+						{
+							WriteValue(Memory::GetAddress(0x51A6B4), 255);
+						}
 						if(ImGui::Button("Game"))
 						{
 							DirectorHooks::SetDirectorMode(DirectorHooks::e_game);
