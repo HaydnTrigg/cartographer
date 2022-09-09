@@ -271,11 +271,11 @@ namespace CampaignModifiers
 		auto bipd = tags::get_tag_fast<s_biped_group_definition>(bipd_datum);
 		for (auto& pills : bipd->pill_shapes)
 		{
-			pills.radius *= player_scale_modifier;
-			pills.bottom.k *= player_scale_modifier;
-			pills.wbottom *= player_scale_modifier;
-			pills.top.k *= player_scale_modifier;
-			pills.wtop *= player_scale_modifier;
+			pills.radius *= player_scale_modifier * 2;
+			pills.bottom.k *= player_scale_modifier * 2;
+			pills.wbottom *= player_scale_modifier * 2;
+			pills.top.k *= player_scale_modifier * 2;
+			pills.wtop *= player_scale_modifier * 2;
 		}
 	}
 

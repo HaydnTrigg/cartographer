@@ -9,7 +9,7 @@ enum e_headhunter_sounds
 	_snd_skull_scored
 };
 
-class HeadHunter : public ICustomGameVariant
+class GraveRobber : public ICustomGameVariant
 {
 public:
 	virtual void Initialize() override;
@@ -30,8 +30,8 @@ public:
 
 	virtual bool OnPlayerScore(ExecTime execTime, void* thisptr, unsigned short a2, int a3, int a4, int a5, char a6) override;
 
-	HeadHunter();
-	~HeadHunter();
+	GraveRobber();
+	~GraveRobber();
 	static void initClient();
 	static void SpawnSkull(datum playerIdx);
 	static void PickupSkull(datum playerIdx, datum skullDatum);

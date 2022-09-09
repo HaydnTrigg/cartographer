@@ -6,6 +6,6 @@
 #include "FireFight\FireFight.h"
 #include "FireFight\DeviceShop\DeviceShop.h"
 #include "GunGame\GunGame.h"
-#include "HeadHunter\HeadHunter.h"
+#include "GraveRobber\GraveRobber.h"
 #include "Infection\Infection.h"
 #include "MiniMode\MiniMode.h"

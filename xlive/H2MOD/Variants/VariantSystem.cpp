@@ -24,7 +24,7 @@ void CustomVariantHandler::RegisterCustomVariants()
 {
 	customVariants.push_back(new Infection());
 	customVariants.push_back(new GunGame());
-	customVariants.push_back(new HeadHunter());
+	customVariants.push_back(new GraveRobber());
 	customVariants.push_back(new FireFight());
 	customVariants.push_back(new MiniMode());
 }

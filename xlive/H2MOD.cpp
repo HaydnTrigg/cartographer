@@ -420,7 +420,7 @@ char __cdecl OnObjectDamage(datum unit_datum_index, int a2, bool a3, bool a4)
 typedef void(__thiscall* update_player_score_t)(void* thisptr, unsigned short a2, int a3, int a4, int a5, char a6);
 update_player_score_t p_update_player_score;
 
-void __fastcall OnPlayerScore(void* thisptr, BYTE _edx, unsigned short a2, int a3, int a4, int a5, char a6)
+void __fastcall OnPlayerScore(void* thisptr, BYTE _edx, unsigned short a2, int a3, int points, int a5, char a6)
 {
 	//LOG_TRACE_GAME("update_player_score_hook ( thisptr: %08X, a2: %08X, a3: %08X, a4: %08X, a5: %08X, a6: %08X )", thisptr, a2, a3, a4, a5, a6);
 	//20/10/2018 18:46:51.541 update_player_score_hook ( thisptr: 3000595C, a2: 00000000, a3: 00000002, a4: 00000001, a5: 00000007, a6: 00000001 )
@@ -431,11 +431,11 @@ void __fastcall OnPlayerScore(void* thisptr, BYTE _edx, unsigned short a2, int a
 	//	20 / 10 / 2018 18 : 48 : 39.756 update_player_score_hook(thisptr : 3000595C, a2 : 00000001, a3 : 00000000, a4 : 00000001, a5 : FFFFFFFF, a6 : 00000000)
 	//	20 / 10 / 2018 18 : 48 : 39.756 update_player_score_hook(thisptr : 3000595C, a2 : 00000000, a3 : 00000003, a4 : 00000001, a5 : 00000009, a6: 00000001)
 
-	if (CustomVariantHandler::OnPlayerScore(ExecTime::_preEventExec, thisptr, a2, a3, a4, a5, a6))
+	if (CustomVariantHandler::OnPlayerScore(ExecTime::_preEventExec, thisptr, a2, a3, points, a5, a6))
 		return;
 
-	p_update_player_score(thisptr, a2, a3, a4, a5, a6);
-	CustomVariantHandler::OnPlayerScore(ExecTime::_postEventExec, thisptr, a2, a3, a4, a5, a6);
+	p_update_player_score(thisptr, a2, a3, points, a5, a6);
+	CustomVariantHandler::OnPlayerScore(ExecTime::_postEventExec, thisptr, a2, a3, points, a5, a6);
 }
 
 // Client Sided Patch

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include "HeadHunter.h"
+#include "GraveRobber.h"
 
 #include "Blam\Engine\Game\GameGlobals.h"
 #include "Blam\Engine\Networking\Session\NetworkSession.h"
@@ -15,11 +15,11 @@ int soundBuffer = 0;
 std::unordered_map<int, std::unordered_map<e_headhunter_sounds, const wchar_t*>> headhunterSoundTable;
 bool b_firstSpawn = true;
 
-HeadHunter::HeadHunter()
+GraveRobber::GraveRobber()
 {
 }
 
-void HeadHunter::TriggerSound(e_headhunter_sounds sound, int sleep)
+void GraveRobber::TriggerSound(e_headhunter_sounds sound, int sleep)
 {
 	if (headhunterSoundTable.count(H2Config_language.code_main)) 
 	{
@@ -33,7 +33,7 @@ void HeadHunter::TriggerSound(e_headhunter_sounds sound, int sleep)
 	}
 }
 
-void HeadHunter::SpawnPlayerClientSetup()
+void GraveRobber::SpawnPlayerClientSetup()
 {
 	if (b_firstSpawn)
 	{
@@ -42,7 +42,7 @@ void HeadHunter::SpawnPlayerClientSetup()
 	}
 }
 
-void HeadHunter::SpawnSkull(datum unit_datum)
+void GraveRobber::SpawnSkull(datum unit_datum)
 {
 	s_biped_data_definition* biped_unit = (s_biped_data_definition*)object_try_and_get_and_verify_type(unit_datum, FLAG(e_object_type::biped));
 
@@ -64,7 +64,7 @@ void HeadHunter::SpawnSkull(datum unit_datum)
 typedef void(__thiscall *update_player_score_t)(void* thisptr, unsigned short a2, int a3, int a4, int a5, char a6);
 extern update_player_score_t p_update_player_score;
 
-void HeadHunter::PickupSkull(datum playerIdx, datum skullDatum)
+void GraveRobber::PickupSkull(datum playerIdx, datum skullDatum)
 {
 	if (!DATUM_IS_NONE(skullDatum))
 	{
@@ -88,7 +88,7 @@ void HeadHunter::PickupSkull(datum playerIdx, datum skullDatum)
 	}
 }
 
-void HeadHunter::initClient()
+void GraveRobber::initClient()
 {
 	b_firstSpawn = true;
 	h2mod->disable_sounds(FLAG(_sound_type_slayer) | ALL_SOUNDS_NO_SLAYER);
@@ -98,24 +98,24 @@ void HeadHunter::initClient()
 	headhunterSoundTable[_lang_id_spanish][e_headhunter_sounds::_snd_skull_scored] = L"sounds/es/skull_scored.wav";
 }
 
-void HeadHunter::Initialize()
+void GraveRobber::Initialize()
 {
 	if (!Memory::IsDedicatedServer())
 	{
-		HeadHunter::initClient();
+		GraveRobber::initClient();
 	}
 }
 
-void HeadHunter::Dispose()
+void GraveRobber::Dispose()
 {
 }
 
-CustomVariantId HeadHunter::GetVariantId()
+CustomVariantId GraveRobber::GetVariantId()
 {
 	return CustomVariantId::_id_headhunter;
 }
 
-void HeadHunter::OnMapLoad(ExecTime execTime, s_game_options* gameOptions)
+void GraveRobber::OnMapLoad(ExecTime execTime, s_game_options* gameOptions)
 {
 	switch (execTime)
 	{
@@ -144,7 +144,7 @@ void HeadHunter::OnMapLoad(ExecTime execTime, s_game_options* gameOptions)
 	}
 }
 
-void HeadHunter::OnPlayerSpawn(ExecTime execTime, datum playerIdx)
+void GraveRobber::OnPlayerSpawn(ExecTime execTime, datum playerIdx)
 {
 	int absPlayerIdx = DATUM_INDEX_TO_ABSOLUTE_INDEX(playerIdx);
 	datum playerUnitDatum = s_player::GetPlayerUnitDatumIndex(absPlayerIdx);
@@ -158,7 +158,7 @@ void HeadHunter::OnPlayerSpawn(ExecTime execTime, datum playerIdx)
 		// postspawn handler
 	case ExecTime::_postEventExec:
 		if (!Memory::IsDedicatedServer())
-			HeadHunter::SpawnPlayerClientSetup();
+			GraveRobber::SpawnPlayerClientSetup();
 		break;
 
 	case ExecTime::_ExecTimeUnknown:
@@ -168,7 +168,7 @@ void HeadHunter::OnPlayerSpawn(ExecTime execTime, datum playerIdx)
 	}
 }
 
-void HeadHunter::OnPlayerDeath(ExecTime execTime, datum playerIdx)
+void GraveRobber::OnPlayerDeath(ExecTime execTime, datum playerIdx)
 {
 	int absPlayerIdx = DATUM_INDEX_TO_ABSOLUTE_INDEX(playerIdx);
 	datum playerUnitDatum = s_player::GetPlayerUnitDatumIndex(absPlayerIdx);
@@ -178,7 +178,7 @@ void HeadHunter::OnPlayerDeath(ExecTime execTime, datum playerIdx)
 	case ExecTime::_preEventExec:
 		// to note after the original function executes, the controlled unit by this player is set to NONE
 		if (!s_game_globals::game_is_predicted())
-			HeadHunter::SpawnSkull(playerUnitDatum);
+			GraveRobber::SpawnSkull(playerUnitDatum);
 		break;
 
 	case ExecTime::_postEventExec:
@@ -191,7 +191,7 @@ void HeadHunter::OnPlayerDeath(ExecTime execTime, datum playerIdx)
 	}
 }
 
-bool HeadHunter::OnPlayerScore(ExecTime execTime, void* thisptr, unsigned short a2, int a3, int a4, int a5, char a6)
+bool GraveRobber::OnPlayerScore(ExecTime execTime, void* thisptr, unsigned short a2, int a3, int a4, int a5, char a6)
 {
 	int absPlayerIdx = a2;
 	datum playerUnitDatum = s_player::GetPlayerUnitDatumIndex(absPlayerIdx);
@@ -220,7 +220,7 @@ bool HeadHunter::OnPlayerScore(ExecTime execTime, void* thisptr, unsigned short 
 	return handled;
 }
 
-bool HeadHunter::OnAutoPickupHandler(ExecTime execTime, datum playerIdx, datum objectIdx)
+bool GraveRobber::OnAutoPickupHandler(ExecTime execTime, datum playerIdx, datum objectIdx)
 {
 	int absPlayerIdx = DATUM_INDEX_TO_ABSOLUTE_INDEX(playerIdx);
 	datum playerUnitDatum = s_player::GetPlayerUnitDatumIndex(absPlayerIdx);
@@ -236,7 +236,7 @@ bool HeadHunter::OnAutoPickupHandler(ExecTime execTime, datum playerIdx, datum o
 
 			if (DATUM_INDEX_TO_ABSOLUTE_INDEX(weaponObject->tag_definition_index) == DATUM_INDEX_TO_ABSOLUTE_INDEX(e_weapons_datum_index::ball))
 			{
-				HeadHunter::PickupSkull(playerIdx, objectIdx);
+				GraveRobber::PickupSkull(playerIdx, objectIdx);
 				handled = true;
 			}
 		}
@@ -253,5 +253,3 @@ bool HeadHunter::OnAutoPickupHandler(ExecTime execTime, datum playerIdx, datum o
 
 	return handled;
 }
-
-

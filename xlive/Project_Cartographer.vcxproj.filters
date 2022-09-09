@@ -50,7 +50,6 @@
     <ClCompile Include="H2MOD\Variants\FireFight\FireFight.cpp" />
     <ClCompile Include="H2MOD\Variants\GunGame\GunGame.cpp" />
     <ClCompile Include="H2MOD\Variants\H2X\H2X.cpp" />
-    <ClCompile Include="H2MOD\Variants\HeadHunter\HeadHunter.cpp" />
     <ClCompile Include="H2MOD\Variants\Infection\Infection.cpp" />
     <ClCompile Include="H2MOD\Variants\VariantMPGameEngine.cpp" />
     <ClCompile Include="H2MOD\Variants\VariantSystem.cpp" />
@@ -152,6 +151,7 @@
     <ClCompile Include="H2MOD\Modules\CustomMenu\CampaignModifiers\c_campaign_modifiers_menu.cpp" />
     <ClCompile Include="H2MOD\Modules\CampaignModifiers\CampaignModifiers.cpp" />
     <ClCompile Include="H2MOD\Variants\MiniMode\MiniMode.cpp" />
+    <ClCompile Include="H2MOD\Variants\GraveRobber\GraveRobber.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdparty\discord\discord_register.h" />
@@ -324,7 +324,6 @@
     <ClInclude Include="H2MOD\Variants\FireFight\FireFight.h" />
     <ClInclude Include="H2MOD\Variants\GunGame\GunGame.h" />
     <ClInclude Include="H2MOD\Variants\H2X\H2X.h" />
-    <ClInclude Include="H2MOD\Variants\HeadHunter\HeadHunter.h" />
     <ClInclude Include="H2MOD\Variants\Infection\Infection.h" />
     <ClInclude Include="H2MOD\Variants\VariantMPGameEngine.h" />
     <ClInclude Include="H2MOD\Variants\VariantSystem.h" />
@@ -491,6 +490,7 @@
     <ClInclude Include="Blam\Cache\TagGroups\scenario_ai_resource.hpp" />
     <ClInclude Include="Blam\Cache\TagGroups\collision_model_definition.hpp" />
     <ClInclude Include="H2MOD\Variants\MiniMode\MiniMode.h" />
+    <ClInclude Include="H2MOD\Variants\GraveRobber\GraveRobber.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc" />
