@@ -8,3 +8,4 @@
 #include "GunGame\GunGame.h"
 #include "HeadHunter\HeadHunter.h"
 #include "Infection\Infection.h"
+#include "MiniMode\MiniMode.h"

@@ -11,6 +11,7 @@ enum CustomVariantId
 	_id_gungame,
 	_id_headhunter,
 	_id_firefigth,
+	_id_mini_mode,
 
 	_custom_variant_id_end
 };

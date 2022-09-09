@@ -17,6 +17,7 @@ std::unordered_map<const wchar_t*, CustomVariantId> customGameVarStr =
 	{ L"graverobber",	CustomVariantId::_id_headhunter },
 	{ L"firefight",		CustomVariantId::_id_firefigth	},
 	{ L"wareconomy",	CustomVariantId::_id_firefigth	},
+	{ L"mini",			CustomVariantId::_id_mini_mode	},
 };
 
 void CustomVariantHandler::RegisterCustomVariants()
@@ -25,6 +26,7 @@ void CustomVariantHandler::RegisterCustomVariants()
 	customVariants.push_back(new GunGame());
 	customVariants.push_back(new HeadHunter());
 	customVariants.push_back(new FireFight());
+	customVariants.push_back(new MiniMode());
 }
 
 ICustomGameVariant* CustomVariantHandler::GetGameVariant(CustomVariantId variantId)

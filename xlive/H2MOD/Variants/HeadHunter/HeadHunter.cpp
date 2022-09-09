@@ -178,7 +178,7 @@ void HeadHunter::OnPlayerDeath(ExecTime execTime, datum playerIdx)
 	case ExecTime::_preEventExec:
 		// to note after the original function executes, the controlled unit by this player is set to NONE
 		if (!s_game_globals::game_is_predicted())
-			HeadHunter::SpawnSkull(playerIdx);
+			HeadHunter::SpawnSkull(playerUnitDatum);
 		break;
 
 	case ExecTime::_postEventExec:
@@ -201,15 +201,14 @@ bool HeadHunter::OnPlayerScore(ExecTime execTime, void* thisptr, unsigned short 
 	switch (execTime)
 	{
 	case ExecTime::_preEventExec:
-		break;
-
-	case ExecTime::_postEventExec:
 		// skip recording the score, until we pickup the skull
-		if (a5 == -1
-			|| a5 == 7)
+		if (a5 == -1 || a5 == 7)
 		{
 			handled = true;
 		}
+		break;
+
+	case ExecTime::_postEventExec:
 		break;
 
 	case ExecTime::_ExecTimeUnknown:

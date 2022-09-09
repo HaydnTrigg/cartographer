@@ -69,6 +69,11 @@ namespace CampaignModifiers
 			{
 				BigHeadEdits();
 			}
+
+			if (campaign_modifiers & campaign_modifier_tiny_chief)
+			{
+				TinyPlayerTagEdits();
+			}
 		}
 	}
 
@@ -239,75 +244,39 @@ namespace CampaignModifiers
 
 	void CampaignModifiers::TinyPlayerEdits(datum playerDatumIdx)
 	{
-		const float scale_multiplier = 0.1;
-
 		int absPlayerIdx = DATUM_INDEX_TO_ABSOLUTE_INDEX(playerDatumIdx);
 		datum playerUnitDatum = s_player::GetPlayerUnitDatumIndex(absPlayerIdx);
 		auto unit_object = object_get_fast_unsafe<s_unit_data_definition>(playerUnitDatum);
-		unit_object->scale *= scale_multiplier;
+		if (unit_object->scale != player_scale_modifier)
+			unit_object->scale = player_scale_modifier;
+	}
 
-		datum chief_coll_datum = tags::find_tag(blam_tag::tag_group_type::collisionmodel, "objects\\characters\\masterchief\\masterchief");
-		if (chief_coll_datum != DATUM_INDEX_NONE)
-		{
-			ScaleCollision(chief_coll_datum, scale_multiplier);
-		}
-
+	void CampaignModifiers::TinyPlayerTagEdits()
+	{
 		datum chief_bipd_datum = tags::find_tag(blam_tag::tag_group_type::biped, "objects\\characters\\masterchief\\masterchief");
 		if (chief_bipd_datum != DATUM_INDEX_NONE)
 		{
-			ScaleBiped(chief_bipd_datum, scale_multiplier);
-		}
-
-		datum arby_coll_datum = tags::find_tag(blam_tag::tag_group_type::collisionmodel, "objects\\characters\\dervish\\dervish");
-		if (arby_coll_datum != DATUM_INDEX_NONE)
-		{
-			ScaleCollision(arby_coll_datum, scale_multiplier);
+			ScaleBiped(chief_bipd_datum);
 		}
 
 		datum arby_bipd_datum = tags::find_tag(blam_tag::tag_group_type::biped, "objects\\characters\\dervish\\dervish");
 		if (arby_bipd_datum != DATUM_INDEX_NONE)
 		{
-			ScaleBiped(arby_bipd_datum, scale_multiplier);
+			ScaleBiped(arby_bipd_datum);
 		}
 	}
 
-	void CampaignModifiers::ScaleBiped(const datum bipd_datum, const float scale_multiplier)
+	void CampaignModifiers::ScaleBiped(const datum bipd_datum)
 	{
 		auto bipd = tags::get_tag_fast<s_biped_group_definition>(bipd_datum);
 		for (auto& pills : bipd->pill_shapes)
 		{
-			pills.radius *= scale_multiplier;
-			pills.bottom.k *= scale_multiplier;
-			pills.wbottom *= scale_multiplier;
-			pills.top.k *= scale_multiplier;
-			pills.wtop *= scale_multiplier;
+			pills.radius *= player_scale_modifier;
+			pills.bottom.k *= player_scale_modifier;
+			pills.wbottom *= player_scale_modifier;
+			pills.top.k *= player_scale_modifier;
+			pills.wtop *= player_scale_modifier;
 		}
-	}
-
-	void CampaignModifiers::ScaleCollision(const datum coll_datum, const float scale_multiplier)
-	{
-		auto coll = tags::get_tag_fast<s_collision_model_block>(coll_datum);
-		for (auto& regions : coll->regions)
-		{
-			for (auto& bsps : regions.permutations[0]->bsps)
-			{
-				for (auto& planes : bsps.bsp.planes)
-				{
-					planes.plane_distance.normal.i *= scale_multiplier;
-					planes.plane_distance.normal.j *= scale_multiplier;
-					planes.plane_distance.normal.k *= scale_multiplier;
-					planes.plane_distance.distance *= scale_multiplier;
-				}
-
-				for (auto& vertex : bsps.bsp.vertices)
-				{
-					vertex.point.x *= scale_multiplier;
-					vertex.point.y *= scale_multiplier;
-					vertex.point.z *= scale_multiplier;
-				}
-			}
-		}
-
 	}
 
 	void CampaignModifiers::Initialize()

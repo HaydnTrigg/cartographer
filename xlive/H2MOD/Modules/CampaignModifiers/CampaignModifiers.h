@@ -8,6 +8,9 @@
 #define campaign_modifier_big_head			8
 #define campaign_modifier_tiny_chief		16
 
+
+#define player_scale_modifier 0.1
+
 namespace CampaignModifiers
 {
 	class c_campaign_modifiers
@@ -25,7 +28,7 @@ namespace CampaignModifiers
 	void RandomizerEdits();
 	void BigHeadEdits();
 	void TinyPlayerEdits(datum playerDatumIdx);
-	void ScaleBiped(const datum bipd_datum, const float scale_multiplier);
-	void ScaleCollision(const datum coll_datum, const float scale_multiplier);
+	void TinyPlayerTagEdits();
+	void ScaleBiped(const datum bipd_datum);
 	void Initialize();
 }

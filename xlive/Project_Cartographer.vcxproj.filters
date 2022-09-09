@@ -151,6 +151,7 @@
     <ClCompile Include="H2MOD\Modules\CustomMenu\DisplayMode\c_display_mode_menu.cpp" />
     <ClCompile Include="H2MOD\Modules\CustomMenu\CampaignModifiers\c_campaign_modifiers_menu.cpp" />
     <ClCompile Include="H2MOD\Modules\CampaignModifiers\CampaignModifiers.cpp" />
+    <ClCompile Include="H2MOD\Variants\MiniMode\MiniMode.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdparty\discord\discord_register.h" />
@@ -489,6 +490,7 @@
     <ClInclude Include="H2MOD\Modules\CampaignModifiers\CampaignModifiers.h" />
     <ClInclude Include="Blam\Cache\TagGroups\scenario_ai_resource.hpp" />
     <ClInclude Include="Blam\Cache\TagGroups\collision_model_definition.hpp" />
+    <ClInclude Include="H2MOD\Variants\MiniMode\MiniMode.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc" />
