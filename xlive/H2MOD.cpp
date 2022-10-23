@@ -40,6 +40,7 @@
 #include "H2MOD\Modules\Stats\StatsHandler.h"
 #include "H2MOD\Modules\TagFixes\TagFixes.h"
 #include "H2MOD\Modules\Tweaks\Tweaks.h"
+#include "H2MOD\Modules\UI_Redraw\ui_redraw.h"
 #include "H2MOD\Tags\MetaExtender.h"
 #include "H2MOD\Tags\MetaLoader\tag_loader.h"
 #include "Util\Hooks\Hook.h"
@@ -592,6 +593,7 @@ bool __cdecl OnMapLoad(s_game_options* options)
 
 			H2Tweaks::toggleAiMp(true);
 			H2Tweaks::toggleUncappedCampaignCinematics(false);
+			UI_Redraw::InjectRedrawnUI();
 
 			if (Engine::get_game_life_cycle() == _life_cycle_in_game)
 			{
@@ -1210,6 +1212,7 @@ void H2MOD::Initialize()
 		DirectorHooks::Initialize();
 		SpecialEvents::Initialize();
 		ImGuiHandler::WeaponOffsets::Initialize();
+		UI_Redraw::FixScaling();
 		//ObserverMode::Initialize();
 		TEST_N_DEF(PC3);
 		if (H2Config_discord_enable && H2GetInstanceId() == 1) {
