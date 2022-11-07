@@ -1,10 +1,11 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 
 #include "H2MOD.h"
 #include "Blam\Cache\TagGroups\biped_definition.hpp"
 #include "Blam\Cache\TagGroups\globals_definition.hpp"
 #include "Blam\Cache\TagGroups\model_definition.hpp"
 #include "Blam\Cache\TagGroups\multiplayer_globals_definition.hpp"
+#include "Blam\Engine\Camera\Camera.h"
 #include "Blam\Engine\Game\DamageData.h"
 #include "Blam\Engine\Game\GameGlobals.h"
 #include "Blam\Engine\Game\GameTimeGlobals.h"
@@ -42,6 +43,7 @@
 #include "H2MOD\Modules\RenderHooks\RenderHooks.h"
 #include "H2MOD\Modules\SpecialEvents\SpecialEvents.h"
 #include "H2MOD\Modules\Stats\StatsHandler.h"
+#include "H2MOD\Modules\SplitScreen\SplitScreen.h"
 #include "H2MOD\Modules\TagFixes\TagFixes.h"
 #include "H2MOD\Modules\Tweaks\Tweaks.h"
 #include "H2MOD\Tags\MetaExtender.h"
@@ -552,9 +554,11 @@ bool __cdecl OnMapLoad(s_game_options* options)
 		UIRankPatch();
 		H2Tweaks::toggleAiMp(false);
 		H2Tweaks::toggleUncappedCampaignCinematics(false);
+		CampaignModifiers::DeInitialize();
 		CampaignModifiers::MainMenuPatches();
 		MetaExtender::free_tag_blocks();
 		options->tickrate = XboxTick::setTickRate(false);
+		SplitScreen::ApplyMenuPatches();
 	}
 	else
 	{
@@ -801,13 +805,15 @@ void H2MOD::team_player_indicator_visibility(bool toggle)
 	this->drawTeamIndicators = toggle;
 }
 
-void __cdecl game_mode_engine_draw_team_indicators()
+void __cdecl game_mode_engine_draw_team_indicators(int a1)
 {
-	typedef void(__cdecl* game_mode_engine_draw_team_indicators_t)();
+	typedef void(__cdecl* game_mode_engine_draw_team_indicators_t)(int a1);
 	auto p_game_mode_engine_draw_team_indicators = Memory::GetAddress<game_mode_engine_draw_team_indicators_t>(0x6AFA4);
 
 	if (h2mod->drawTeamIndicators)
-		p_game_mode_engine_draw_team_indicators();
+	{		
+		p_game_mode_engine_draw_team_indicators(0);
+	}
 }
 
 typedef short(__cdecl* get_enabled_teams_flags_t)(s_network_session*);
@@ -1037,6 +1043,58 @@ void vip_lock(e_game_life_cycle state)
 	}
 }
 
+void __cdecl draw_player_names_above_head_hook(int datum_index, float a2)
+{
+	typedef s_player* (__cdecl get_player_from_datum_t)(s_data_array* a1, unsigned int a2);
+	auto p_get_player_from_datum = Memory::GetAddress<get_player_from_datum_t*>(0x6639B);
+
+	typedef real_point3d* (__cdecl matrix4x3_transform_point_t)(real_matrix4x3* a1, real_point3d* v1, real_point3d* v2);
+	auto p_matrix4x3_transform_point = Memory::GetAddress<matrix4x3_transform_point_t*>(0x7795A);
+
+	typedef void(__cdecl sub_6309D6_t)(wchar_t* p_string);
+	auto p_sub_6309D6 = Memory::GetAddress<sub_6309D6_t*>(0x2309D6);
+
+	typedef void(__cdecl render_player_name_text_t)(wchar_t* string, float a2, float* a3);
+	auto p_render_player_name_text = Memory::GetAddress<render_player_name_text_t*>(0x6ADCD);
+
+	real_matrix4x3* global_projection = Memory::GetAddress<real_matrix4x3*>(0x4E673C);
+	s_camera* global_camera = Memory::GetAddress<s_camera*>(0x4E66C8);
+
+	s_player* player;
+	int unit_index;
+	real_point3d player_head_position;
+	float text_screen_location[2];
+	real_point3d text_world_position;
+	wchar_t player_name[512];
+
+	player = p_get_player_from_datum(s_player::GetArray(), datum_index);
+	if (player)
+	{
+		unit_index = player->unit_index;
+		if (unit_index != -1)
+		{
+			Engine::Unit::unit_get_head_position(unit_index, &player_head_position);
+			player_head_position.z += 0.050000001;
+			p_matrix4x3_transform_point(global_projection, &player_head_position, &text_world_position);
+			if (world_to_screen(global_camera, global_projection, 0, &text_world_position, text_screen_location))
+			{
+				player_name[0] = '\0';
+				wcsncpy_s(player_name, player->properties[0].player_name, 512u);
+				p_sub_6309D6(player_name);
+				if (CustomVariantHandler::VariantEnabled(_id_headhunter))
+				{
+					update_text_headhunter_hook(datum_index, player_name);
+					p_render_player_name_text(player_name, 1, text_screen_location);
+				}
+				else
+				{
+					p_render_player_name_text(player_name, a2, text_screen_location);
+				}
+			}
+		}
+	}
+}
+
 void H2MOD::RegisterEvents()
 {
 	if(!Memory::IsDedicatedServer())
@@ -1153,8 +1211,8 @@ void H2MOD::ApplyHooks() {
 		PatchCall(Memory::GetAddress(0x182d6d), GrenadeChainReactIsEngineMPCheck);
 		PatchCall(Memory::GetAddress(0x92C05), BansheeBombIsEngineMPCheck);
 		PatchCall(Memory::GetAddress(0x13ff75), FlashlightIsEngineSPCheck);
-
 		PatchCall(Memory::GetAddress(0x226702), game_mode_engine_draw_team_indicators);
+		PatchCall(Memory::GetAddress(0x75669), draw_player_names_above_head_hook);
 
 		// Initialise_tag_loader();
 		PlayerControl::ApplyHooks();
@@ -1165,6 +1223,12 @@ void H2MOD::ApplyHooks() {
 
 		// Change campaign load level screen to use a different event handler
 		WritePointer(Memory::GetAddress(0x3CF584), c_load_level_event_handler);
+
+		// Nop Check for drawing name above head
+		NopFill(Memory::GetAddress(0x75655), 2);
+
+		
+		SplitScreen::ApplyHooks();
 	}
 	else {
 		LOG_INFO_GAME("{} - applying dedicated server hooks", __FUNCTION__);

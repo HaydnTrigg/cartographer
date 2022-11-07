@@ -268,6 +268,14 @@ struct real_matrix4x3
 	}
 };
 
+struct matrix2x4x3
+{
+	int forward;
+	real_matrix4x3 matrix;
+	real_matrix4x3 matrix1;
+	int up;
+};
+
 /* channel intensity is represented on a 0 to 1 scale */
 struct real_color_argb
 {

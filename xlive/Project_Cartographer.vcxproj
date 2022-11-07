@@ -47,15 +47,17 @@
     <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)Halo2\</OutDir>
-    <IntDir>.\Release\</IntDir>
+    <OutDir>C:\Program Files (x86)\Microsoft Games\Halo 2</OutDir>
+    <IntDir>
+    </IntDir>
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(DXSDK_DIR)Include;$(IncludePath)</IncludePath>
     <LibraryPath>$(DXSDK_DIR)Lib\x86;3rdparty/directx/lib;3rdparty/discord;3rdparty/libcurl;3rdparty/miniupnpc/lib;3rdparty/detours/lib.X86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)Halo2\</OutDir>
-    <IntDir>.\Debug\</IntDir>
+    <OutDir>C:\Program Files (x86)\Microsoft Games\Halo 2</OutDir>
+    <IntDir>
+    </IntDir>
     <LinkIncremental>true</LinkIncremental>
     <LibraryPath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;.\libs;..\protobuf-2.6.1\vsprojects\Debug;$(LibraryPath)</LibraryPath>
     <IncludePath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;.\;..\protobuf-2.6.1;$(IncludePath)</IncludePath>
@@ -225,6 +227,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Blam\Engine\Camera\Camera.cpp" />
     <ClCompile Include="Blam\Engine\DataArray\TagDataIterator.cpp" />
     <ClCompile Include="Blam\Engine\Game\GameEngineGlobals.cpp" />
     <ClCompile Include="Blam\Engine\Game\GameGlobals.cpp" />
@@ -233,6 +236,7 @@
     <ClInclude Include="Blam\Cache\TagGroups\bitmap_definition.hpp" />
     <ClInclude Include="Blam\Cache\TagGroups\collision_model_definition.hpp" />
     <ClInclude Include="Blam\Cache\TagGroups\scenario_ai_resource.hpp" />
+    <ClInclude Include="Blam\Engine\Camera\Camera.h" />
     <ClInclude Include="Blam\Engine\IceCreamFlavor\IceCreamFlavor.h" />
     <ClInclude Include="Blam\Engine\Networking\NetworkCommon.h" />
     <ClCompile Include="Blam\Engine\Players\Players.cpp" />
@@ -250,6 +254,7 @@
     <ClCompile Include="H2MOD\GUI\imgui_integration\DebugOverlay.cpp" />
     <ClCompile Include="H2MOD\GUI\imgui_integration\ImGui_CartographerStyle.cpp" />
     <ClCompile Include="H2MOD\GUI\imgui_integration\ImGui_Handler.cpp" />
+    <ClCompile Include="H2MOD\GUI\imgui_integration\ImGui_HeadHunter_Skull_Count.cpp" />
     <ClCompile Include="H2MOD\GUI\imgui_integration\ImGui_NetworkStatsOverlay.cpp" />
     <ClCompile Include="H2MOD\GUI\imgui_integration\MessageBox.cpp" />
     <ClCompile Include="H2MOD\GUI\imgui_integration\MOTD.cpp" />
@@ -302,6 +307,7 @@
     <ClCompile Include="H2MOD\Modules\WeaponOffsets\WeaponOffsets.cpp" />
     <ClCompile Include="H2MOD\Tags\MetaExtender.cpp" />
     <ClCompile Include="H2MOD\Tags\TagInterface.cpp" />
+    <ClCompile Include="H2MOD\Variants\HeadHunter\HeadHunter.cpp" />
     <ClCompile Include="H2MOD\Variants\FireFight\DeviceShop\DeviceShop.cpp" />
     <ClCompile Include="H2MOD\Variants\GraveRobber\GraveRobber.cpp" />
     <ClCompile Include="H2MOD\Variants\MiniMode\MiniMode.cpp" />
@@ -311,6 +317,7 @@
     <ClCompile Include="H2MOD\Tags\MetaLoader\tag_loader.cpp" />
     <ClCompile Include="H2MOD\Modules\Shell\ServerConsole.cpp" />
     <ClCompile Include="Blam\LazyBlam\LazyBlam.cpp" />
+    <ClCompile Include="H2MOD\Modules\SplitScreen\SplitScreen.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -579,6 +586,7 @@
     <ClInclude Include="H2MOD\GUI\imgui_integration\Console\ImGui_ConsoleImpl.h" />
     <ClInclude Include="H2MOD\GUI\imgui_integration\ImGui_CartographerStyle.h" />
     <ClInclude Include="H2MOD\GUI\imgui_integration\ImGui_Handler.h" />
+    <ClInclude Include="H2MOD\GUI\imgui_integration\ImGui_HeadHunter_Skull_Count.h" />
     <ClInclude Include="H2MOD\Modules\CampaignModifiers\CampaignModifiers.h" />
     <ClInclude Include="H2MOD\Modules\Config\WeaponOffsetConfig\WeaponOffsetConfig.h" />
     <ClInclude Include="H2MOD\GUI\imgui_integration\ImGui_NetworkStatsOverlay.h" />
@@ -630,6 +638,7 @@
     <ClInclude Include="H2MOD\Modules\WeaponOffsets\WeaponOffsetConfig.h" />
     <ClInclude Include="H2MOD\Tags\MetaExtender.h" />
     <ClInclude Include="H2MOD\Tags\TagInterface.h" />
+    <ClInclude Include="H2MOD\Variants\HeadHunter\HeadHunter.h" />
     <ClInclude Include="H2MOD\Variants\FireFight\DeviceShop\DeviceShop.h" />
     <ClInclude Include="H2MOD\Variants\GraveRobber\GraveRobber.h" />
     <ClInclude Include="H2MOD\Variants\MiniMode\MiniMode.h" />
@@ -639,6 +648,7 @@
     <ClInclude Include="H2MOD\Tags\MetaLoader\meta_struct.h" />
     <ClInclude Include="H2MOD\Tags\MetaLoader\tag_loader.h" />
     <ClInclude Include="Blam\LazyBlam\LazyBlam.hpp" />
+    <ClInclude Include="H2MOD\Modules\SplitScreen\SplitScreen.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Util\curl-interface.h" />
     <ClInclude Include="Util\Memory.h" />

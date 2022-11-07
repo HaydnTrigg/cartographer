@@ -31,4 +31,5 @@ namespace CampaignModifiers
 	void TinyPlayerTagEdits();
 	void ScaleBiped(const datum bipd_datum);
 	void Initialize();
+	void DeInitialize();
 }

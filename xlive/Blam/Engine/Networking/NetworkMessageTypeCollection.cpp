@@ -84,6 +84,16 @@ bool __cdecl decode_anti_cheat_message(bitstream* stream, int a2, s_anti_cheat* 
 	return stream->overflow() == false;
 }
 
+void __cdecl encode_headhunter_skull_message(bitstream* stream, int a2, s_headhunter_skulls* data)
+{
+	stream->data_encode_bits("headhunter-skull-count", data->skull_count, 16);
+}
+bool __cdecl decode_headhunter_skull_message(bitstream* stream, int a2, s_headhunter_skulls* data)
+{
+	stream->data_decode_bits("headhunter-skull-count", data->skull_count, 16);
+	return stream->overflow() == false;
+}
+
 void register_custom_network_message(void* network_messages)
 {
 	typedef void(__cdecl* register_test_packet_t)(void* network_messages);
@@ -108,6 +118,9 @@ void register_custom_network_message(void* network_messages)
 
 	register_network_message(network_messages, _custom_variant_settings, "variant-settings", 0, CustomVariantSettingsPacketSize, CustomVariantSettingsPacketSize,
 		(void*)CustomVariantSettings::EncodeVariantSettings, (void*)CustomVariantSettings::DecodeVariantSettings, NULL);
+
+	register_network_message(network_messages, _headhunter_skull_count, "headhunter-skull-count", 0, sizeof(s_headhunter_skulls), sizeof(s_headhunter_skulls),
+		(void*)encode_headhunter_skull_message, (void*)decode_headhunter_skull_message, NULL);
 }
 
 typedef void(__stdcall *handle_out_of_band_message_t)(void *thisx, network_address* address, e_network_message_type_collection message_type, int a4, void* packet);
@@ -240,6 +253,16 @@ void __stdcall handle_channel_message_hook(void *thisx, int network_channel_inde
 		{
 			s_anti_cheat* recieved_data = (s_anti_cheat*)packet;
 			H2Config_anti_cheat_enabled = recieved_data->enabled;
+		}
+		break;
+	}
+
+	case _headhunter_skull_count:
+	{
+		if (peer_network_channel->channel_state == s_network_channel::e_channel_state::unk_state_5)
+		{
+			s_headhunter_skulls* recieved_data = (s_headhunter_skulls*)packet;
+			memcpy(skull_count, recieved_data->skull_count, sizeof(s_headhunter_skulls));
 		}
 		break;
 	}
@@ -376,6 +399,21 @@ void NetworkMessage::SendAntiCheat(int peerIdx)
 				observer->sendNetworkMessage(session->session_index, observer_channel->observer_index, s_network_observer::e_network_message_send_protocol::in_band, _anti_cheat, sizeof(s_anti_cheat), &data);
 			}
 		}
+	}
+}
+void NetworkMessage::SendSkullCounts(int peerIdx)
+{
+	s_network_session* session = NetworkSession::GetCurrentNetworkSession();
+
+	if (NetworkSession::LocalPeerIsSessionHost())
+	{
+		s_network_observer* observer = session->p_network_observer;
+		s_peer_observer_channel* observer_channel = NetworkSession::GetPeerObserverChannel(peerIdx);
+
+		s_headhunter_skulls data;
+		memcpy(data.skull_count, skull_count, sizeof(s_headhunter_skulls));
+
+		observer->sendNetworkMessage(session->session_index, observer_channel->observer_index, s_network_observer::e_network_message_send_protocol::in_band, _headhunter_skull_count, sizeof(s_headhunter_skulls), &data);
 	}
 }
 

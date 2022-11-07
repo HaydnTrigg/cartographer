@@ -12,6 +12,9 @@
 #include "ImGui_CartographerStyle.h"
 #include "Console\ImGui_ConsoleImpl.h"
 #include "ImGui_NetworkStatsOverlay.h"
+#include "ImGui_HeadHunter_Skull_Count.h"
+
+bool g_headhunter_skull_count = false;
 
 namespace ImGuiHandler
 {
@@ -45,6 +48,8 @@ namespace ImGuiHandler
 	{
 		// TODO add these to some container
 		if (g_network_stats_overlay)
+			return true;
+		if (g_headhunter_skull_count)
 			return true;
 		for (auto& window : imgui_windows)
 		{
@@ -82,6 +87,7 @@ namespace ImGuiHandler
 		ImGui::NewFrame();
 
 		ShowNetworkStatsOverlay(&g_network_stats_overlay);
+		ShowSkullCount(&g_headhunter_skull_count);
 		for (auto& window : imgui_windows)
 		{
 			if (window.doRender)

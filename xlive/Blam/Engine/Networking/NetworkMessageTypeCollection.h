@@ -63,6 +63,7 @@ enum e_network_message_type_collection : unsigned int
 	_rank_change,
 	_anti_cheat,
 	_custom_variant_settings,
+	_headhunter_skull_count,
 
 	_network_message_type_collection_end
 };
@@ -125,6 +126,7 @@ static const char* network_message_type_collection_name[] = {
 	"rank_change",
 	"anti_cheat",
 	"custom_variant_settings",
+	"headhunter_skull_count"
 
 	"end"
 };
@@ -156,6 +158,11 @@ struct s_anti_cheat
 	bool enabled;
 };
 
+struct s_headhunter_skulls
+{
+	__int8 skull_count[16];
+};
+
 #pragma pack(push, 1)
 struct s_text_chat
 {
@@ -182,4 +189,5 @@ namespace NetworkMessage
 	void SendTeamChange(int peerIdx, int teamIdx);
 	void SendRankChange(int peerIdx, BYTE rank);
 	void SendAntiCheat(int peerIdx);
+	void SendSkullCounts(int peerIdx);
 }

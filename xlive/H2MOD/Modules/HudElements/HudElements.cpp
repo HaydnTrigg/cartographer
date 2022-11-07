@@ -2,6 +2,8 @@
 
 #include "HudElements.h"
 #include "H2MOD\Engine\Engine.h"
+#include "Blam\Engine\Camera\Camera.h"
+#include "Blam\Engine\Game\GameEngineGlobals.h"
 #include "H2MOD\Modules\Shell\Config.h"
 #include "H2MOD\Modules\CustomVariantSettings\CustomVariantSettings.h"
 #include "H2MOD\Modules\Input\KeyboardInput.h"
@@ -68,23 +70,192 @@ static bool __cdecl RenderHudCheck(unsigned int a1)
 	return false;
 }
 
-typedef void(__cdecl render_camera_build_projection_t)(char*, int, int);
+typedef void(__cdecl render_camera_build_projection_t)(s_camera*, int, int);
 render_camera_build_projection_t* p_render_camera_build_projection;
 
-void __cdecl render_camera_build_projection_hook(char* camera, int frustum_bounds, int out_projection)
+void __cdecl render_camera_build_projection_hook(s_camera* camera, int frustum_bounds, int out_projection)
 {
-	float old_camera_field_of_view = *(float*)(camera + 0x28);
+	float old_camera_field_of_view = camera->field_of_view;
 	
 	if (H2Config_static_first_person) 
 	{
-		*(float*)(camera + 0x28) = ((64.f * M_PI) / 180.0f) * 0.78500003f;
-		//*(float*)(a1 + 0x28) = 0.86558843f;
+		camera->field_of_view = ((64.f * M_PI) / 180.0f) * 0.78500003f;
 	}
 	
 	p_render_camera_build_projection(camera, frustum_bounds, out_projection);
 	
-	*(float*)(camera + 0x28) = old_camera_field_of_view;
+	camera->field_of_view = old_camera_field_of_view;
 }
+
+float __fastcall sub_46EDAF(int a1)
+{
+	typedef float(__cdecl game_ticks_to_seconds_t)(float ticks);
+	auto p_game_ticks_to_seconds = Memory::GetAddress<game_ticks_to_seconds_t*>(0x7C0A9);
+	__int8* byte_8BF900 = Memory::GetAddress<__int8*>(0x4BF900);
+
+	double v1; // st7
+	float result; // xmm0_4
+	float v3; // [esp+4h] [ebp-4h]
+
+	v1 = p_game_ticks_to_seconds(byte_8BF900[a1]) * 4.0;
+	if (v1 < 0.0)
+		return 0.0;
+	result = 1.0;
+	v3 = v1;
+	if (v3 <= 1.0)
+		return v1;
+	return result;
+}
+
+/*
+void __fastcall hud_draw_player_text_hook(float a1) 
+{
+	typedef bool(sub_620FBD_t)();
+	auto p_sub_620FBD = Memory::GetAddress<sub_620FBD_t*>(0x220FBD);
+
+	typedef int(sub_664F3C_t)();
+	auto p_sub_664F3C = Memory::GetAddress<sub_664F3C_t*>(0x264F3C);
+
+	typedef int (game_seconds_to_ticks_round_t)(float a1);
+	auto p_game_seconds_to_ticks_round = Memory::GetAddress<game_seconds_to_ticks_round_t*>(0x7C0DB);
+
+	typedef void(__fastcall initialize_game_state_player_iterator_t)(int *_this);
+	auto p_initialize_game_state_player_iterator = Memory::GetAddress<initialize_game_state_player_iterator_t*>(0x7C0DB);
+
+	typedef bool(__fastcall players_iterator_next_t)(int* _this);
+	auto p_players_iterator_next = Memory::GetAddress<players_iterator_next_t*>(0x5B120);
+
+	typedef int(__fastcall get_last_iterated_datum_index_t)(int* _this);
+	auto p_get_last_iterated_datum_index = Memory::GetAddress<get_last_iterated_datum_index_t*>(0x5B15A);
+
+	typedef __int8(__fastcall sub_46A656_t)(unsigned __int16 a1, int a2);
+	auto p_sub_46A656 = Memory::GetAddress<sub_46A656_t*>(0x6A656);
+
+	typedef int(__cdecl sub_477080_t)(rect2d* a1);
+	auto p_sub_477080 = Memory::GetAddress<sub_477080_t*>(0x77080);
+
+	typedef int(__cdecl sub_477071_t)(rect2d* a1);
+	auto p_sub_477071 = Memory::GetAddress<sub_477071_t*>(0x77071);
+	
+	typedef __int16*(__cdecl sub_477049_t)(rect2d* a1, __int16 a2, __int16 a3, __int16 a4, __int16 a5);
+	auto p_sub_477049 = Memory::GetAddress<sub_477049_t*>(0x77049);
+
+	typedef void(__cdecl sub_673167_t)();
+	auto p_sub_673167 = Memory::GetAddress<sub_673167_t*>(0x77049);
+
+	typedef void(__cdecl render_scoreboard_primitives_t)(rect2d* a1, int* a2);
+	auto p_render_scoreboard_primitives = Memory::GetAddress<render_scoreboard_primitives_t*>(0x77049);
+
+	typedef float(__fastcall sub_46EDAF_t)(int a1, double a2);
+	auto p_sub_46EDAF = Memory::GetAddress<sub_46EDAF_t*>(0x6EDAF);
+
+	typedef int(__cdecl sub_4749F7_t)(int a2, float arg4);
+	auto p_sub_4749F7 = Memory::GetAddress<sub_4749F7_t*>(0x749F7);
+
+	real_matrix4x3* global_projection = Memory::GetAddress<real_matrix4x3*>(0x4E673C);
+	s_camera* global_camera = Memory::GetAddress<s_camera*>(0x4E66C8);
+	s_game_engine_globals* game_engine_globals = s_game_engine_globals::get();
+	int local_player_render_index = *Memory::GetAddress<int*>(0x4E6800);
+	float* off_8127A0 = Memory::GetAddress<float*>(0x4127A0);
+
+	int local_player_render_index_copy; // esi
+	int player_index; // edi
+	int v3; // eax
+	int last_iterated_datum_index; // eax
+	int v5; // eax
+	float v6; // xmm0_4
+	__int16 v7; // ax
+	float v8; // xmm0_4
+	float* render_text_flag; // [esp+0h] [ebp-28h]
+	__int16 arg4a; // [esp+0h] [ebp-28h]
+	double arg4b; // [esp+0h] [ebp-28h]
+	int a2a[4]; // [esp+Ch] [ebp-1Ch] BYREF
+	double a1a; // [esp+1Ch] [ebp-Ch] BYREF
+
+	if (!h2mod->GetEngineType() || p_sub_620FBD())
+		return;
+	local_player_render_index_copy = local_player_render_index;
+	player_index = h2mod->get_player_datum_index_from_controller_index(local_player_render_index);
+	if (local_player_render_index_copy != -1)
+	{
+		if (((unsigned __int8)(1 << local_player_render_index_copy) & game_engine_globals->gap2[0]) != 0)
+		{
+			if (p_sub_664F3C() <= 0)
+			{
+				game_engine_globals->gap2[0] &= ~(1 << local_player_render_index_copy);
+			}
+			else
+			{
+				v3 = p_game_seconds_to_ticks_round(3.0);
+				if (++game_engine_globals->gap2[local_player_render_index_copy + 1] > v3)
+					game_engine_globals->gap2[0] &= ~(1 << local_player_render_index_copy);
+			}
+		}
+		else
+		{
+			game_engine_globals->gap2[local_player_render_index_copy + 1] = 0;
+		}
+	}
+	if (player_index != -1)
+	{
+		p_initialize_game_state_player_iterator(a2a);
+		while (p_players_iterator_next(a2a))
+		{
+			if (p_get_last_iterated_datum_index(a2a) != player_index)
+			{
+				last_iterated_datum_index = p_get_last_iterated_datum_index(a2a);
+				p_sub_46A656(player_index, last_iterated_datum_index);
+				*(float*)&a1a = a1;
+				if (a1 > 0.0)
+				{
+					//render_text_flag = (float*)a1a;
+					v5 = p_get_last_iterated_datum_index((int*)a2a);
+					draw_player_names_above_head_hook(v5, *(float*)&render_text_flag);
+				}
+			}
+		}
+	}
+	if (local_player_render_index_copy == -1)
+	{
+		v6 = 1.0;
+	LABEL_19:
+		a2a[1] = *off_8127A0;
+		a2a[2] = off_8127A0[1];
+		a2a[3] = off_8127A0[2];
+		a2a[0] = v6;
+		arg4a = p_sub_477080(&global_camera->screen);
+		v7 = p_sub_477071(&global_camera->screen);
+		p_sub_477049((rect2d*)&a1a, 0, 0, v7, arg4a);
+		p_sub_673167();
+		p_render_scoreboard_primitives((rect2d*)&a1a, a2a);
+		//nullsub_66();
+		goto LABEL_20;
+	}
+	v6 = game_engine_globals->unk_local_player_hud_field[local_player_render_index_copy];
+	if (v6 > 0.0)
+		goto LABEL_19;
+LABEL_20:
+	if (player_index != -1)
+	{
+		v8 = sub_46EDAF(local_player_render_index_copy);
+		*(float*)&a1a = v8;
+		if (v8 >= 0.0)
+		{
+			if (v8 <= 1.0)
+			{
+				if (v8 <= 0.0)
+					return;
+			}
+			else
+			{
+				a1a = 0x3F800000;
+			}
+			*(float*)&arg4b = pow(*(float*)&a1a, 1.899999976158142);
+			p_sub_4749F7(player_index, *(float*)&arg4b);
+		}
+	}
+}*/
+
 
 void HudElements::setCrosshairSize(bool mapLoadContext)
 {
@@ -232,6 +403,7 @@ void HudElements::ApplyHooks()
 	PatchCall(Memory::GetAddress(0x228579), RenderFirstPersonCheck);
 	PatchCall(Memory::GetAddress(0x223955), RenderHudCheck);
 	PatchCall(Memory::GetAddress(0x191440), render_camera_build_projection_hook);
+	//PatchCall(Memory::GetAddress(0x226716), hud_draw_player_text_hook);
 	p_render_camera_build_projection = Memory::GetAddress<render_camera_build_projection_t*>(0x1953f5);
 }
 

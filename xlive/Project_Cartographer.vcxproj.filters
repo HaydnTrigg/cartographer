@@ -152,6 +152,10 @@
     <ClCompile Include="H2MOD\Modules\CampaignModifiers\CampaignModifiers.cpp" />
     <ClCompile Include="H2MOD\Variants\MiniMode\MiniMode.cpp" />
     <ClCompile Include="H2MOD\Variants\GraveRobber\GraveRobber.cpp" />
+    <ClCompile Include="H2MOD\Variants\HeadHunter\HeadHunter.cpp" />
+    <ClCompile Include="H2MOD\GUI\imgui_integration\ImGui_HeadHunter_Skull_Count.cpp" />
+    <ClCompile Include="Blam\Engine\Camera\Camera.cpp" />
+    <ClCompile Include="H2MOD\Modules\SplitScreen\SplitScreen.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdparty\discord\discord_register.h" />
@@ -491,6 +495,10 @@
     <ClInclude Include="Blam\Cache\TagGroups\collision_model_definition.hpp" />
     <ClInclude Include="H2MOD\Variants\MiniMode\MiniMode.h" />
     <ClInclude Include="H2MOD\Variants\GraveRobber\GraveRobber.h" />
+    <ClInclude Include="H2MOD\Variants\HeadHunter\HeadHunter.h" />
+    <ClInclude Include="H2MOD\GUI\imgui_integration\ImGui_HeadHunter_Skull_Count.h" />
+    <ClInclude Include="Blam\Engine\Camera\Camera.h" />
+    <ClInclude Include="H2MOD\Modules\SplitScreen\SplitScreen.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc" />

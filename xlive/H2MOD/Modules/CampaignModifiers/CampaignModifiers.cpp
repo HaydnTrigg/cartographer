@@ -5,10 +5,8 @@
 #include "Blam\Cache\DataTypes\StringID.h"
 #include "Blam\Cache\TagGroups\biped_definition.hpp"
 #include "Blam\Cache\TagGroups\character_definition.hpp"
-#include "Blam\Cache\TagGroups\collision_model_definition.hpp"
 #include "Blam\Cache\TagGroups\model_definition.hpp"
 #include "Blam\Cache\TagGroups\projectile_definition.hpp"
-#include "Blam\Cache\TagGroups\physics_model_definition.hpp"
 #include "Blam\Cache\TagGroups\render_model_definition.hpp"
 #include "Blam\Cache\TagGroups\scenario_ai_resource.hpp"
 #include "Blam\Cache\TagGroups\scenario_definition.hpp"
@@ -282,5 +280,10 @@ namespace CampaignModifiers
 	void CampaignModifiers::Initialize()
 	{
 		tags::on_map_load(c_campaign_modifiers::ApplyMapModifiers);
+	}
+
+	void CampaignModifiers::DeInitialize()
+	{
+		EventHandler::remove_callback(TinyPlayerEdits, EventType::player_spawn, EventExecutionType::execute_after);
 	}
 }

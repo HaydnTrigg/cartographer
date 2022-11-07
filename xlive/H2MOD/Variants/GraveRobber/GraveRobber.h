@@ -2,12 +2,8 @@
 
 #include "Blam\Cache\DataTypes\BlamDataTypes.h"
 #include "H2MOD\Variants\VariantSystem.h"
+#include "H2MOD\Variants\HeadHunter\HeadHunter.h"
 
-enum e_headhunter_sounds
-{
-	_snd_head_hunter,
-	_snd_skull_scored
-};
 
 class GraveRobber : public ICustomGameVariant
 {

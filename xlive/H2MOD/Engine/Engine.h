@@ -16,6 +16,7 @@ namespace Engine
 		void __cdecl remove_equipment(datum unit_idx);
 		signed int __cdecl inventory_next_weapon(datum unit_idx);
 		bool __cdecl assign_equipment_to_unit(datum unit_idx, datum object_idx, short a3);
+		void __fastcall unit_get_head_position(int a1, real_point3d* a2);
 	}
 
 	namespace Objects

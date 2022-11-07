@@ -31,6 +31,7 @@ enum e_static_lod : DWORD
 	cinematic
 };
 
+void draw_player_names_above_head_hook(int datum_index, float a2);
 void call_give_player_weapon(int PlayerIndex, datum WeaponId, bool bReset);
 
 class H2MOD
@@ -59,7 +60,6 @@ public:
 	void custom_sound_play(const wchar_t* soundName, int delay);
 	void disable_weapon_pickup(bool b_Enable);
 	void set_local_rank(BYTE rank);
-	void cine_start_tex();
 
 	e_engine_type GetEngineType() { return engineType; }
 	void SetCurrentEngineType(e_engine_type value) { engineType = value; }

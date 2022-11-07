@@ -16,6 +16,7 @@
 #include "H2MOD\Modules\RunLoop\RunLoop.h"
 #include "H2MOD\Modules\Shell\Config.h"
 #include "H2MOD\Modules\SpecialEvents\SpecialEvents.h"
+#include "H2MOD\Modules\SplitScreen\SplitScreen.h"
 
 #ifndef NDEBUG
 #include "H2MOD\Modules\ObserverMode\ObserverMode.h"
@@ -1090,6 +1091,17 @@ namespace ImGuiHandler {
 						if (ImGui::Button("Campaign Modifiers"))
 						{
 							CallWgit(c_campaign_modifiers_list_menu::open);
+						}
+						if (ImGui::Button("Coop Menu"))
+						{
+							NopFill(Memory::GetAddress(0x244F0A), 4);
+							NopFill(Memory::GetAddress(0x244F0E), 4);
+							NopFill(Memory::GetAddress(0x244F15), 4);
+
+							typedef void (__cdecl initiate_lobby_type_t)(int a1);
+							auto p_initiate_lobby_type = Memory::GetAddress<initiate_lobby_type_t*>(0x217138);
+
+							p_initiate_lobby_type(0);
 						}
 					}
 				}

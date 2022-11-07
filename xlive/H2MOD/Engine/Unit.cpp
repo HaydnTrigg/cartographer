@@ -2,6 +2,8 @@
 
 #include "Engine.h"
 
+#include "Blam\Enums\HaloStrings.h"
+#include "Util\Hooks\Hook.h"
 namespace Engine
 {
 	namespace Unit
@@ -33,6 +35,17 @@ namespace Engine
 			auto passign_equipment_to_unit = Memory::GetAddress<assign_equipment_to_unit_t>(0x1442AA, 0x1330FA);
 
 			return passign_equipment_to_unit(unit_idx, object_idx, a3);
+		}
+
+		void __fastcall unit_get_head_position(int a1, real_point3d* a2)
+		{
+			typedef signed __int16(__cdecl object_get_marker_by_string_id_t)(int a1, string_id a2, matrix2x4x3* a3, __int16 a4);
+			auto p_object_get_marker_by_string_id = Memory::GetAddress<object_get_marker_by_string_id_t*>(0x13277C);
+
+			struct matrix2x4x3 a3;
+
+			p_object_get_marker_by_string_id(a1, HS_HEAD, &a3, 1);
+			memcpy(a2, &a3.matrix1.translation, sizeof(real_point3d));
 		}
 	}
 }

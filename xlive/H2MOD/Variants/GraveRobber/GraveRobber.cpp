@@ -11,10 +11,6 @@
 #include "H2MOD/Modules/HaloScript/HaloScript.h"
 #include "H2MOD/Engine/Engine.h"
 
-int soundBuffer = 0;
-std::unordered_map<int, std::unordered_map<e_headhunter_sounds, const wchar_t*>> headhunterSoundTable;
-bool b_firstSpawn = true;
-
 GraveRobber::GraveRobber()
 {
 }
@@ -79,11 +75,7 @@ void GraveRobber::PickupSkull(datum playerIdx, datum skullDatum)
 		{
 			p_update_player_score(player_score_data, DATUM_INDEX_TO_ABSOLUTE_INDEX(playerIdx), 0, 1, -1, 0);
 			HaloScript::ObjectDestroy(skullDatum);
-			if (TimeElapsedMS(soundBuffer) > 2500)
-			{
-				soundBuffer = GetCurrentTimeMS();
-				TriggerSound(_snd_skull_scored, 500);
-			}
+			TriggerSound(_snd_skull_scored, 500);
 		}
 	}
 }
@@ -91,6 +83,7 @@ void GraveRobber::PickupSkull(datum playerIdx, datum skullDatum)
 void GraveRobber::initClient()
 {
 	b_firstSpawn = true;
+	h2mod->team_player_indicator_visibility(true);
 	h2mod->disable_sounds(FLAG(_sound_type_slayer) | ALL_SOUNDS_NO_SLAYER);
 	headhunterSoundTable[_lang_id_english][e_headhunter_sounds::_snd_head_hunter] = L"sounds/en/headhunter.wav";
 	headhunterSoundTable[_lang_id_english][e_headhunter_sounds::_snd_skull_scored] = L"sounds/en/skull_scored.wav";
@@ -112,7 +105,7 @@ void GraveRobber::Dispose()
 
 CustomVariantId GraveRobber::GetVariantId()
 {
-	return CustomVariantId::_id_headhunter;
+	return CustomVariantId::_id_grave_robber;
 }
 
 void GraveRobber::OnMapLoad(ExecTime execTime, s_game_options* gameOptions)

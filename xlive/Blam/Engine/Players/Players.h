@@ -1,6 +1,7 @@
 #pragma once
 #include "Blam\Engine\DataArray\DataArray.h"
 #include "Blam\Engine\Objects\Objects.h"
+#include "Blam\Engine\Simulation\MachineID.h"
 
 #define ENGINE_PLAYER_MAX 16
 
@@ -166,7 +167,8 @@ struct s_player
 	struct s_player_properties
 	{
 		wchar_t player_name[16];
-		char unk[32];
+		int spawn_protection_time;
+		char unk[28];
 
 		struct s_player_profile
 		{
@@ -180,7 +182,8 @@ struct s_player
 			char emblem_flags;
 		} profile;
 
-		BYTE gap48[8];
+		DWORD field_48;
+		DWORD field_4C;
 		wchar_t clan_name[16];
 		struct {
 			DWORD ID_1;
@@ -204,8 +207,7 @@ struct s_player
 	unsigned long long identifier;
 	DWORD player_creation_tick;
 	BYTE abNet[6];
-	__int16 machine_index;
-	int unk_user_index_2;
+	s_machine_identifier machine_identifier;
 	int unk_user_index;
 	int controller_index;
 	__int16 user_index;
