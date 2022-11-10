@@ -1,21 +1,23 @@
 #include "stdafx.h"
 
-#include "Blam\Engine\IceCreamFlavor\IceCreamFlavor.h"
-#include "Blam\Engine\Networking\NetworkMessageTypeCollection.h"
-#include "H2MOD\Modules\CustomMenu\CustomMenu.h"
-#include "H2MOD\Modules\CustomMenu\CustomLanguage.h"
-#include "H2MOD\Modules\GamePhysics\Patches\MeleeFix.h"
-#include "H2MOD\Modules\HudElements\HudElements.h"
-#include "H2MOD\Modules\Input\Mouseinput.h"
-#include "H2MOD\Modules\RenderHooks\RenderHooks.h"
-#include "H2MOD\Modules\Shell\Config.h"
-#include "H2MOD\Modules\SpecialEvents\SpecialEvents.h"
-#include "Util\Hooks\Hook.h"
+#include "Blam/Engine/Game/game/cheats.h"
+#include "Blam/Engine/Game/game/game.h"
+#include "Blam/Engine/Networking/NetworkMessageTypeCollection.h"
+#include "H2MOD/Modules/CustomMenu/CustomMenu.h"
+#include "H2MOD/Modules/CustomMenu/CustomLanguage.h"
+#include "H2MOD/Modules/GamePhysics/Patches/MeleeFix.h"
+#include "H2MOD/Modules/HudElements/HudElements.h"
+#include "H2MOD/Modules/Input/Mouseinput.h"
+#include "H2MOD/Modules/Input/ControllerInput.h"
+#include "H2MOD/Modules/RenderHooks/RenderHooks.h"
+#include "H2MOD/Modules/Shell/Config.h"
+#include "H2MOD/Modules/SpecialEvents/SpecialEvents.h"
+#include "Util/Hooks/Hook.h"
 
 #ifndef NDEBUG
-#include "H2MOD\Modules\DirectorHooks\DirectorHooks.h"
-#include "H2MOD\Modules\ObserverMode\ObserverMode.h"
-#include "H2MOD\Utils\Utils.h"
+#include "H2MOD/Modules/DirectorHooks/DirectorHooks.h"
+#include "H2MOD/Modules/ObserverMode/ObserverMode.h"
+#include "H2MOD/Utils/Utils.h"
 #endif
 
 #include "imgui.h"
@@ -337,12 +339,6 @@ namespace ImGuiHandler {
 					ImGui::Checkbox(GetString(hires_fix), &H2Config_hiresfix);
 					if (ImGui::IsItemHovered())
 						ImGui::SetTooltip(GetString(hires_fix_tooltip));
-
-
-					//ImGui::Checkbox(GetString(experimental_rendering_changes), &H2Config_experimental_fps);
-					//if (ImGui::IsItemHovered())
-					//	ImGui::SetTooltip(GetString(experimental_rendering_tooltip));
-
 				}
 			}
 			void MouseKeyboardSettings()
@@ -661,7 +657,7 @@ namespace ImGuiHandler {
 			}
 			void HostSettings()
 			{
-				if (NetworkSession::LocalPeerIsSessionHost() || h2mod->GetEngineType() == e_engine_type::_single_player) {
+				if (NetworkSession::LocalPeerIsSessionHost() || s_game_globals::game_is_campaign()) {
 					if (ImGui::CollapsingHeader(GetString(host_campagin_settings)))
 					{
 						ImGui::Columns(2, NULL, false);
@@ -690,7 +686,7 @@ namespace ImGuiHandler {
 						}
 						ImGui::Columns(1);
 						ImGui::Separator();
-						bool* skulls = ice_cream_flavor_state();
+						bool* skulls = cheats::ice_cream_flavor_state();
 						ImGui::Columns(3, NULL, false);
 
 						TextVerticalPad(GetString(skull_anger));
@@ -950,7 +946,7 @@ namespace ImGuiHandler {
 			//ImGui::PushFont(font2);
 			ImGui::SetNextWindowSize(ImVec2(650, 530), ImGuiCond_Appearing);
 			ImGui::SetNextWindowSizeConstraints(ImVec2(610, 530), ImVec2(1920, 1080));
-			if (h2mod->GetEngineType() == _main_menu)
+			if (!s_game_globals::game_is_mainmenu())
 				ImGui::SetNextWindowBgAlpha(1);
 			if (ImGui::Begin(GetString(e_advanced_string::title), &open, window_flags))
 			{

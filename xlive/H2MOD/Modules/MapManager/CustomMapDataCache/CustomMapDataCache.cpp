@@ -2,11 +2,11 @@
 #include "stdafx.h"
 #include "CustomMapDataCache.h"
 
-#include "H2MOD\Tags\TagInterface.h"
-#include "Blam\Engine\DataArray\DataArray.h"
-#include "Blam\FileSystem\FiloInterface.h"
+#include "H2MOD/Tags/TagInterface.h"
+#include "Blam/Engine/Game/memory/data.h"
+#include "Blam/FileSystem/FiloInterface.h"
 
-#include "Util\Hooks\Hook.h"
+#include "Util/Hooks/Hook.h"
 
 #include "H2MOD/Modules/OnScreenDebug/OnscreenDebug.h"
 

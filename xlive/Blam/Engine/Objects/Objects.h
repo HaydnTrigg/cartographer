@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Blam\Math\BlamMath.h"
-#include "Blam\Engine\DataArray\DataArray.h"
-#include "Blam\Engine\Players\PlayerActions.h"
-#include "Blam\Engine\Objects\ObjectPlacementData.h"
+#include "Blam/Engine/Game/math/real_math.h"
+#include "Blam/Engine/Game/memory/data.h"
+#include "Blam/Engine/Objects/ObjectPlacementData.h"
+#include "Blam/Engine/Players/PlayerActions.h"
 
 enum e_object_team : BYTE
 {

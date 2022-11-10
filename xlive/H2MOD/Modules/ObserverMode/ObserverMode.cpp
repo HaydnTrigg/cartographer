@@ -4,7 +4,7 @@
 #include "H2MOD.h"
 #include "H2MOD\GUI\imgui_integration\imgui_handler.h"
 #include "H2MOD\Modules\DirectorHooks\DirectorHooks.h"
-#include "H2MOD\Modules\Input\PlayerControl.h"
+#include "Blam/Engine/Game/game/player_control.h"
 #include "H2MOD\Utils\Utils.h"
 #include "Util\Hooks\Hook.h"
 #include <math.h>

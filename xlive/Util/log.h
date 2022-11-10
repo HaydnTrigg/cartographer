@@ -171,7 +171,6 @@ public:
 
 
 #undef log_a
-#undef log_w
 #undef log_b
 
 public:

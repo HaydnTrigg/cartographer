@@ -9,7 +9,7 @@
 #include "H2MOD\Modules\Achievements\Achievements.h"
 #include "H2MOD\Modules\Shell\Config.h"
 #include "H2MOD\Modules\Input\KeyboardInput.h"
-#include "H2MOD\Modules\Input\PlayerControl.h"
+#include "Blam/Engine/Game/game/player_control.h"
 #include "H2MOD\Modules\Networking\Networking.h"
 #include "H2MOD\Modules\OnScreenDebug\OnscreenDebug.h"
 #include "H2MOD\Modules\Shell\Shell.h"
@@ -653,7 +653,7 @@ int WINAPI XLiveRender()
 			}
 #pragma endregion achievement rendering
 
-			if (displayXyz && (NetworkSession::LocalPeerIsSessionHost() || h2mod->GetEngineType() == e_engine_type::_single_player)) {
+			if (displayXyz && (NetworkSession::LocalPeerIsSessionHost() || s_game_globals::game_is_campaign())) {
 				int text_y_coord = 60;
 				PlayerIterator playerIt;
 				while (playerIt.get_next_active_player()) 

@@ -1,15 +1,14 @@
 #include "stdafx.h"
 
 #include "StatsHandler.h"
-#include "Blam\Engine\Memory\bitstream.h"
-#include "Blam\Engine\Networking\NetworkMessageTypeCollection.h"
+#include "Blam/Engine/Game/memory/bitstream.h"
+#include "Blam/Engine/Networking/NetworkMessageTypeCollection.h"
 
-#include "H2MOD\Engine\Engine.h"
-#include "H2MOD\Modules\Shell\Config.h"
-#include "H2MOD\Modules\Shell\Startup\Startup.h"
-#include "H2MOD\Modules\EventHandler\EventHandler.hpp"
-#include "H2MOD\Utils\Utils.h"
-#include "Util\hash.h"
+#include "H2MOD/Modules/Shell/Config.h"
+#include "H2MOD/Modules/Shell/Startup/Startup.h"
+#include "H2MOD/Modules/EventHandler/EventHandler.hpp"
+#include "H2MOD/Utils/Utils.h"
+#include "Util/hash.h"
 
 bool MatchInvalidated = false;
 StatsHandler::StatsAPIRegisteredStatus Status;
@@ -102,7 +101,7 @@ void StatsHandler::server_command_event(ServerConsole::e_server_console_commands
 {
 	if(Status.StatsEnabled)
 	{
-		if(command == ServerConsole::skip && Engine::get_game_life_cycle() == _life_cycle_in_game)
+		if(command == ServerConsole::skip && get_game_life_cycle() == _life_cycle_in_game)
 		{
 			InvalidateMatch(true);
 		}
@@ -890,8 +889,8 @@ void StatsHandler::playerJoinEvent(int peerIndex)
 	// but only in the post game carnage report/pregame
 	// ranks will update at the end of the game
 
-	if (Engine::get_game_life_cycle() != _life_cycle_pre_game
-		&& Engine::get_game_life_cycle() != _life_cycle_post_game)
+	if (get_game_life_cycle() != _life_cycle_pre_game
+		&& get_game_life_cycle() != _life_cycle_post_game)
 		return;
 
 	std::thread(getPlayerRanksByStringList, buildPlayerRankUpdateQueryStringList()).detach();

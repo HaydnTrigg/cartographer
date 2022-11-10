@@ -1,9 +1,10 @@
 #include "stdafx.h"
 
 #include "ProjectileFix.h"
-#include "Blam\Engine\Game\GameTimeGlobals.h"
+#include "Blam/Engine/Game/game/game.h"
+#include "Blam/Engine/Game/game/game_time.h"
 #include "Blam\Engine\Objects\Objects.h"
-#include "Blam\Math\BlamMath.h"
+#include "Blam\Engine\Game\math\real_math.h"
 #include "H2MOD\Tags\TagInterface.h"
 #include "Util\Hooks\Hook.h"
 

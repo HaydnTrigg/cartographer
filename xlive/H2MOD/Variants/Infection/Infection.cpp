@@ -1,18 +1,17 @@
 #include "stdafx.h"
 
 #include "Infection.h"
-#include "Blam\Engine\Game\GameGlobals.h"
+#include "Blam/Engine/Game/game/game.h"
 #include "Blam\Engine\Networking\NetworkMessageTypeCollection.h"
+#include "Blam\Engine\Game\units\units.h"
 #include "Blam\Cache\TagGroups\item_collection_definition.hpp"
 #include "Blam\Cache\TagGroups\scenario_definition.hpp"
 #include "Blam\Cache\TagGroups\vehicle_collection_definition.hpp"
-#include "H2MOD\Engine\Engine.h"
 #include "H2MOD\Modules\SpecialEvents\SpecialEvents.h"
 #include "H2MOD\Modules\Shell\Config.h"
 #include "H2MOD\Modules\CustomMenu\CustomLanguage.h"
 #include "H2MOD\Modules\PlayerRepresentation\PlayerRepresentation.h"
 #include "H2MOD\Tags\MetaLoader\tag_loader.h"
-#include "H2MOD\Tags\TagInterface.h"
 
 std::vector<unsigned long long> Infection::zombieIdentifiers;
 
@@ -143,7 +142,7 @@ void Infection::InitHost() {
 				// Can't make equipment null otherwise it'll crash, dosent spawn anything anyways so it's fine
 				if (itmc->item_permutations[0]->item.TagGroup == blam_tag::tag_group_type::equipment)
 				{
-					itmc->item_permutations[0]->item.TagIndex = tags::find_tag(blam_tag::tag_group_type::equipment, "objects\powerups\shotgun_ammo\shotgun_ammo");
+					itmc->item_permutations[0]->item.TagIndex = tags::find_tag(blam_tag::tag_group_type::equipment, "objects\\powerups\\shotgun_ammo\\shotgun_ammo");
 				}
 				else
 				{
@@ -289,7 +288,7 @@ void Infection::OnMapLoad(ExecTime execTime, s_game_options* gameOptions)
 		break;
 
 	case ExecTime::_postEventExec:
-		switch (h2mod->GetEngineType())
+		switch (s_game_globals::get_engine_type())
 		{
 			// cleanup when loading main menu
 		case _multiplayer:
@@ -353,7 +352,7 @@ void Infection::OnPlayerDeath(ExecTime execTime, datum playerIdx)
 				}
 				else {
 					// take away zombie's weapons
-					Engine::Unit::remove_equipment(playerUnitDatum);
+					units::unit_delete_all_weapons(playerUnitDatum);
 				}
 			}
 		}

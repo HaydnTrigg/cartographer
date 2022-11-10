@@ -5,7 +5,7 @@
 #include "ComVar.h"
 #include "CommandHandler.h"
 #include "CommandCollection.h"
-#include "H2MOD\Modules\Input\PlayerControl.h"
+#include "Blam/Engine/Game/game/player_control.h"
 
 class Console;
 

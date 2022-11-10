@@ -1,11 +1,10 @@
 #include "stdafx.h"
 
 #include "GunGame.h"
-#include "Blam\Engine\Game\GameGlobals.h"
+#include "Blam/Engine/Game/game/game.h"
 #include "Blam\Engine\Networking\Session\NetworkSession.h"
 #include "Blam\Engine\Networking\NetworkMessageTypeCollection.h"
 #include "H2MOD.h"
-#include "H2MOD\Engine\Engine.h"
 
 #include "Util\ReadIniArguments.h"
 

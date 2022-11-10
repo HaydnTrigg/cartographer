@@ -8,7 +8,7 @@
 
 void UIRankPatch() {
 
-	if (h2mod->GetEngineType() != _main_menu || Memory::IsDedicatedServer())
+	if (!s_game_globals::game_is_mainmenu() || Memory::IsDedicatedServer())
 		return;
 
 	//BYTE PlayerLevel = -1;								//eventually this will pull level from webserver

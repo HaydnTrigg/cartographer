@@ -2,17 +2,15 @@
 
 #include "MainGameTime.h"
 
-#include "Util\Hooks\Hook.h"
+#include "Util/Hooks/Hook.h"
 
-#include "Blam\Engine\Game\GameTimeGlobals.h"
-#include "Blam\Engine\Game\GameGlobals.h"
+#include "Blam/Engine/Game/game/game_time.h"
+#include "H2MOD/Modules/Shell/Shell.h"
+#include "H2MOD/Modules/Shell/Config.h"
+#include "H2MOD/Modules/OnScreenDebug/OnscreenDebug.h"
+#include "H2MOD/Utils/Utils.h"
 
-#include "H2MOD\Modules\Shell\Shell.h"
-#include "H2MOD\Modules\Shell\Config.h"
-#include "H2MOD\Modules\OnScreenDebug\OnscreenDebug.h"
-#include "H2MOD\Utils\Utils.h"
-
-#include "H2MOD\GUI\imgui_integration\Console\ImGui_ConsoleImpl.h"
+#include "H2MOD/GUI/imgui_integration/Console/ImGui_ConsoleImpl.h"
 
 extern bool b_XboxTick;
 

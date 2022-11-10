@@ -1,6 +1,7 @@
 #pragma once
 
 #include "H2MOD.h"
+#include "Blam/Engine/Game/math/integer_math.h"
 #include "H2MOD/Modules/Input/ControllerInput.h"
 
 void InitH2Config();
@@ -14,8 +15,8 @@ void ReadH2Config();
 
 #define DLL_VERSION_MAJOR               0
 #define DLL_VERSION_MINOR               6
-#define DLL_VERSION_REVISION            7
-#define DLL_VERSION_BUILD				5
+#define DLL_VERSION_REVISION            8
+#define DLL_VERSION_BUILD				0
 
 #define DLL_VERSION            DLL_VERSION_MAJOR, DLL_VERSION_MINOR, DLL_VERSION_REVISION, DLL_VERSION_BUILD
 #define STRINGIZE2(s) #s

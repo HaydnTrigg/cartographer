@@ -22,8 +22,6 @@ typedef struct XLIVE_INPUT_INFO {
 	LRESULT lRet;
 } XLIVE_INPUT_INFO;
 
-#define DISPLAY_DEV_TESTING_MENU 0
-
 void initFontsIfRequired();
 void drawText(int x, int y, DWORD color, const char* text, LPD3DXFONT pFont);
 void drawRect(int x, int y, int width, int height, DWORD Color);

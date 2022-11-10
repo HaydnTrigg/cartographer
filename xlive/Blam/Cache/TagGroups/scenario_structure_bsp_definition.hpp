@@ -2,7 +2,7 @@
 #include "Blam\Cache\DataTypes\BlamDataTypes.h"
 #include "Blam\Cache\DataTypes\BlamPrimitiveType.h"
 #include "Blam\Common\Common.h"
-#include "Blam\Math\real_math.h"
+#include "Blam\Engine\Game\math\real_math.h"
 
 /*********************************************************************
 * name: scenario_structure_bsp

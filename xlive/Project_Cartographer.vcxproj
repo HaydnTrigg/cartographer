@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -225,24 +225,38 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Blam\Engine\DataArray\TagDataIterator.cpp" />
-    <ClCompile Include="Blam\Engine\Game\GameEngineGlobals.cpp" />
-    <ClCompile Include="Blam\Engine\Game\GameGlobals.cpp" />
-    <ClCompile Include="Blam\Engine\Game\GameTimeGlobals.cpp" />
-    <ClCompile Include="Blam\Engine\Game\PhysicsConstants.cpp" />
+    <ClCompile Include="Blam\Engine\Game\game\cheats.h" />
+    <ClCompile Include="Blam\Engine\Game\networking\session\network_session.cpp" />
+    <ClCompile Include="Blam\Engine\Game\tag_files\tag_groups.cpp" />
+    <ClCompile Include="Blam\Engine\Game\GameHooks.cpp" />
+    <ClCompile Include="Blam\Engine\Game\game\game_time.cpp" />
+    <ClCompile Include="Blam\Engine\Game\game\game.cpp" />
+    <ClCompile Include="Blam\Engine\Game\game\game_engine.cpp" />
+    <ClCompile Include="Blam\Engine\Game\math\color_math.cpp" />
+    <ClCompile Include="Blam\Engine\Game\math\random_math.cpp" />
+    <ClCompile Include="Blam\Engine\Game\physics\PhysicsConstants.cpp" />
     <ClInclude Include="Blam\Cache\TagGroups\bitmap_definition.hpp" />
     <ClInclude Include="Blam\Cache\TagGroups\collision_model_definition.hpp" />
-    <ClInclude Include="Blam\Engine\IceCreamFlavor\IceCreamFlavor.h" />
+    <ClInclude Include="Blam\Engine\Game\ai\actors.h" />
+    <ClInclude Include="Blam\Engine\Game\GameHooks.h" />
+    <ClInclude Include="Blam\Engine\Game\game\game.h" />
+    <ClInclude Include="Blam\Engine\Game\game\game_engine.h" />
+    <ClInclude Include="Blam\Engine\Game\hs\hs_function.h" />
+    <ClInclude Include="Blam\Engine\Game\math\color_math.h" />
+    <ClInclude Include="Blam\Engine\Game\math\random_math.h" />
+    <ClInclude Include="Blam\Engine\Game\networking\session\network_session.h" />
+    <ClInclude Include="Blam\Engine\Game\objects\damage\damage.h" />
+    <ClInclude Include="Blam\Engine\Game\units\units.h" />
     <ClInclude Include="Blam\Engine\Networking\NetworkCommon.h" />
+    <ClCompile Include="Blam\Engine\Game\networking\logic\life_cycle_manager.cpp" />
+    <ClCompile Include="Blam\Engine\Game\units\units.cpp" />
     <ClCompile Include="Blam\Engine\Players\Players.cpp" />
-    <ClCompile Include="Blam\Engine\render\render_cameras.cpp" />
+    <ClCompile Include="Blam\Engine\Game\render\render_cameras.cpp" />
     <ClCompile Include="Blam\LazyBlam\LazyBlamLoader.cpp" />
     <ClCompile Include="Blam\LazyBlam\LazyBlamRebase.cpp" />
-    <ClCompile Include="Blam\Math\real_matrix4x3.cpp" />
-    <ClCompile Include="Blam\Math\real_vector3d.cpp" />
-    <ClCompile Include="H2MOD\Engine\Engine.cpp" />
+    <ClCompile Include="Blam\Engine\Game\math\matrix_math.cpp" />
+    <ClCompile Include="Blam\Engine\Game\math\real_math.cpp" />
     <ClCompile Include="Blam\Engine\Objects\Objects.cpp" />
-    <ClCompile Include="H2MOD\Engine\Unit.cpp" />
     <ClCompile Include="H2MOD\EngineHooks\EngineHooks.cpp" />
     <ClCompile Include="H2MOD\GUI\imgui_integration\AdvancedSettings.cpp" />
     <ClCompile Include="H2MOD\GUI\imgui_integration\Console\CommandCollection.cpp" />
@@ -261,6 +275,8 @@
     <ClCompile Include="H2MOD\Modules\CustomMenu\c_screen_widget.cpp" />
     <ClCompile Include="H2MOD\Modules\CustomMenu\c_user_interface_widget.cpp" />
     <ClCompile Include="H2MOD\Modules\CustomMenu\c_virtual_keyboard_menu.cpp" />
+    <ClCompile Include="H2MOD\Modules\Input\ControllerInput.cpp" />
+    <ClCompile Include="H2MOD\Modules\Input\Mouseinput.cpp" />
     <ClCompile Include="H2MOD\Modules\MainLoopPatches\Interpolation\FirstPersonInterpolate.cpp" />
     <ClCompile Include="H2MOD\Modules\MainLoopPatches\Interpolation\Interpolation.cpp" />
     <ClCompile Include="H2MOD\Modules\MainLoopPatches\Interpolation\ObjectInterpolate.cpp" />
@@ -273,17 +289,15 @@
     <ClCompile Include="H2MOD\Modules\HaloScript\HaloScript.cpp" />
     <ClCompile Include="H2MOD\Modules\GamePhysics\Patches\MeleeFix.cpp" />
     <ClCompile Include="H2MOD\Modules\HudElements\HudElements.cpp" />
-    <ClCompile Include="H2MOD\Modules\Input\ControllerInput.cpp" />
     <ClCompile Include="H2MOD\Modules\Input\KeyboardInput.cpp" />
-    <ClCompile Include="H2MOD\Modules\Input\PlayerControl.cpp" />
-    <ClCompile Include="H2MOD\Modules\KantTesting\KantTesting.cpp" />
+    <ClCompile Include="Blam\Engine\Game\game\player_control.cpp" />
     <ClCompile Include="H2MOD\Modules\MainLoopPatches\TestGameTimePrep.cpp" />
     <ClCompile Include="H2MOD\Modules\MainLoopPatches\UncappedFPS2\UncappedFPS2.cpp" />
     <ClCompile Include="H2MOD\Modules\MainLoopPatches\MainGameTime\MainGameTime.cpp" />
     <ClCompile Include="H2MOD\Modules\MainMenu\MapSlots.cpp" />
     <ClCompile Include="H2MOD\Modules\MapManager\MapManager.cpp" />
     <ClCompile Include="Blam\Engine\Networking\NetworkMessageTypeCollection.cpp" />
-    <ClCompile Include="Blam\Engine\Memory\bitstream.cpp" />
+    <ClCompile Include="Blam\Engine\Game\memory\bitstream.cpp" />
     <ClCompile Include="Blam\Engine\Networking\Transport\NetworkChannel.cpp" />
     <ClCompile Include="Blam\Engine\Networking\Transport\NetworkObserver.cpp" />
     <ClCompile Include="Blam\Engine\Networking\Session\NetworkSession.cpp" />
@@ -341,7 +355,6 @@
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotSet</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NoExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
-    <ClCompile Include="H2MOD\Modules\Input\Mouseinput.cpp" />
     <ClCompile Include="H2MOD\Modules\MainMenu\Ranks.cpp" />
     <ClCompile Include="H2MOD\Modules\Networking\Networking.cpp" />
     <ClCompile Include="H2MOD\Modules\OnScreenDebug\OnscreenDebug.cpp" />
@@ -538,21 +551,19 @@
     <ClInclude Include="Blam\Cache\TagGroups\shader_definition.hpp" />
     <ClInclude Include="Blam\Cache\TagGroups\weather_system_definition.hpp" />
     <ClInclude Include="Blam\Common\Common.h" />
-    <ClInclude Include="Blam\Engine\DataArray\TagDataIterator.h" />
-    <ClInclude Include="Blam\Engine\Game\DamageData.h" />
-    <ClInclude Include="Blam\Engine\Game\GameEngineGlobals.h" />
-    <ClInclude Include="Blam\Engine\Game\GameGlobals.h" />
-    <ClInclude Include="Blam\Engine\Game\GameState.h" />
-    <ClInclude Include="Blam\Engine\Game\GameVariant.h" />
-    <ClInclude Include="Blam\Engine\Game\PhysicsConstants.h" />
+    <ClInclude Include="Blam\Engine\Game\tag_files\tag_groups.h" />
+    <ClInclude Include="Blam\Engine\Game\saved_games\game_state.h" />
+    <ClInclude Include="Blam\Engine\Game\saved_games\game_variant.h" />
+    <ClInclude Include="Blam\Engine\Game\physics\PhysicsConstants.h" />
     <ClInclude Include="Blam\Engine\Networking\NetworkPrimitiveTypes.h" />
     <ClInclude Include="Blam\Engine\Networking\Replication\ReplicationControlView.h" />
     <ClInclude Include="Blam\Engine\Networking\Replication\ReplicationEntity.h" />
+    <ClInclude Include="Blam\Engine\Game\networking\logic\life_cycle_manager.h" />
     <ClInclude Include="Blam\Engine\Players\LocalPlayers.h" />
     <ClInclude Include="Blam\Engine\Players\PlayerActions.h" />
     <ClInclude Include="Blam\Engine\Networking\PlayerMotion.h" />
     <ClInclude Include="Blam\Engine\Networking\PlayerPrediction.h" />
-    <ClInclude Include="Blam\Engine\render\render_cameras.h" />
+    <ClInclude Include="Blam\Engine\Game\render\render_cameras.h" />
     <ClInclude Include="Blam\Engine\Simulation\GameInterface\SimulationGameEntities.h" />
     <ClInclude Include="Blam\Engine\Simulation\GameInterface\SimulationGameObjects.h" />
     <ClInclude Include="Blam\Engine\Simulation\GameInterface\SimulationGameUnits.h" />
@@ -565,16 +576,14 @@
     <ClInclude Include="Blam\Engine\Simulation\SimulationWorld.h" />
     <ClInclude Include="Blam\Engine\Simulation\UnitControl.h" />
     <ClInclude Include="Blam\Enums\HaloStrings.h" />
-    <ClInclude Include="Blam\Engine\camera\camera.h" />
+    <ClInclude Include="Blam\Engine\Game\camera\camera.h" />
     <ClInclude Include="Blam\LazyBlam\TagTable.h" />
     <ClInclude Include="Blam\Cache\DataTypes\DataRef.h" />
-    <ClInclude Include="Blam\Math\integer_math.h" />
-    <ClInclude Include="Blam\Math\real_math.h" />
-    <ClInclude Include="Blam\Engine\DataArray\DataArray.h" />
-    <ClInclude Include="Blam\Math\real_matrix4x3.h" />
-    <ClInclude Include="Blam\Math\real_vector3d.h" />
+    <ClInclude Include="Blam\Engine\Game\math\integer_math.h" />
+    <ClInclude Include="Blam\Engine\Game\math\real_math.h" />
+    <ClInclude Include="Blam\Engine\Game\memory\data.h" />
+    <ClInclude Include="Blam\Engine\Game\math\matrix_math.h" />
     <ClInclude Include="CartographerDllConf.h" />
-    <ClInclude Include="H2MOD\Engine\Engine.h" />
     <ClInclude Include="H2MOD\EngineHooks\EngineHooks.h" />
     <ClInclude Include="H2MOD\GUI\imgui_integration\Console\CommandCollection.h" />
     <ClInclude Include="H2MOD\GUI\imgui_integration\Console\CommandHandler.h" />
@@ -592,6 +601,8 @@
     <ClInclude Include="H2MOD\Modules\CustomMenu\c_screen_widget.h" />
     <ClInclude Include="H2MOD\Modules\CustomMenu\c_user_interface_widget.h" />
     <ClInclude Include="H2MOD\Modules\CustomMenu\c_virtual_keyboard_menu.h" />
+    <ClInclude Include="H2MOD\Modules\Input\ControllerInput.h" />
+    <ClInclude Include="H2MOD\Modules\Input\Mouseinput.h" />
     <ClInclude Include="H2MOD\Modules\MainLoopPatches\Interpolation\FirstPersonInterpolate.h" />
     <ClInclude Include="H2MOD\Modules\MainLoopPatches\Interpolation\Interpolation.h" />
     <ClInclude Include="H2MOD\Modules\MainLoopPatches\Interpolation\ObjectInterpolate.h" />
@@ -604,17 +615,15 @@
     <ClInclude Include="H2MOD\Modules\HaloScript\HaloScript.h" />
     <ClInclude Include="H2MOD\Modules\GamePhysics\Patches\MeleeFix.h" />
     <ClInclude Include="H2MOD\Modules\HudElements\HudElements.h" />
-    <ClInclude Include="H2MOD\Modules\Input\ControllerInput.h" />
     <ClInclude Include="H2MOD\Modules\Input\KeyboardInput.h" />
-    <ClInclude Include="H2MOD\Modules\Input\PlayerControl.h" />
-    <ClInclude Include="H2MOD\Modules\KantTesting\KantTesting.h" />
+    <ClInclude Include="Blam\Engine\Game\game\player_control.h" />
     <ClInclude Include="H2MOD\Modules\MainLoopPatches\TestGameTimePrep.h" />
     <ClInclude Include="H2MOD\Modules\MainLoopPatches\UncappedFPS2\UncappedFPS2.h" />
     <ClInclude Include="H2MOD\Modules\MainLoopPatches\MainGameTime\MainGameTime.h" />
     <ClInclude Include="H2MOD\Modules\MainMenu\MapSlots.h" />
     <ClInclude Include="H2MOD\Modules\MapManager\MapManager.h" />
     <ClInclude Include="Blam\Engine\Networking\NetworkMessageTypeCollection.h" />
-    <ClInclude Include="Blam\Engine\Memory\bitstream.h" />
+    <ClInclude Include="Blam\Engine\Game\memory\bitstream.h" />
     <ClInclude Include="Blam\Engine\Networking\Transport\NetworkChannel.h" />
     <ClInclude Include="Blam\Engine\Networking\Transport\NetworkObserver.h" />
     <ClInclude Include="Blam\Engine\Networking\Session\NetworkSession.h" />
@@ -654,16 +663,14 @@
     <ClInclude Include="Blam\Cache\DataTypes\TagBlock.h" />
     <ClInclude Include="Blam\Cache\TagGroups.hpp" />
     <ClInclude Include="Blam\Cache\TagGroups\character_definition.hpp" />
-    <ClInclude Include="Blam\Engine\Actor\Actor.h" />
     <ClInclude Include="Blam\FileSystem\FiloInterface.h" />
-    <ClInclude Include="Blam\Engine\Game\GameTimeGlobals.h" />
-    <ClInclude Include="Blam\Engine\Game\HaloScript.h" />
+    <ClInclude Include="Blam\Engine\Game\game\game_time.h" />
+    <ClInclude Include="Blam\Engine\Game\hs\hs.h" />
     <ClInclude Include="Blam\Engine\Objects\ObjectPlacementData.h" />
     <ClInclude Include="Blam\Engine\Objects\Objects.h" />
     <ClInclude Include="Blam\Engine\Players\PlayerControls.h" />
     <ClInclude Include="Blam\Engine\Players\Players.h" />
-    <ClInclude Include="Blam\Engine\Game\GameOptions.h" />
-    <ClInclude Include="Blam\Math\BlamMath.h" />
+    <ClInclude Include="Blam\Engine\Game\game\game_options.h" />
     <ClInclude Include="H2MOD.h" />
     <ClInclude Include="H2MOD\Discord\DiscordInterface.h" />
     <ClInclude Include="H2MOD\GUI\GUI.h" />
@@ -678,7 +685,6 @@
     <ClInclude Include="H2MOD\Modules\CustomMenu\c_list_widget.h" />
     <ClInclude Include="H2MOD\Modules\CustomMenu\c_screen_with_menu.h" />
     <ClInclude Include="H2MOD\Modules\GamePhysics\Patches\ProjectileFix.h" />
-    <ClInclude Include="H2MOD\Modules\Input\Mouseinput.h" />
     <ClInclude Include="H2MOD\Modules\MainMenu\Ranks.h" />
     <ClInclude Include="H2MOD\Modules\Networking\Networking.h" />
     <ClInclude Include="H2MOD\Modules\OnScreenDebug\OnscreenDebug.h" />

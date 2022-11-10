@@ -2,14 +2,13 @@
 
 #include "HeadHunter.h"
 
-#include "Blam\Engine\Game\GameGlobals.h"
+#include "Blam/Engine/Game/game/game.h"
 #include "Blam\Engine\Networking\Session\NetworkSession.h"
 
 #include "H2MOD\Utils\Utils.h"
 #include "H2MOD\Modules\Shell\Config.h"
 #include "H2MOD/Modules/CustomMenu/CustomLanguage.h"
 #include "H2MOD/Modules/HaloScript/HaloScript.h"
-#include "H2MOD/Engine/Engine.h"
 
 int soundBuffer = 0;
 std::unordered_map<int, std::unordered_map<e_headhunter_sounds, const wchar_t*>> headhunterSoundTable;
@@ -123,7 +122,7 @@ void HeadHunter::OnMapLoad(ExecTime execTime, s_game_options* gameOptions)
 		break;
 
 	case ExecTime::_postEventExec:
-		switch (h2mod->GetEngineType())
+		switch (s_game_globals::get_engine_type())
 			{
 				// cleanup when loading main menu
 			case _multiplayer:

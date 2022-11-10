@@ -1,6 +1,6 @@
 #pragma once
 #include "Blam\Common\Common.h"
-#include "Blam\Math\real_math.h"
+#include "Blam\Engine\Game\math\real_math.h"
 
 struct s_player_prediction
 {

@@ -14,7 +14,6 @@
 #include "Blam\Cache\TagGroups\weapon_definition.hpp"
 #include "Blam\Engine\Networking\NetworkMessageTypeCollection.h"
 #include "Blam\Enums\HaloStrings.h"
-#include "H2MOD\Engine\Engine.h"
 #include "H2MOD\GUI\imgui_integration\imgui_handler.h"
 #include "H2MOD\Modules\EventHandler\EventHandler.hpp"
 #include "H2MOD\Modules\PlayerRepresentation\PlayerRepresentation.h"
@@ -152,7 +151,7 @@ namespace SpecialEvents
 
 	void ChristmasOnMapLoad()
 	{
-		if (h2mod->GetEngineType() == e_engine_type::_main_menu)
+		if (s_game_globals::game_is_mainmenu())
 		{
 			datum menu_music_datum = tags::find_tag(blam_tag::tag_group_type::soundlooping, "sound\\ui\\main_menu_music\\main_menu_music");
 			auto menu_music = tags::get_tag<blam_tag::tag_group_type::soundlooping, char>(menu_music_datum);
@@ -166,7 +165,7 @@ namespace SpecialEvents
 				track_loop->TagIndex = -1;
 			}
 		}
-		if (h2mod->GetEngineType() == e_engine_type::_multiplayer)
+		if (s_game_globals::game_is_multiplayer())
 		{
 			// Halo 2 tags
 			datum sword_weapon_datum = tags::find_tag(blam_tag::tag_group_type::weapon, "objects\\weapons\\melee\\energy_blade\\energy_blade");
@@ -307,7 +306,7 @@ namespace SpecialEvents
 
 	void PaddysOnMapLoad()
 	{
-		if (h2mod->GetEngineType() == e_engine_type::_multiplayer)
+		if (s_game_globals::game_is_multiplayer())
 		{
 			datum paddy_hat_datum = tag_loader::Get_tag_datum("objects\\multi\\stpat_hat\\stpat_hat", blam_tag::tag_group_type::scenery, "carto_shared");
 			datum paddy_beard_datum = tag_loader::Get_tag_datum("objects\\multi\\stpat_hat\\beard\\beard", blam_tag::tag_group_type::scenery, "carto_shared");
@@ -378,7 +377,7 @@ namespace SpecialEvents
 
 	void MookMaddnessOnMapLoad()
 	{
-		if (h2mod->GetEngineType() == e_engine_type::_multiplayer)
+		if (s_game_globals::game_is_multiplayer())
 		{
 			datum ball_weapon_datum = tags::find_tag(blam_tag::tag_group_type::weapon, "objects\\weapons\\multiplayer\\ball\\ball");
 			datum bomb_weapon_datum = tags::find_tag(blam_tag::tag_group_type::weapon, "objects\\weapons\\multiplayer\\assault_bomb\\assault_bomb");
@@ -475,7 +474,7 @@ namespace SpecialEvents
 
 	void HalloweenOnMapLoad()
 	{
-		if (h2mod->GetEngineType() == _multiplayer)
+		if (s_game_globals::game_is_multiplayer())
 		{
 			// Load specific tags from shared and modify placements depending on the map being played
 			s_cache_header* cache_header = tags::get_cache_header();
@@ -567,7 +566,7 @@ namespace SpecialEvents
 
 	void BirthdayOnMapLoad()
 	{
-		if (h2mod->GetEngineType() == _multiplayer)
+		if (s_game_globals::game_is_multiplayer())
 		{
 			// Carto Shared Tags
 			datum bday_hat_datum = tag_loader::Get_tag_datum("scenarios\\objects\\multi\\carto_shared\\birthday_hat\\birthday_hat", blam_tag::tag_group_type::scenery, "carto_shared");
@@ -664,7 +663,7 @@ namespace SpecialEvents
 						while (true)
 						{
 							std::this_thread::sleep_for(1000ms);
-							if (h2mod->GetEngineType() == _main_menu && H2Config_event_music)
+							if (!s_game_globals::game_is_mainmenu() && H2Config_event_music)
 							{
 								if (!flop) {
 									flop = true;

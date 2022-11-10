@@ -1,5 +1,6 @@
 #pragma once
 #include "Blam\Common\Common.h"
+#include "Blam\Engine\Game\networking\logic\life_cycle_manager.h"
 
 namespace UncappedFPS2
 {

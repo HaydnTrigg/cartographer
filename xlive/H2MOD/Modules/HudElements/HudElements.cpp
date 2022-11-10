@@ -1,19 +1,18 @@
 #include "stdafx.h"
 
 #include "HudElements.h"
-
-#include "Blam\Engine\IceCreamFlavor\IceCreamFlavor.h"
-#include "Blam\Engine\render\render_cameras.h"
-#include "H2MOD\Engine\Engine.h"
-#include "H2MOD\Modules\Shell\Config.h"
-#include "H2MOD\Modules\CustomVariantSettings\CustomVariantSettings.h"
-#include "H2MOD\Modules\Input\KeyboardInput.h"
-#include "H2MOD\Modules\OnScreenDebug\OnscreenDebug.h"
-#include "H2MOD\Modules\Shell\Startup\Startup.h"
-#include "H2MOD\Utils\Utils.h"
-#include "H2MOD\Tags\TagInterface.h"
-#include "Blam\Cache\TagGroups\bitmap_definition.hpp"
-#include "Util\Hooks\Hook.h"
+#include "Blam/Engine/Game/game/cheats.h"
+#include "Blam/Engine/Game/render/render_cameras.h"
+#include "Blam/Engine/Game/networking/logic/life_cycle_manager.h"
+#include "H2MOD/Modules/Shell/Config.h"
+#include "H2MOD/Modules/CustomVariantSettings/CustomVariantSettings.h"
+#include "H2MOD/Modules/Input/KeyboardInput.h"
+#include "H2MOD/Modules/OnScreenDebug/OnscreenDebug.h"
+#include "H2MOD/Modules/Shell/Startup/Startup.h"
+#include "H2MOD/Utils/Utils.h"
+#include "H2MOD/Tags/TagInterface.h"
+#include "Blam/Cache/TagGroups/bitmap_definition.hpp"
+#include "Util/Hooks/Hook.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -30,7 +29,7 @@ static bool RenderIngameChat() {
 		return true;
 	}
 
-	else if (h2mod->GetEngineType() != _main_menu && Engine::get_game_life_cycle() == _life_cycle_in_game) {
+	else if (!s_game_globals::game_is_mainmenu() && get_game_life_cycle() == _life_cycle_in_game) {
 		//Enable chat in engine mode and game state mp.
 		return false;
 	}
@@ -52,7 +51,7 @@ static bool __cdecl RenderHudCheck(unsigned int a1)
 	DWORD new_hud_globals = *(DWORD*)(H2BaseAddr + 0x9770F4);
 	float& hud_opacity = *(float*)(new_hud_globals + 0x228); // set the opacity
 
-	if (!b_showHUD || ice_cream_flavor_available(_blind))
+	if (!b_showHUD || cheats::ice_cream_flavor_available(e_skulls::_blind))
 	{
 		hud_opacity = 0.f;
 		hud_opacity_reset = false;
@@ -85,7 +84,7 @@ void HudElements::setCrosshairSize(bool mapLoadContext)
 		crosshairInit = false;
 	}
 
-	if (h2mod->GetEngineType() != e_engine_type::_main_menu) {
+	if (!s_game_globals::game_is_mainmenu()) {
 		auto hud_reticles_datum = tags::find_tag(blam_tag::tag_group_type::bitmap, "ui\\hud\\bitmaps\\new_hud\\crosshairs\\hud_reticles");
 		if (hud_reticles_datum != DATUM_INDEX_NONE)
 		{

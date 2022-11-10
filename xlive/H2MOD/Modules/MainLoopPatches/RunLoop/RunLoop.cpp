@@ -1,25 +1,24 @@
 #include "stdafx.h"
 
 #include "RunLoop.h"
-#include "Blam\Engine\Game\GameTimeGlobals.h"
-#include "H2MOD\Modules\Shell\Shell.h"
-#include "H2MOD\Modules\Shell\Config.h"
-#include "H2MOD\GUI\GUI.h"
-#include "H2MOD\Engine\Engine.h"
-#include "H2MOD\Modules\Shell\Startup\Startup.h"
-#include "H2MOD\Modules\Stats\StatsHandler.h"
-#include "H2MOD\Modules\CustomMenu\CustomMenu.h"
-#include "H2MOD\Modules\EventHandler\EventHandler.hpp"
-#include "H2MOD\Modules\Input\ControllerInput.h"
-#include "H2MOD\Modules\MainLoopPatches\MainGameTime\MainGameTime.h"
-#include "H2MOD\Modules\MainLoopPatches\UncappedFPS2\UncappedFPS2.h"
-#include "H2MOD\Modules\MapManager\MapManager.h"
-#include "H2MOD\Modules\OnScreenDebug\OnscreenDebug.h"
+#include "Blam/Engine/Game/game/game_time.h"
+#include "H2MOD/Modules/Shell/Shell.h"
+#include "H2MOD/Modules/Shell/Config.h"
+#include "H2MOD/GUI/GUI.h"
+#include "H2MOD/Modules/Shell/Startup/Startup.h"
+#include "H2MOD/Modules/Stats/StatsHandler.h"
+#include "H2MOD/Modules/CustomMenu/CustomMenu.h"
+#include "H2MOD/Modules/EventHandler/EventHandler.hpp"
+#include "H2MOD/Modules/Input/ControllerInput.h"
+#include "H2MOD/Modules/MainLoopPatches/MainGameTime/MainGameTime.h"
+#include "H2MOD/Modules/MainLoopPatches/UncappedFPS2/UncappedFPS2.h"
+#include "H2MOD/Modules/MapManager/MapManager.h"
+#include "H2MOD/Modules/OnScreenDebug/OnscreenDebug.h"
 
-#include "H2MOD\Utils\Utils.h"
-#include "XLive\xnet\IpManagement\XnIp.h"
+#include "H2MOD/Utils/Utils.h"
+#include "XLive/xnet/IpManagement/XnIp.h"
 
-#include "Util\Hooks\Hook.h"
+#include "Util/Hooks/Hook.h"
 
 #define TIMER_RESOLUTION 1
 
@@ -280,7 +279,7 @@ bool __cdecl cinematic_in_progress_hook()
 	case _rendering_mode_old:
 		// TODO: get_game_life_cycle is only used with networked sessions, meaning this will not work in single player
 		// and i keep it this way because the EventHandler in UncappedFPS2.cpp uses the game's life cycle as well
-		return p_cinematic_is_running() || Engine::get_game_life_cycle() == _life_cycle_in_game || _Shell::IsGameMinimized();
+		return p_cinematic_is_running() || get_game_life_cycle() == _life_cycle_in_game || _Shell::IsGameMinimized();
 
 	// these two options disable the hacks that hired gun added to the main loop
 	case _rendering_mode_new:

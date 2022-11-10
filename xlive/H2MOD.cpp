@@ -1,51 +1,52 @@
 #include "stdafx.h"
 
 #include "H2MOD.h"
-#include "Blam\Enums\HaloStrings.h"
-#include "Blam\Cache\TagGroups\biped_definition.hpp"
-#include "Blam\Cache\TagGroups\globals_definition.hpp"
-#include "Blam\Cache\TagGroups\model_definition.hpp"
-#include "Blam\Engine\Memory\bitstream.h"
-#include "Blam\Engine\Game\GameGlobals.h"
-#include "Blam\Engine\Game\GameTimeGlobals.h"
-#include "Blam\FileSystem\FiloInterface.h"
-#include "Blam\Engine\Game\DamageData.h"
-#include "Blam\Engine\Networking\NetworkMessageTypeCollection.h"
-#include "Blam\Cache\TagGroups\multiplayer_globals_definition.hpp"
-#include "Blam\Engine\IceCreamFlavor\IceCreamFlavor.h"
-#include "H2MOD\Discord\DiscordInterface.h"
-#include "H2MOD\Engine\Engine.h"
-#include "H2MOD\EngineHooks\EngineHooks.h"
-#include "H2MOD\GUI\GUI.h"
-#include "H2MOD\Modules\Shell\Shell.h"
-#include "H2MOD\Modules\Shell\Config.h"
-#include "H2MOD\Modules\CustomVariantSettings\CustomVariantSettings.h"
-#include "H2MOD\Modules\DirectorHooks\DirectorHooks.h"
-#include "H2MOD\Modules\EventHandler\EventHandler.hpp"
-#include "H2MOD\Modules\GamePhysics\Patches\MeleeFix.h"
-#include "H2MOD\Modules\GamePhysics\Patches\ProjectileFix.h"
-#include "H2MOD\Modules\HaloScript\HaloScript.h"
-#include "H2MOD\Modules\HudElements\HudElements.h"
-#include "H2MOD\Modules\Input\ControllerInput.h"
-#include "H2MOD\Modules\Input\KeyboardInput.h"
-#include "H2MOD\Modules\Input\Mouseinput.h"
-#include "H2MOD\Modules\Input\PlayerControl.h"
-#include "H2MOD\Modules\KantTesting\KantTesting.h"
-#include "H2MOD\Modules\MainMenu\MapSlots.h"
-#include "H2MOD\Modules\MainMenu\Ranks.h"
-#include "H2MOD\Modules\ObserverMode\ObserverMode.h"
-#include "H2MOD\Modules\OnScreenDebug\OnscreenDebug.h"
-#include "H2MOD\Modules\PlayerRepresentation\PlayerRepresentation.h"
-#include "H2MOD\Modules\PlaylistLoader\PlaylistLoader.h"
-#include "H2MOD\Modules\RenderHooks\RenderHooks.h"
-#include "H2MOD\Modules\SpecialEvents\SpecialEvents.h"
-#include "H2MOD\Modules\Stats\StatsHandler.h"
-#include "H2MOD\Modules\TagFixes\TagFixes.h"
-#include "H2MOD\Modules\Tweaks\Tweaks.h"
-#include "H2MOD\Tags\MetaExtender.h"
-#include "H2MOD\Tags\MetaLoader\tag_loader.h"
-#include "Util\Hooks\Hook.h"
-#include "H2MOD\GUI\imgui_integration\imgui_handler.h"
+#include "Blam/Cache/TagGroups/biped_definition.hpp"
+#include "Blam/Cache/TagGroups/globals_definition.hpp"
+#include "Blam/Cache/TagGroups/model_definition.hpp"
+#include "Blam/Engine/Game/GameHooks.h"
+#include "H2MOD/Modules/Input/Mouseinput.h"
+#include "Blam/Engine/Game/game/player_control.h"
+#include "Blam/Engine/Game/game/game.h"
+#include "Blam/Engine/Game/game/game_time.h"
+#include "Blam/Engine/Game/objects/damage/damage.h"
+#include "Blam/Engine/Game/memory/bitstream.h"
+#include "Blam/Engine/Game/memory/data.h"
+#include "Blam/Engine/Game/networking/logic/life_cycle_manager.h"
+#include "Blam/Engine/Game/networking/session/network_session.h"
+#include "Blam/Engine/Game/units/units.h"
+#include "Blam/Engine/Networking/NetworkMessageTypeCollection.h"
+#include "Blam/Cache/TagGroups/multiplayer_globals_definition.hpp"
+#include "Blam/Engine/Game/game/cheats.h"
+#include "H2MOD/Discord/DiscordInterface.h"
+#include "H2MOD/EngineHooks/EngineHooks.h"
+#include "H2MOD/GUI/GUI.h"
+#include "H2MOD/Modules/Shell/Shell.h"
+#include "H2MOD/Modules/Shell/Config.h"
+#include "H2MOD/Modules/CustomVariantSettings/CustomVariantSettings.h"
+#include "H2MOD/Modules/DirectorHooks/DirectorHooks.h"
+#include "H2MOD/Modules/EventHandler/EventHandler.hpp"
+#include "H2MOD/Modules/GamePhysics/Patches/MeleeFix.h"
+#include "H2MOD/Modules/GamePhysics/Patches/ProjectileFix.h"
+#include "H2MOD/Modules/HaloScript/HaloScript.h"
+#include "H2MOD/Modules/HudElements/HudElements.h"
+#include "H2MOD/Modules/Input/ControllerInput.h"
+#include "H2MOD/Modules/Input/KeyboardInput.h"
+#include "H2MOD/Modules/MainMenu/MapSlots.h"
+#include "H2MOD/Modules/MainMenu/Ranks.h"
+#include "H2MOD/Modules/ObserverMode/ObserverMode.h"
+#include "H2MOD/Modules/OnScreenDebug/OnscreenDebug.h"
+#include "H2MOD/Modules/PlayerRepresentation/PlayerRepresentation.h"
+#include "H2MOD/Modules/PlaylistLoader/PlaylistLoader.h"
+#include "H2MOD/Modules/RenderHooks/RenderHooks.h"
+#include "H2MOD/Modules/SpecialEvents/SpecialEvents.h"
+#include "H2MOD/Modules/Stats/StatsHandler.h"
+#include "H2MOD/Modules/TagFixes/TagFixes.h"
+#include "H2MOD/Modules/Tweaks/Tweaks.h"
+#include "H2MOD/Tags/MetaExtender.h"
+#include "H2MOD/Tags/MetaLoader/tag_loader.h"
+#include "Util/Hooks/Hook.h"
+#include "H2MOD/GUI/imgui_integration/imgui_handler.h"
 
 #include <float.h>
 
@@ -210,9 +211,9 @@ void call_give_player_weapon(int playerIndex, datum weaponId, bool bReset)
 		datum object_idx = Engine::Objects::object_new(&nObject);
 
 		if (bReset)
-			Engine::Unit::remove_equipment(unit_datum);
+			units::unit_delete_all_weapons(unit_datum);
 
-		Engine::Unit::assign_equipment_to_unit(unit_datum, object_idx, 1);
+		units::assign_equipment_to_unit(unit_datum, object_idx, 1);
 	}
 }
 
@@ -299,7 +300,7 @@ void H2MOD::set_player_unit_grenades_count(int playerIndex, e_grenades type, BYT
 		{
 			// delete all weapons if required
 			if (resetEquipment)
-				Engine::Unit::remove_equipment(unit_datum_index);
+				units::unit_delete_all_weapons(unit_datum_index);
 
 			// set grenade count
 			*(BYTE*)(unit_object + 0x252 + type) = count;
@@ -518,9 +519,6 @@ bool __cdecl OnMapLoad(s_game_options* options)
 	if (result == false) // verify if the game didn't fail to load the map
 		return false;
 
-	// set the engine type
-	h2mod->SetCurrentEngineType(options->m_engine_type);
-
 	tags::run_callbacks();
 
 	get_object_table_memory();
@@ -543,7 +541,7 @@ bool __cdecl OnMapLoad(s_game_options* options)
 		resetAfterMatch = false;
 	}
 
-	if (h2mod->GetEngineType() == e_engine_type::_main_menu)
+	if (s_game_globals::game_is_mainmenu())
 	{
 		addDebugText("Engine type: Main-Menu");
 		UIRankPatch();
@@ -554,7 +552,7 @@ bool __cdecl OnMapLoad(s_game_options* options)
 	else
 	{
 		wchar_t* variant_name = NetworkSession::GetGameVariantName();
-		LOG_INFO_GAME(L"[h2mod] engine type: {}, game variant name: {}", (int)h2mod->GetEngineType(), variant_name);
+		LOG_INFO_GAME(L"[h2mod] engine type: {}, game variant name: {}", (int)s_game_globals::get_engine_type(), variant_name);
 
 		for (auto& gametype_it : GametypesMap)
 		{
@@ -566,7 +564,7 @@ bool __cdecl OnMapLoad(s_game_options* options)
 		MouseInput::SetSensitivity(H2Config_mouse_sens);
 		HudElements::OnMapLoad();
 
-		if (h2mod->GetEngineType() == e_engine_type::_multiplayer)
+		if (s_game_globals::game_is_multiplayer())
 		{
 			addDebugText("Engine type: Multiplayer");
 
@@ -593,7 +591,7 @@ bool __cdecl OnMapLoad(s_game_options* options)
 			H2Tweaks::toggleAiMp(true);
 			H2Tweaks::toggleUncappedCampaignCinematics(false);
 
-			if (Engine::get_game_life_cycle() == _life_cycle_in_game)
+			if (get_game_life_cycle() == _life_cycle_in_game)
 			{
 				// send server map checksums to client
 				//MapChecksumSync::SendState();
@@ -604,11 +602,10 @@ bool __cdecl OnMapLoad(s_game_options* options)
 			}
 
 		}
-		else if (h2mod->GetEngineType() == e_engine_type::_single_player)
+		else if (s_game_globals::game_is_campaign())
 		{
 			//if anyone wants to run code on map load single player
 			addDebugText("Engine type: Singleplayer");
-			//H2X::Initialize(true);
 			H2Tweaks::toggleUncappedCampaignCinematics(true);
 		}
 
@@ -649,7 +646,7 @@ void __cdecl changeTeam(int localPlayerIndex, int teamIndex)
 {
 	s_network_session* session = NetworkSession::GetCurrentNetworkSession();
 
-	if ((session->parameters[0].session_mode == 4 && Engine::get_game_life_cycle() == _life_cycle_pre_game)
+	if ((session->parameters[0].session_mode == 4 && get_game_life_cycle() == _life_cycle_pre_game)
 		|| (StrStrIW(NetworkSession::GetGameVariantName(), L"rvb") != NULL && teamIndex > 1)) {
 		//rvb mode enabled, don't change teams
 		return;
@@ -703,24 +700,16 @@ __declspec(naked) void calculate_model_lod_detour()
 	}
 }
 
-typedef bool(__cdecl* fn_c000bd114_t)(e_skulls);
-fn_c000bd114_t p_fn_c000bd114;
-
-bool __cdecl fn_c000bd114_IsSkullEnabled(e_skulls skull_index)
-{
-	return ice_cream_flavor_available(skull_index);
-}
-
 bool GrenadeChainReactIsEngineMPCheck() {
-	return h2mod->GetEngineType() == e_engine_type::_multiplayer;
+	return s_game_globals::game_is_multiplayer();
 }
 
 bool BansheeBombIsEngineMPCheck() {
-	return h2mod->GetEngineType() == e_engine_type::_multiplayer;
+	return s_game_globals::game_is_multiplayer();
 }
 
 bool FlashlightIsEngineSPCheck() {
-	return h2mod->GetEngineType() == e_engine_type::_single_player;
+	return s_game_globals::game_is_campaign();
 }
 
 void GivePlayerWeaponDatum(datum unit_datum, datum weapon_tag_index)
@@ -734,8 +723,8 @@ void GivePlayerWeaponDatum(datum unit_datum, datum weapon_tag_index)
 		datum object_idx = Engine::Objects::object_new(&object_placement);
 		if (!DATUM_IS_NONE(object_idx))
 		{
-			Engine::Unit::remove_equipment(unit_datum);
-			Engine::Unit::assign_equipment_to_unit(unit_datum, object_idx, 1);
+			units::unit_delete_all_weapons(unit_datum);
+			units::assign_equipment_to_unit(unit_datum, object_idx, 1);
 		}
 	}
 }
@@ -766,7 +755,7 @@ bool device_active = true;
 // This happens whenever a player activates a device control.
 int __cdecl device_touch(datum device_datum, datum unit_datum)
 {
-	if (h2mod->GetEngineType() == e_engine_type::_multiplayer)
+	if (s_game_globals::game_is_multiplayer())
 	{
 		// We check this to see if the device control is a 'shopping' device, if so send a request to buy an item to the DeviceShop.
 		if (get_device_acceleration_scale(device_datum) == 999.0f)
@@ -796,13 +785,13 @@ void H2MOD::team_player_indicator_visibility(bool toggle)
 	this->drawTeamIndicators = toggle;
 }
 
-void __cdecl game_mode_engine_draw_team_indicators()
+void __cdecl game_mode_engine_draw_team_indicators(int a1)
 {
-	typedef void(__cdecl* game_mode_engine_draw_team_indicators_t)();
+	typedef void(__cdecl* game_mode_engine_draw_team_indicators_t)(int a1);
 	auto p_game_mode_engine_draw_team_indicators = Memory::GetAddress<game_mode_engine_draw_team_indicators_t>(0x6AFA4);
 
 	if (h2mod->drawTeamIndicators)
-		p_game_mode_engine_draw_team_indicators();
+		p_game_mode_engine_draw_team_indicators(0);
 }
 
 typedef short(__cdecl* get_enabled_teams_flags_t)(s_network_session*);
@@ -1010,27 +999,6 @@ bool __cdecl should_start_pregame_countdown_hook()
 		return false;
 	}
 }
-//TODO: Move this.
-void vip_lock(e_game_life_cycle state)
-{
-	if(state == _life_cycle_post_game)
-	{
-		ServerConsole::ClearVip();
-		*Memory::GetAddress<byte*>(0, 0x534850) = 0;
-		//ServerConsole::SendCommand2(1, L"vip", L"clear");
-		//ServerConsole::SendCommand2(1, L"Privacy", L"Open");
-	}
-	if(state == _life_cycle_in_game)
-	{
-		for (auto i = 0; i < NetworkSession::GetPeerCount(); i++)
-		{
-			ServerConsole::AddVip(NetworkSession::GetPeerPlayerName(i));
-			//ServerConsole::SendCommand2(2, L"vip", L"add", NetworkSession::getPeerPlayerName(i));
-		}
-		//ServerConsole::SendCommand2(1, L"Privacy", L"VIP");
-		*Memory::GetAddress<byte*>(0, 0x534850) = 2;
-	}
-}
 
 void H2MOD::RegisterEvents()
 {
@@ -1039,22 +1007,13 @@ void H2MOD::RegisterEvents()
 		// Server only callbacks
 		// Setup Events for H2Config_vip_lock
 		if (H2Config_vip_lock)
-			EventHandler::register_callback(vip_lock, EventType::gamelifecycle_change, EventExecutionType::execute_after);
+			EventHandler::register_callback(network_session::vip_lock, EventType::gamelifecycle_change, EventExecutionType::execute_after);
 	}
 	else 
 	{
 		// Client only callbacks	
 	}
 }
-
-//Shader LOD Bias stuff
-//typedef int(__cdecl p_sub_81A676)(int a1, int a2, float a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10);
-//p_sub_81A676* c_sub_81A676;
-//
-//int __cdecl sub_81A676(int a1, int a2, float a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10)
-//{
-//	return c_sub_81A676(a1, a2, a3, 4, a5, a6, a7, a8, a9, a10);
-//}
 
 // unlocks all single player maps
 int __cdecl get_last_single_player_level_id_unlocked_from_profile()
@@ -1085,6 +1044,7 @@ void H2MOD::ApplyHooks() {
 	DETOUR_BEGIN();
 
 	EngineHooks::ApplyHooks();
+	ApplyGameHooks();
 
 	/* Labeled "AutoPickup" handler may be proximity to vehicles and such as well */
 	PatchCall(Memory::GetAddress(0x58789, 0x60C81), OnAutoPickUpHandler);
@@ -1106,7 +1066,7 @@ void H2MOD::ApplyHooks() {
 	p_object_cause_damage = Memory::GetAddress<object_cause_damage_t>(0x17AD81, 0x1525E1);
 	PatchCall(Memory::GetAddress(0x147DB8, 0x172D55), projectile_collision_object_cause_damage);
 
-	// server/client detours 
+	// server/client detours
 	DETOUR_ATTACH(p_player_spawn, Memory::GetAddress<player_spawn_t>(0x55952, 0x5DE4A), OnPlayerSpawn);
 	DETOUR_ATTACH(p_player_died, Memory::GetAddress<player_died_t>(0x5587B, 0x5DD73), OnPlayerDeath);
 	DETOUR_ATTACH(p_map_cache_load, Memory::GetAddress<map_cache_load_t>(0x8F62, 0x1F35C), OnMapLoad);
@@ -1119,28 +1079,12 @@ void H2MOD::ApplyHooks() {
 		LOG_INFO_GAME("{} - applying client hooks", __FUNCTION__);
 		/* These hooks are only built for the client, don't enable them on the server! */
 
-		//Shader display hook
-		//c_test_hook = Memory::GetAddress<p_test_hook*>(0x1A2AEE);
-		//PatchCall(Memory::GetAddress(0x1a10de), test_shader_hook);
-		//PatchCall(Memory::GetAddress(0x1a1324), test_hook);
-		//PatchCall(Memory::GetAddress(0x1A2FF6), test_shader_hook);
-		//PatchCall(Memory::GetAddress(0x1a316B), test_hook);
-
-		//Shader LOD Bias stuff
-		//c_sub_81A676 = Memory::GetAddress<p_sub_81A676*>(0x19A676);
-		//PatchCall(Memory::GetAddress(0x19AD71), sub_81A676);
-		//PatchCall(Memory::GetAddress(0x19ADBC), sub_81A676);
-
-		// DETOUR_ATTACH(p_load_wgit, Memory::GetAddress<load_wgit_t>(0x2106A2), OnWgitLoad);
-
 		DETOUR_ATTACH(p_show_error_screen, Memory::GetAddress<show_error_screen_t>(0x20E15A), showErrorScreen);
 
 		PatchCall(Memory::GetAddress(0x169E59), aim_assist_targeting_clear_hook);
 
 		//TODO: expensive, use for debugging/searching
 		//string_display_hook_method = (string_display_hook)DetourFunc(Memory::GetAddress<BYTE*>(0x287AB5), (BYTE*)stringDisplayHook, 5);
-
-		//pResetRound = (ResetRounds)DetourFunc(Memory::GetAddress<BYTE*>(0x6B1C8), (BYTE*)OnNextRound, 7);
 
 		TEST_N_DEF(PC2);
 		
@@ -1156,15 +1100,12 @@ void H2MOD::ApplyHooks() {
 		// set max model quality to L6
 		WriteValue(Memory::GetAddress(0x190B38 + 1), 5);
 
-		DETOUR_ATTACH(p_fn_c000bd114, Memory::GetAddress<fn_c000bd114_t>(0xbd114), fn_c000bd114_IsSkullEnabled);
-
 		PatchCall(Memory::GetAddress(0x182d6d), GrenadeChainReactIsEngineMPCheck);
 		PatchCall(Memory::GetAddress(0x92C05), BansheeBombIsEngineMPCheck);
 		PatchCall(Memory::GetAddress(0x13ff75), FlashlightIsEngineSPCheck);
 
 		PatchCall(Memory::GetAddress(0x226702), game_mode_engine_draw_team_indicators);
 
-		// Initialise_tag_loader();
 		PlayerControl::ApplyHooks();
 		p_set_screen_bounds = Memory::GetAddress<set_screen_bounds_t*>(0x264979);
 		// PatchCall(GetAddress(0x25E1E5), set_screen_bounds);
@@ -1227,7 +1168,6 @@ void H2MOD::Initialize()
 	TagFixes::Initalize();
 	MapSlots::Initialize();
 	HaloScript::Initialize();
-	KantTesting::Initialize();
 	H2MOD::ApplyHooks();
 	H2MOD::RegisterEvents();
 
