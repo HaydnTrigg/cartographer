@@ -1044,7 +1044,10 @@ void H2MOD::ApplyHooks() {
 	DETOUR_BEGIN();
 
 	EngineHooks::ApplyHooks();
+
+#ifdef NGAMEREWRITE
 	ApplyGameHooks();
+#endif
 
 	/* Labeled "AutoPickup" handler may be proximity to vehicles and such as well */
 	PatchCall(Memory::GetAddress(0x58789, 0x60C81), OnAutoPickUpHandler);
