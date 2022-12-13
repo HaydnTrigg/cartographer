@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include "HaloScript.h"
+#include "hs.h"
 
 namespace HaloScript
 {
