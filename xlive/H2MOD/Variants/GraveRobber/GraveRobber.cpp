@@ -2,10 +2,10 @@
 #include "GraveRobber.h"
 
 #include "H2MOD.h"
+#include "Blam/Engine/hs/hs.h"
 #include "Blam/Engine/Game/GameGlobals.h"
 #include "Blam/Engine/Players/LocalPlayers.h"
 #include "H2MOD/Modules/CustomMenu/CustomLanguage.h"
-#include "H2MOD/Modules/HaloScript/HaloScript.h"
 #include "H2MOD/Modules/Shell/Config.h"
 #include "H2MOD/Utils/Utils.h"
 

@@ -54,8 +54,9 @@
     <LibraryPath>$(DXSDK_DIR)Lib\x86;3rdparty/directx/lib;3rdparty/discord;3rdparty/libcurl;3rdparty/miniupnpc/lib;3rdparty/detours/lib.X86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)Halo2\</OutDir>
-    <IntDir>.\Debug\</IntDir>
+    <OutDir>C:\Program Files (x86)\Microsoft Games\Halo 2</OutDir>
+    <IntDir>
+    </IntDir>
     <LinkIncremental>true</LinkIncremental>
     <LibraryPath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;.\libs;..\protobuf-2.6.1\vsprojects\Debug;$(LibraryPath)</LibraryPath>
     <IncludePath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;.\;..\protobuf-2.6.1;$(IncludePath)</IncludePath>
@@ -290,6 +291,7 @@
     <ClCompile Include="H2MOD\GUI\ImGui_Integration\ImGui_NetworkStatsOverlay.cpp" />
     <ClCompile Include="H2MOD\GUI\ImGui_Integration\MessageBox.cpp" />
     <ClCompile Include="H2MOD\GUI\ImGui_Integration\MOTD.cpp" />
+    <ClCompile Include="H2MOD\Modules\Coop\Coop.cpp" />
     <ClCompile Include="H2MOD\Modules\CustomMenu\Accounts\c_account_create_menu.cpp" />
     <ClCompile Include="H2MOD\Modules\CustomMenu\Accounts\c_account_list_menu.cpp" />
     <ClCompile Include="H2MOD\Modules\CustomMenu\c_brightness_menu.cpp" />
@@ -306,7 +308,7 @@
     <ClCompile Include="H2MOD\Modules\DirectorHooks\DirectorHooks.cpp" />
     <ClCompile Include="H2MOD\Modules\EventHandler\EventHandler.cpp" />
     <ClCompile Include="H2MOD\Modules\GamePhysics\MeleeLunge.cpp" />
-    <ClCompile Include="H2MOD\Modules\HaloScript\HaloScript.cpp" />
+    <ClCompile Include="Blam\Engine\hs\hs.cpp" />
     <ClCompile Include="H2MOD\Modules\GamePhysics\Patches\MeleeFix.cpp" />
     <ClCompile Include="H2MOD\Modules\HudElements\HudElements.cpp" />
     <ClCompile Include="H2MOD\Modules\Input\ControllerInput.cpp" />
@@ -628,6 +630,7 @@
     <ClInclude Include="H2MOD\GUI\ImGui_Integration\ImGui_Handler.h" />
     <ClInclude Include="H2MOD\Modules\Config\WeaponOffsetConfig\WeaponOffsetConfig.h" />
     <ClInclude Include="H2MOD\GUI\ImGui_Integration\ImGui_NetworkStatsOverlay.h" />
+    <ClInclude Include="H2MOD\Modules\Coop\Coop.h" />
     <ClInclude Include="H2MOD\Modules\CustomMenu\Accounts\c_account_create_menu.h" />
     <ClInclude Include="H2MOD\Modules\CustomMenu\Accounts\c_account_list_menu.h" />
     <ClInclude Include="H2MOD\Modules\CustomMenu\c_brightness_menu.h" />
@@ -644,7 +647,7 @@
     <ClInclude Include="H2MOD\Modules\DirectorHooks\DirectorHooks.h" />
     <ClInclude Include="H2MOD\Modules\EventHandler\EventHandler.hpp" />
     <ClInclude Include="H2MOD\Modules\GamePhysics\MeleeLunge.h" />
-    <ClInclude Include="H2MOD\Modules\HaloScript\HaloScript.h" />
+    <ClInclude Include="Blam\Engine\hs\hs.h" />
     <ClInclude Include="H2MOD\Modules\GamePhysics\Patches\MeleeFix.h" />
     <ClInclude Include="H2MOD\Modules\HudElements\HudElements.h" />
     <ClInclude Include="H2MOD\Modules\Input\ControllerInput.h" />
