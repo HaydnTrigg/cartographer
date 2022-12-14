@@ -3,6 +3,7 @@
 
 #include "Blam/Engine/Players/Players.h"
 #include "Blam/Engine/Networking/NetworkMessageTypeCollection.h"
+#include "H2MOD/Modules/OnScreenDebug/OnscreenDebug.h"
 #include "Util/Hooks/Hook.h"
 
 namespace hs
@@ -68,6 +69,12 @@ namespace hs
 		p_object_destroy(object_datum_index);
 	}
 
+	void __cdecl print_to_console(const char* output)
+	{
+		std::string finalOutput("[HSC Print] "); finalOutput += output;
+		addDebugText(finalOutput.c_str());
+	}
+
 	typedef void(__cdecl fade_out_t)(float r, float g, float b, __int16 ticks);
 	fade_out_t* p_fade_out;
 	s_hs_fade_args* __cdecl fade_out_evaluate(__int16 op_code, int thread_id, bool unk_bool)
@@ -110,6 +117,25 @@ namespace hs
 		return (s_hs_fade_args*)p_hs_return(thread_id, 0);
 	}
 
+	const char** __cdecl print_evaluate(__int16 op_code, int thread_id, char unk_bool)
+	{
+		const char** text; // eax
+
+		text = (const char**)p_hs_arguments_evaluate(op_code, thread_id, unk_bool);
+		if (!text) { return text; }
+		print_to_console(*text);
+
+		for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
+		{
+			if (NetworkSession::PlayerIsActive(i))
+			{
+				NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), _hs_print, sizeof(s_networked_hs_function::arg_buffer), *text);
+			}
+		}
+
+		return (const char**)p_hs_return(thread_id, 0);
+	}
+
 	void CallNetworkedHSFunction(const s_networked_hs_function* data)
 	{
 		switch ((byte)data->function_type)
@@ -126,13 +152,27 @@ namespace hs
 			p_fade_in(args->color.red, args->color.green, args->color.blue, args->ticks);
 			break;
 		}
+		case _hs_print:
+		{
+			const char* text = (const char*)data->arg_buffer;
+			print_to_console(text);
+			break;
+		}
 		default:
+			print_to_console("HS FUNCTION WITH TYPE THAT DOSENT EXIST SENT");
 			break;
 		}
 	}
 
 	void ApplyHooks()
 	{
+		// hook the print command to redirect the output to our console
+		if (!Memory::IsDedicatedServer())
+		{
+			PatchCall(Memory::GetAddress(0xE9E50), print_to_console);
+		}
+
+		WritePointer(Memory::GetAddress(0x3BE3E8, 0x37AD00), print_evaluate);
 		WritePointer(Memory::GetAddress(0x3C0CBC, 0x37D5D4), fade_out_evaluate);
 		WritePointer(Memory::GetAddress(0x3C0CA4, 0x37D5BC), fade_in_evaluate);
 	}

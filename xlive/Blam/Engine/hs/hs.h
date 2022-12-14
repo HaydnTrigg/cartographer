@@ -166,14 +166,15 @@ namespace hs
 	enum e_hs_networked_fuction_type : byte
 	{
 		_hs_fade_out = 0,
-		_hs_fade_in
+		_hs_fade_in,
+		_hs_print
 	};
 
 	struct s_networked_hs_function
 	{
 		hs::e_hs_networked_fuction_type function_type;
 		//byte arg_size_in_bits;
-		byte arg_buffer[64];
+		char arg_buffer[64];
 	};
 
 	struct s_hs_fade_args
