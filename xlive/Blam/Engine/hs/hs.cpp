@@ -7,7 +7,7 @@
 
 namespace hs
 {
-	typedef void*(__cdecl hs_arguments_evaluate_t)(__int16 a1, unsigned __int16 a2, char a3);
+	typedef void*(__cdecl hs_arguments_evaluate_t)(__int16 op_code, unsigned __int16 thread_id, bool unk_bool);
 	hs_arguments_evaluate_t* p_hs_arguments_evaluate;
 	typedef char*(__cdecl hs_return_t)(int a1, int a2);
 	hs_return_t* p_hs_return;
@@ -70,32 +70,63 @@ namespace hs
 
 	typedef void(__cdecl fade_out_t)(float r, float g, float b, __int16 ticks);
 	fade_out_t* p_fade_out;
-	hs_fade_args* __cdecl fade_out_evaluate(__int16 a1, int a2, char a3)
+	s_hs_fade_args* __cdecl fade_out_evaluate(__int16 op_code, int thread_id, bool unk_bool)
 	{
-		hs_fade_args* args;
+		s_hs_fade_args* args;
 
-		args = (hs_fade_args*)p_hs_arguments_evaluate(a1, a2, a3);
+		args = (s_hs_fade_args*)p_hs_arguments_evaluate(op_code, thread_id, unk_bool);
 		if (!args) { return args; }
 
 		for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
 		{
 			if (NetworkSession::PlayerIsActive(i))
 			{
-				NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), _hs_fade_out, args);
+				NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), _hs_fade_out, sizeof(s_hs_fade_args), args);
 			}
 		}
 
 		p_fade_out(args->color.red, args->color.green, args->color.blue, args->ticks);
-		return (hs_fade_args*)p_hs_return(a2, 0);
+		return (s_hs_fade_args*)p_hs_return(thread_id, 0);
+	}
+
+	typedef void(__cdecl fade_in_t)(float r, float g, float b, __int16 ticks);
+	fade_in_t* p_fade_in;
+	s_hs_fade_args* __cdecl fade_in_evaluate(__int16 op_code, int thread_id, char unk_bool)
+	{
+		s_hs_fade_args* args;
+
+		args = (s_hs_fade_args*)p_hs_arguments_evaluate(op_code, thread_id, unk_bool);
+		if (!args) { return args; }
+
+		for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
+		{
+			if (NetworkSession::PlayerIsActive(i))
+			{
+				NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), _hs_fade_in, sizeof(s_hs_fade_args), args);
+			}
+		}
+
+		p_fade_in(args->color.red, args->color.green, args->color.blue, args->ticks);
+		return (s_hs_fade_args*)p_hs_return(thread_id, 0);
 	}
 
 	void CallNetworkedHSFunction(const s_networked_hs_function* data)
 	{
-		switch (data->function_type)
+		switch ((byte)data->function_type)
 		{
 		case _hs_fade_out:
-			const hs_fade_args* args = (hs_fade_args*)data->args;
+		{
+			const s_hs_fade_args* args = (const s_hs_fade_args*)data->arg_buffer;
 			p_fade_out(args->color.red, args->color.green, args->color.blue, args->ticks);
+			break;
+		}
+		case _hs_fade_in:
+		{
+			const s_hs_fade_args* args = (const s_hs_fade_args*)data->arg_buffer;
+			p_fade_in(args->color.red, args->color.green, args->color.blue, args->ticks);
+			break;
+		}
+		default:
 			break;
 		}
 	}
@@ -103,6 +134,7 @@ namespace hs
 	void ApplyHooks()
 	{
 		WritePointer(Memory::GetAddress(0x3C0CBC, 0x37D5D4), fade_out_evaluate);
+		WritePointer(Memory::GetAddress(0x3C0CA4, 0x37D5BC), fade_in_evaluate);
 	}
 
 	void Initialize()
@@ -121,5 +153,6 @@ namespace hs
 		p_render_lights_enable_cinematic_shadow = Memory::GetAddress<render_lights_enable_cinematic_shadow_t*>(0x19245A);
 		p_object_destroy = Memory::GetAddress<object_destroy_t*>(0xFDCFD, 0x124ED5);
 		p_fade_out = Memory::GetAddress<fade_out_t*>(0xA3CCA, 0x95F2A);
+		p_fade_in = Memory::GetAddress<fade_in_t*>(0xA402C, 0x9628C);
 	}
 }

@@ -85,14 +85,14 @@ bool __cdecl decode_anti_cheat_message(bitstream* stream, int a2, s_anti_cheat* 
 void __cdecl encode_hs_function_message(bitstream* stream, int a2, hs::s_networked_hs_function* data)
 {
 	stream->data_encode_integer("hs-function-type", data->function_type, 8);
-	stream->data_encode_integer("hs-function-arg-size", data->arg_size_in_bits, 8);
-	stream->data_encode_bits("hs-function-args", &data->args, data->arg_size_in_bits);
+	//stream->data_encode_integer("hs-function-arg-size", data->arg_size_in_bits, 8);
+	stream->data_encode_bits("hs-function-args", data->arg_buffer, sizeof(data->arg_buffer) * 8);
 }
 bool __cdecl decode_hs_function_message(bitstream* stream, int a2, hs::s_networked_hs_function* data)
 {
 	data->function_type = (hs::e_hs_networked_fuction_type)stream->data_decode_integer("hs-function-type", 8);
-	data->arg_size_in_bits = (byte)stream->data_decode_integer("hs-function-arg-size", 8);
-	stream->data_decode_bits("hs-function-args", &data->args, data->arg_size_in_bits);
+	//data->arg_size_in_bits = (byte)stream->data_decode_integer("hs-function-arg-size", 8);
+	stream->data_decode_bits("hs-function-args", data->arg_buffer, sizeof(data->arg_buffer) * 8);
 	return stream->overflow() == false;
 }
 
@@ -121,7 +121,7 @@ void register_custom_network_message(void* network_messages)
 	register_network_message(network_messages, _custom_variant_settings, "variant-settings", 0, CustomVariantSettingsPacketSize, CustomVariantSettingsPacketSize,
 		(void*)CustomVariantSettings::EncodeVariantSettings, (void*)CustomVariantSettings::DecodeVariantSettings, NULL);
 
-	register_network_message(network_messages, _hs_function, "hs-function-data", 0, 0, sizeof(0x50),
+	register_network_message(network_messages, _hs_function, "hs-function-data", 0, sizeof(hs::s_networked_hs_function), sizeof(hs::s_networked_hs_function),
 		(void*)encode_hs_function_message, (void*)decode_hs_function_message, NULL);
 }
 
