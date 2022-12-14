@@ -1,14 +1,12 @@
 #include "stdafx.h"
-
 #include "NetworkMessageTypeCollection.h"
-#include "Blam\Engine\Memory\bitstream.h"
 
-#include "H2MOD\Modules\Shell\Config.h"
-#include "H2MOD\Modules\CustomVariantSettings\CustomVariantSettings.h"
-#include "H2MOD\Modules\EventHandler\EventHandler.hpp"
-#include "H2MOD\Modules\MapManager\MapManager.h"
-
-#include "Util\Hooks\Hook.h"
+#include "Blam/Engine/Memory/bitstream.h"
+#include "H2MOD/Modules/Shell/Config.h"
+#include "H2MOD/Modules/CustomVariantSettings/CustomVariantSettings.h"
+#include "H2MOD/Modules/EventHandler/EventHandler.hpp"
+#include "H2MOD/Modules/MapManager/MapManager.h"
+#include "Util/Hooks/Hook.h"
 
 BYTE g_network_message_type_collection[e_network_message_type_collection::_network_message_type_collection_end * 32];
 
@@ -84,6 +82,20 @@ bool __cdecl decode_anti_cheat_message(bitstream* stream, int a2, s_anti_cheat* 
 	return stream->overflow() == false;
 }
 
+void __cdecl encode_hs_function_message(bitstream* stream, int a2, hs::s_networked_hs_function* data)
+{
+	stream->data_encode_integer("hs-function-type", data->function_type, 8);
+	stream->data_encode_integer("hs-function-arg-size", data->arg_size_in_bits, 8);
+	stream->data_encode_bits("hs-function-args", &data->args, data->arg_size_in_bits);
+}
+bool __cdecl decode_hs_function_message(bitstream* stream, int a2, hs::s_networked_hs_function* data)
+{
+	data->function_type = (hs::e_hs_networked_fuction_type)stream->data_decode_integer("hs-function-type", 8);
+	data->arg_size_in_bits = (byte)stream->data_decode_integer("hs-function-arg-size", 8);
+	stream->data_decode_bits("hs-function-args", &data->args, data->arg_size_in_bits);
+	return stream->overflow() == false;
+}
+
 void register_custom_network_message(void* network_messages)
 {
 	typedef void(__cdecl* register_test_packet_t)(void* network_messages);
@@ -108,6 +120,9 @@ void register_custom_network_message(void* network_messages)
 
 	register_network_message(network_messages, _custom_variant_settings, "variant-settings", 0, CustomVariantSettingsPacketSize, CustomVariantSettingsPacketSize,
 		(void*)CustomVariantSettings::EncodeVariantSettings, (void*)CustomVariantSettings::DecodeVariantSettings, NULL);
+
+	register_network_message(network_messages, _hs_function, "hs-function-data", 0, sizeof(hs::s_networked_hs_function), sizeof(hs::s_networked_hs_function),
+		(void*)encode_hs_function_message, (void*)decode_hs_function_message, NULL);
 }
 
 typedef void(__stdcall *handle_out_of_band_message_t)(void *thisx, network_address* address, e_network_message_type_collection message_type, int a4, void* packet);
@@ -265,6 +280,16 @@ void __stdcall handle_channel_message_hook(void *thisx, int network_channel_inde
 		}
 		break; // don't return, leave the game to update state
 	}
+	
+	case _hs_function:
+	{
+		if (peer_network_channel->channel_state == s_network_channel::e_channel_state::unk_state_5)
+		{
+			const hs::s_networked_hs_function* recieved_data = (hs::s_networked_hs_function*)packet;
+			hs::CallNetworkedHSFunction(recieved_data);
+		}
+		break;
+	}
 
 	default:
 		break;
@@ -360,6 +385,7 @@ void NetworkMessage::SendRankChange(int peerIdx, BYTE rank)
 		}
 	}
 }
+
 void NetworkMessage::SendAntiCheat(int peerIdx)
 {
 	s_network_session* session = NetworkSession::GetCurrentNetworkSession();

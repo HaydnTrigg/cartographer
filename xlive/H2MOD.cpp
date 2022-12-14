@@ -1162,7 +1162,7 @@ void H2MOD::Initialize()
 	MeleeFix::Initialize();
 	TagFixes::Initalize();
 	MapSlots::Initialize();
-	HaloScript::Initialize();
+	hs::Initialize();
 	KantTesting::Initialize();
 	H2X::ApplyPatches();
 	H2MOD::ApplyHooks();

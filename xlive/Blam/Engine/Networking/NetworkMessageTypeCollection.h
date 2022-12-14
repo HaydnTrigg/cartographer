@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Blam\Engine\Networking\Session\NetworkSession.h"
+#include "Blam/Engine/hs/hs.h"
+#include "Blam/Engine/Networking/Session/NetworkSession.h"
 
 #define player_identifier_size_bits (sizeof(unsigned long long) * CHAR_BIT)
 
@@ -63,6 +64,7 @@ enum e_network_message_type_collection : unsigned int
 	_rank_change,
 	_anti_cheat,
 	_custom_variant_settings,
+	_hs_function,
 
 	_network_message_type_collection_end
 };
@@ -125,6 +127,7 @@ static const char* network_message_type_collection_name[] = {
 	"rank_change",
 	"anti_cheat",
 	"custom_variant_settings",
+	"hs_function",
 
 	"end"
 };
@@ -182,4 +185,24 @@ namespace NetworkMessage
 	void SendTeamChange(int peerIdx, int teamIdx);
 	void SendRankChange(int peerIdx, BYTE rank);
 	void SendAntiCheat(int peerIdx);
+
+	template <typename T>
+	void SendHSFunction(int peerIdx, hs::e_hs_networked_fuction_type function_type, T* args)
+	{
+		s_network_session* session = NetworkSession::GetCurrentNetworkSession();
+
+		if (NetworkSession::LocalPeerIsSessionHost())
+		{
+			s_network_observer* observer = session->p_network_observer;
+			s_peer_observer_channel* observer_channel = NetworkSession::GetPeerObserverChannel(peerIdx);
+
+			hs::s_networked_hs_function data;
+			data.function_type = function_type;
+			data.args = new T* { args };
+			data.arg_size_in_bits = sizeof(T) * 8;
+
+			observer->sendNetworkMessage(session->session_index, observer_channel->observer_index, s_network_observer::e_network_message_send_protocol::in_band, _hs_function, sizeof(data), &data);
+			delete data.args;
+		}
+	}
 }
