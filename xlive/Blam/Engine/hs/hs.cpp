@@ -1,9 +1,17 @@
 #include "stdafx.h"
-
 #include "hs.h"
 
-namespace HaloScript
+#include "Blam/Engine/Players/Players.h"
+#include "Blam/Engine/Networking/NetworkMessageTypeCollection.h"
+#include "Util/Hooks/Hook.h"
+
+namespace hs
 {
+	typedef void*(__cdecl hs_arguments_evaluate_t)(__int16 a1, unsigned __int16 a2, char a3);
+	hs_arguments_evaluate_t* p_hs_arguments_evaluate;
+	typedef char*(__cdecl hs_return_t)(int a1, int a2);
+	hs_return_t* p_hs_return;
+
 	typedef int(__cdecl unit_kill_t)(datum unitDatum);
 	unit_kill_t* p_unit_kill;
 	void UnitKill(datum unitDatum)
@@ -60,8 +68,50 @@ namespace HaloScript
 		p_object_destroy(object_datum_index);
 	}
 
+	typedef void(__cdecl fade_out_t)(float r, float g, float b, __int16 ticks);
+	fade_out_t* p_fade_out;
+	hs_fade_args* __cdecl fade_out_evaluate(__int16 a1, int a2, char a3)
+	{
+		hs_fade_args* args;
+
+		args = (hs_fade_args*)p_hs_arguments_evaluate(a1, a2, a3);
+		if (!args) { return args; }
+
+		for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
+		{
+			if (NetworkSession::PlayerIsActive(i))
+			{
+				NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), _hs_fade_out, args);
+			}
+		}
+
+		p_fade_out(args->color.red, args->color.green, args->color.blue, args->ticks);
+		return (hs_fade_args*)p_hs_return(a2, 0);
+	}
+
+	void CallNetworkedHSFunction(const s_networked_hs_function* data)
+	{
+		switch (data->function_type)
+		{
+		case _hs_fade_out:
+			const hs_fade_args* args = (hs_fade_args*)data->args;
+			p_fade_out(args->color.red, args->color.green, args->color.blue, args->ticks);
+			break;
+		}
+	}
+
+	void ApplyHooks()
+	{
+		WritePointer(Memory::GetAddress(0x3C0CBC, 0x37D5D4), fade_out_evaluate);
+	}
+
 	void Initialize()
 	{
+		ApplyHooks();
+
+		p_hs_arguments_evaluate = Memory::GetAddress<hs_arguments_evaluate_t*>(0x9581D, 0xAAA1D);
+		p_hs_return = Memory::GetAddress<hs_return_t*>(0x9505D, 0xAA25D);
+
 		p_unit_kill	= Memory::GetAddress<unit_kill_t*>(0x13B514, 0x12A363);
 		p_unit_in_vehicle = Memory::GetAddress<unit_in_vehicle_t*>(0x1846D9, 0x16E775);
 		p_unit_get_health = Memory::GetAddress<unit_get_health_t*>(0x184477, 0x165E13);
@@ -70,5 +120,6 @@ namespace HaloScript
 		p_physics_set_velocity_frame = Memory::GetAddress<physics_set_velocity_frame_t*>(0xB3D5B, 0xA3F6E);
 		p_render_lights_enable_cinematic_shadow = Memory::GetAddress<render_lights_enable_cinematic_shadow_t*>(0x19245A);
 		p_object_destroy = Memory::GetAddress<object_destroy_t*>(0xFDCFD, 0x124ED5);
+		p_fade_out = Memory::GetAddress<fade_out_t*>(0xA3CCA, 0x95F2A);
 	}
 }
