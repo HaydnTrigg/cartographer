@@ -187,7 +187,7 @@ namespace NetworkMessage
 	void SendAntiCheat(int peerIdx);
 
 	template <typename T>
-	void SendHSFunction(int peerIdx, hs::e_hs_networked_fuction_type function_type, T* args)
+	void SendHSFunction(int peerIdx, hs::e_hs_networked_fuction_type function_type, byte argSize, T* args)
 	{
 		s_network_session* session = NetworkSession::GetCurrentNetworkSession();
 
@@ -198,11 +198,17 @@ namespace NetworkMessage
 
 			hs::s_networked_hs_function data;
 			data.function_type = function_type;
-			data.args = new T* { args };
-			data.arg_size_in_bits = sizeof(T) * 8;
+			memset(data.arg_buffer, 0, sizeof(data.arg_buffer));
+			memcpy(data.arg_buffer, args, argSize);
 
-			observer->sendNetworkMessage(session->session_index, observer_channel->observer_index, s_network_observer::e_network_message_send_protocol::in_band, _hs_function, sizeof(data), &data);
-			delete data.args;
+			if (peerIdx != -1 && !NetworkSession::PeerIndexLocal(peerIdx))
+			{
+				if (observer_channel->field_1) 
+				{
+					observer->sendNetworkMessage(session->session_index, observer_channel->observer_index, s_network_observer::e_network_message_send_protocol::in_band, 
+						_hs_function, sizeof(hs::s_networked_hs_function), &data);
+				}
+			}
 		}
 	}
 }
