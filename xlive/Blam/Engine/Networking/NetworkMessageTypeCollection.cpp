@@ -120,7 +120,7 @@ void register_custom_network_message(void* network_messages)
 	register_network_message(network_messages, _custom_variant_settings, "variant-settings", 0, CustomVariantSettingsPacketSize, CustomVariantSettingsPacketSize,
 		(void*)CustomVariantSettings::EncodeVariantSettings, (void*)CustomVariantSettings::DecodeVariantSettings, NULL);
 
-	register_network_message(network_messages, _hs_function, "hs-function-data", 0, sizeof(hs::s_networked_hs_function), sizeof(hs::s_networked_hs_function),
+	register_network_message(network_messages, _hs_function, "hs-function-data", 0, 0, sizeof(0x50),
 		(void*)encode_hs_function_message, (void*)decode_hs_function_message, NULL);
 }
 
