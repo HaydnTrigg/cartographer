@@ -673,12 +673,6 @@ void H2MOD::set_local_clan_tag(int local_player_index, unsigned long long tag)
 	p_update_player_profile(local_player_index);
 }
 
-void __cdecl print_to_console(const char* output)
-{
-	std::string finalOutput("[HSC Print] "); finalOutput += output;
-	addDebugText(finalOutput.c_str());
-}
-
 DWORD calculate_model_lod;
 DWORD calculate_model_lod_detour_end;
 __declspec(naked) void calculate_model_lod_detour()
@@ -1082,9 +1076,6 @@ void H2MOD::ApplyHooks() {
 		TEST_N_DEF(PC2);
 		
 		DETOUR_ATTACH(p_change_local_team, Memory::GetAddress<change_team_t>(0x2068F2), changeTeam);
-
-		// hook the print command to redirect the output to our console
-		PatchCall(Memory::GetAddress(0xE9E50), print_to_console);
 
 		calculate_model_lod = Memory::GetAddress(0x19CA3E);
 		calculate_model_lod_detour_end = Memory::GetAddress(0x19CDA3 + 5);
