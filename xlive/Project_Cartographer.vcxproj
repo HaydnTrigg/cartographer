@@ -659,7 +659,6 @@
     <ClInclude Include="Blam\Engine\Actor\Actor.h" />
     <ClInclude Include="Blam\FileSystem\FiloInterface.h" />
     <ClInclude Include="Blam\Engine\Game\GameTimeGlobals.h" />
-    <ClInclude Include="Blam\Engine\Game\HaloScript.h" />
     <ClInclude Include="Blam\Engine\Objects\ObjectPlacementData.h" />
     <ClInclude Include="Blam\Engine\Objects\Objects.h" />
     <ClInclude Include="Blam\Engine\Players\PlayerControls.h" />
