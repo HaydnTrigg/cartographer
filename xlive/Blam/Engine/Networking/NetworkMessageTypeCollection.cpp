@@ -84,14 +84,12 @@ bool __cdecl decode_anti_cheat_message(bitstream* stream, int a2, s_anti_cheat* 
 
 void __cdecl encode_hs_function_message(bitstream* stream, int a2, hs::s_networked_hs_function* data)
 {
-	stream->data_encode_integer("hs-function-type", data->function_type, 8);
-	//stream->data_encode_integer("hs-function-arg-size", data->arg_size_in_bits, 8);
+	stream->data_encode_integer("hs-function-type", data->function_type, sizeof(hs::e_hs_function) * 8);
 	stream->data_encode_bits("hs-function-args", data->arg_buffer, sizeof(data->arg_buffer) * 8);
 }
 bool __cdecl decode_hs_function_message(bitstream* stream, int a2, hs::s_networked_hs_function* data)
 {
-	data->function_type = (hs::e_hs_networked_fuction_type)stream->data_decode_integer("hs-function-type", 8);
-	//data->arg_size_in_bits = (byte)stream->data_decode_integer("hs-function-arg-size", 8);
+	data->function_type = (hs::e_hs_function)stream->data_decode_integer("hs-function-type", sizeof(hs::e_hs_function) * 8);
 	stream->data_decode_bits("hs-function-args", data->arg_buffer, sizeof(data->arg_buffer) * 8);
 	return stream->overflow() == false;
 }
@@ -404,6 +402,37 @@ void NetworkMessage::SendAntiCheat(int peerIdx)
 		}
 	}
 }
+
+void NetworkMessage::SendHSFunction(int peerIdx, hs::e_hs_function function_type, byte argSize, void* args)
+{
+	s_network_session* session = NetworkSession::GetCurrentNetworkSession();
+
+	if (NetworkSession::LocalPeerIsSessionHost())
+	{
+		s_network_observer* observer = session->p_network_observer;
+		s_peer_observer_channel* observer_channel = NetworkSession::GetPeerObserverChannel(peerIdx);
+
+		hs::s_networked_hs_function data;
+		data.function_type = function_type;
+		memset(data.arg_buffer, 0, sizeof(data.arg_buffer));
+		if (function_type == hs::e_hs_function::e_hs_function_print) 
+		{ 
+			const char* text = *(const char**)args;
+			memcpy(data.arg_buffer, text, argSize);
+		}
+		else { memcpy(data.arg_buffer, args, argSize); }
+
+		if (peerIdx != -1 && !NetworkSession::PeerIndexLocal(peerIdx))
+		{
+			if (observer_channel->field_1)
+			{
+				observer->sendNetworkMessage(session->session_index, observer_channel->observer_index, s_network_observer::e_network_message_send_protocol::in_band,
+					_hs_function, sizeof(hs::s_networked_hs_function), &data);
+			}
+		}
+	}
+}
+
 
 void NetworkMessage::ApplyGamePatches()
 {

@@ -3,15 +3,19 @@
 
 #include "Blam/Engine/Players/Players.h"
 #include "Blam/Engine/Networking/NetworkMessageTypeCollection.h"
+#include "H2MOD.h"
 #include "H2MOD/Modules/OnScreenDebug/OnscreenDebug.h"
 #include "Util/Hooks/Hook.h"
 
 namespace hs
 {
-	typedef void*(__cdecl hs_arguments_evaluate_t)(__int16 op_code, unsigned __int16 thread_id, bool unk_bool);
-	hs_arguments_evaluate_t* p_hs_arguments_evaluate;
-	typedef char*(__cdecl hs_return_t)(int a1, int a2);
-	hs_return_t* p_hs_return;
+	typedef void* (__cdecl* hs_arguments_evaluate_t)(__int16 op_code, unsigned __int16 thread_id, bool unk_bool);
+	hs_arguments_evaluate_t p_hs_arguments_evaluate;
+
+	typedef void(__cdecl fade_out_t)(float r, float g, float b, __int16 ticks);
+	fade_out_t* p_fade_out;
+	typedef void(__cdecl fade_in_t)(float r, float g, float b, __int16 ticks);
+	fade_in_t* p_fade_in;
 
 	typedef int(__cdecl unit_kill_t)(datum unitDatum);
 	unit_kill_t* p_unit_kill;
@@ -69,93 +73,98 @@ namespace hs
 		p_object_destroy(object_datum_index);
 	}
 
+	typedef void(__cdecl* player_enable_input_t)(bool will_enable);
+	player_enable_input_t p_player_enable_input;
+	void player_enable_input(bool will_enable)
+	{
+		p_player_enable_input(will_enable);
+	}
+
+	typedef void(__cdecl* camera_control_t)(bool control);
+	camera_control_t p_camera_control;
+	void camera_control(bool control)
+	{
+		p_camera_control(control);
+	}
+
 	void __cdecl print_to_console(const char* output)
 	{
 		std::string finalOutput("[HSC Print] "); finalOutput += output;
 		addDebugText(finalOutput.c_str());
 	}
 
-	typedef void(__cdecl fade_out_t)(float r, float g, float b, __int16 ticks);
-	fade_out_t* p_fade_out;
-	s_hs_fade_args* __cdecl fade_out_evaluate(__int16 op_code, int thread_id, bool unk_bool)
+	void* __cdecl hs_arguments_evaluate(__int16 op_code, unsigned __int16 thread_id, bool unk_bool)
 	{
-		s_hs_fade_args* args;
+		typedef void* (__cdecl* hs_evaluate_t)(unsigned __int16 thread_id, __int16 arg_count, int arg_array, bool unk_bool);
+		hs_evaluate_t p_hs_evaluate = Memory::GetAddress<hs_evaluate_t>(0x956FA, 0xAA8FA);
+		HaloScriptCommand** hs_function_table = Memory::GetAddress<HaloScriptCommand**>(0x41C5B0, 0x3C0028);
 
-		args = (s_hs_fade_args*)p_hs_arguments_evaluate(op_code, thread_id, unk_bool);
-		if (!args) { return args; }
+		bool found = false;
+		void* args = p_hs_evaluate(thread_id, hs_function_table[op_code]->arg_count, (int)hs_function_table[op_code]->arg_array, unk_bool);
 
-		for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
+		if (NetworkSession::GetLocalSessionState() != _network_session_state_none)
 		{
-			if (NetworkSession::PlayerIsActive(i))
+			LOG_ERROR_GAME("[{}] {}", __FUNCTION__, op_code);
+
+			//If host send out the packets
+			if (h2mod->GetEngineType() == _single_player && NetworkSession::LocalPeerIsSessionHost())
 			{
-				NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), _hs_fade_out, sizeof(s_hs_fade_args), args);
+				for (unsigned short i = 0; i < HS_SYNC_TABLE_SIZE; i++)
+				{
+					if (hs_sync_table[i] == op_code)
+					{
+						found = true;
+					}
+				}
+
+				if (!found || !args) { return args; }
+
+				for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
+				{
+					if (NetworkSession::PlayerIsActive(i)) 
+					{ 
+						NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), (e_hs_function)op_code, sizeof(s_networked_hs_function::arg_buffer), args); 
+					}
+				}
+				return args;
 			}
 		}
 
-		p_fade_out(args->color.red, args->color.green, args->color.blue, args->ticks);
-		return (s_hs_fade_args*)p_hs_return(thread_id, 0);
-	}
-
-	typedef void(__cdecl fade_in_t)(float r, float g, float b, __int16 ticks);
-	fade_in_t* p_fade_in;
-	s_hs_fade_args* __cdecl fade_in_evaluate(__int16 op_code, int thread_id, char unk_bool)
-	{
-		s_hs_fade_args* args;
-
-		args = (s_hs_fade_args*)p_hs_arguments_evaluate(op_code, thread_id, unk_bool);
-		if (!args) { return args; }
-
-		for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
-		{
-			if (NetworkSession::PlayerIsActive(i))
-			{
-				NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), _hs_fade_in, sizeof(s_hs_fade_args), args);
-			}
-		}
-
-		p_fade_in(args->color.red, args->color.green, args->color.blue, args->ticks);
-		return (s_hs_fade_args*)p_hs_return(thread_id, 0);
-	}
-
-	const char** __cdecl print_evaluate(__int16 op_code, int thread_id, char unk_bool)
-	{
-		const char** text; // eax
-
-		text = (const char**)p_hs_arguments_evaluate(op_code, thread_id, unk_bool);
-		if (!text) { return text; }
-		print_to_console(*text);
-
-		for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
-		{
-			if (NetworkSession::PlayerIsActive(i))
-			{
-				NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), _hs_print, sizeof(s_networked_hs_function::arg_buffer), *text);
-			}
-		}
-
-		return (const char**)p_hs_return(thread_id, 0);
+		return args;
 	}
 
 	void CallNetworkedHSFunction(const s_networked_hs_function* data)
 	{
-		switch ((byte)data->function_type)
+		switch (data->function_type)
 		{
-		case _hs_fade_out:
+		case e_hs_function_fade_out:
 		{
 			const s_hs_fade_args* args = (const s_hs_fade_args*)data->arg_buffer;
 			p_fade_out(args->color.red, args->color.green, args->color.blue, args->ticks);
 			break;
 		}
-		case _hs_fade_in:
+		case e_hs_function_fade_in:
 		{
 			const s_hs_fade_args* args = (const s_hs_fade_args*)data->arg_buffer;
 			p_fade_in(args->color.red, args->color.green, args->color.blue, args->ticks);
 			break;
 		}
-		case _hs_print:
+		case e_hs_function_print:
 		{
 			const char* text = (const char*)data->arg_buffer;
 			print_to_console(text);
+			break;
+		}
+		case e_hs_function_player_enable_input:
+		{
+			const bool* enable = (const bool*)data->arg_buffer;
+			player_enable_input(*enable);
+			break;
+		}
+		case e_hs_function_camera_control:
+		{
+			const bool* control = (const bool*)data->arg_buffer;
+			camera_control(*control);
 			break;
 		}
 		default:
@@ -166,23 +175,24 @@ namespace hs
 
 	void ApplyHooks()
 	{
+		// Hook arguments evaluate function so we can add our functionality for syncing the scripts
+		DETOUR_BEGIN();
+		DETOUR_ATTACH(p_hs_arguments_evaluate, Memory::GetAddress<hs_arguments_evaluate_t>(0x9581D, 0xAAA1D), hs_arguments_evaluate);
+		DETOUR_COMMIT();
+
+
 		// hook the print command to redirect the output to our console
 		if (!Memory::IsDedicatedServer())
 		{
 			PatchCall(Memory::GetAddress(0xE9E50), print_to_console);
 		}
-
-		WritePointer(Memory::GetAddress(0x3BE3E8, 0x37AD00), print_evaluate);
-		WritePointer(Memory::GetAddress(0x3C0CBC, 0x37D5D4), fade_out_evaluate);
-		WritePointer(Memory::GetAddress(0x3C0CA4, 0x37D5BC), fade_in_evaluate);
 	}
 
 	void Initialize()
 	{
 		ApplyHooks();
 
-		p_hs_arguments_evaluate = Memory::GetAddress<hs_arguments_evaluate_t*>(0x9581D, 0xAAA1D);
-		p_hs_return = Memory::GetAddress<hs_return_t*>(0x9505D, 0xAA25D);
+		p_hs_arguments_evaluate = Memory::GetAddress<hs_arguments_evaluate_t>(0x9581D, 0xAAA1D);
 
 		p_unit_kill	= Memory::GetAddress<unit_kill_t*>(0x13B514, 0x12A363);
 		p_unit_in_vehicle = Memory::GetAddress<unit_in_vehicle_t*>(0x1846D9, 0x16E775);
@@ -194,5 +204,11 @@ namespace hs
 		p_object_destroy = Memory::GetAddress<object_destroy_t*>(0xFDCFD, 0x124ED5);
 		p_fade_out = Memory::GetAddress<fade_out_t*>(0xA3CCA, 0x95F2A);
 		p_fade_in = Memory::GetAddress<fade_in_t*>(0xA402C, 0x9628C);
+
+		if (!Memory::IsDedicatedServer())
+		{
+			p_player_enable_input = Memory::GetAddress<player_enable_input_t>(0x51464);
+			p_camera_control = Memory::GetAddress<camera_control_t>(0x5A181);
+		}
 	}
 }

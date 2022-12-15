@@ -185,30 +185,5 @@ namespace NetworkMessage
 	void SendTeamChange(int peerIdx, int teamIdx);
 	void SendRankChange(int peerIdx, BYTE rank);
 	void SendAntiCheat(int peerIdx);
-
-	template <typename T>
-	void SendHSFunction(int peerIdx, hs::e_hs_networked_fuction_type function_type, byte argSize, T* args)
-	{
-		s_network_session* session = NetworkSession::GetCurrentNetworkSession();
-
-		if (NetworkSession::LocalPeerIsSessionHost())
-		{
-			s_network_observer* observer = session->p_network_observer;
-			s_peer_observer_channel* observer_channel = NetworkSession::GetPeerObserverChannel(peerIdx);
-
-			hs::s_networked_hs_function data;
-			data.function_type = function_type;
-			memset(data.arg_buffer, 0, sizeof(data.arg_buffer));
-			memcpy(data.arg_buffer, args, argSize);
-
-			if (peerIdx != -1 && !NetworkSession::PeerIndexLocal(peerIdx))
-			{
-				if (observer_channel->field_1) 
-				{
-					observer->sendNetworkMessage(session->session_index, observer_channel->observer_index, s_network_observer::e_network_message_send_protocol::in_band, 
-						_hs_function, sizeof(hs::s_networked_hs_function), &data);
-				}
-			}
-		}
-	}
+	void SendHSFunction(int peerIdx, hs::e_hs_function function_type, byte argSize, void* args);
 }
