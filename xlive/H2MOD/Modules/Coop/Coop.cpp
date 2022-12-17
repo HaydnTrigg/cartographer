@@ -2,7 +2,7 @@
 #include "Coop.h"
 
 #include "H2MOD/Tags/TagInterface.h"
-
+#include "Util/Hooks/Hook.h"
 namespace coop
 {
 	void PreOnMapLoadPatches(s_game_options* game_options)
@@ -11,6 +11,14 @@ namespace coop
 		{
 			game_options->m_engine_type = _single_player;
 			game_options->coop = 1;
+		}
+	}
+
+	void PostMapLoadPatches()
+	{
+		if (!Memory::IsDedicatedServer())
+		{
+			//WriteValue<BYTE>(Memory::GetAddress(0x1F32E3), JMP_OP_CODE);
 		}
 	}
 }

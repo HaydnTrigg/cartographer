@@ -2,7 +2,7 @@
 #include "Blam/Cache/DataTypes/StringID.h"
 #include "Blam/Math/real_math.h"
 
-#define HS_SYNC_TABLE_SIZE 5
+#define HS_SYNC_TABLE_SIZE 14
 
 namespace hs
 {
@@ -1083,7 +1083,16 @@ namespace hs
 		e_hs_function_fade_in,
 		e_hs_function_print,
 		e_hs_function_player_enable_input,
-		e_hs_function_camera_control
+		e_hs_function_camera_control,
+		e_hs_function_ai_allegiance,
+		e_hs_function_sound_impulse_start,
+		e_hs_function_ai_play_line_on_object,
+		e_hs_function_camera_set_animation_relative,
+		e_hs_function_cinematic_start,
+		e_hs_function_cinematic_stop,
+		//e_hs_function_custom_animation_relative,
+		//e_hs_function_object_create_anew,
+		//e_hs_function_object_cinematic_lod
 	};
 
 	struct HaloScriptGlobal
@@ -1109,13 +1118,49 @@ namespace hs
 	{
 		hs::e_hs_function function_type;
 		//byte arg_size_in_bits;
-		char arg_buffer[64];
+		char arg_buffer[128];
 	};
 
 	struct s_hs_fade_args
 	{
 		real_color_rgb color;
 		__int16 ticks;
+	};
+
+	struct s_hs_sound_impulse_args
+	{
+		char* sound;
+		int object_datum;
+		float scale;
+	};
+
+	struct s_hs_ai_play_line_on_object_args
+	{
+		int object_datum;
+		char* sound;
+	};
+
+	struct s_hs_camera_set_animation_relative_args
+	{
+		char* animation_path;
+		char* animation;
+		int unit; 
+		WORD cutscene_flag_index;
+	};
+	
+	struct s_hs_custom_animation_relative_args
+	{
+		int object_datum;
+		string_id animation_path;
+		string_id animation;
+		bool interpolates_into_animation;
+		WORD object_name_index;
+	};
+
+	struct s_hs_object_cinematic_lod_args
+	{
+		WORD object_name; 
+		bool enable;
 	};
 
 	void UnitKill(datum unitDatum);

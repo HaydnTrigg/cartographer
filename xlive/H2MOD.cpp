@@ -605,6 +605,7 @@ bool __cdecl OnMapLoad(s_game_options* options)
 		{
 			//if anyone wants to run code on map load single player
 			addDebugText("Engine type: Singleplayer");
+			coop::PostMapLoadPatches();
 			//H2X::Initialize(true);
 		}
 
