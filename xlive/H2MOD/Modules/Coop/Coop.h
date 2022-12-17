@@ -4,4 +4,5 @@
 namespace coop
 {
 	void PreOnMapLoadPatches(s_game_options* game_options);
+	void PostMapLoadPatches();
 }
