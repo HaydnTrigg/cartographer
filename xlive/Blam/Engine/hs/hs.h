@@ -2,7 +2,8 @@
 #include "Blam/Cache/DataTypes/StringID.h"
 #include "Blam/Math/real_math.h"
 
-#define HS_SYNC_TABLE_SIZE 14
+#define HS_SYNC_TABLE_SIZE 16
+#define HS_SENT_BUFFER_SIZE 128
 
 namespace hs
 {
@@ -1091,8 +1092,11 @@ namespace hs
 		e_hs_function_cinematic_start,
 		e_hs_function_cinematic_stop,
 		//e_hs_function_custom_animation_relative,
-		//e_hs_function_object_create_anew,
-		//e_hs_function_object_cinematic_lod
+		//e_hs_function_object_cinematic_lod,
+		e_hs_function_device_animate_position,
+		e_hs_function_device_set_position_track,
+		e_hs_function_switch_bsp,
+		e_hs_function_switch_bsp_by_name
 	};
 
 	struct HaloScriptGlobal
@@ -1117,8 +1121,7 @@ namespace hs
 	struct s_networked_hs_function
 	{
 		hs::e_hs_function function_type;
-		//byte arg_size_in_bits;
-		char arg_buffer[128];
+		char arg_buffer[HS_SENT_BUFFER_SIZE];
 	};
 
 	struct s_hs_fade_args
@@ -1127,16 +1130,16 @@ namespace hs
 		__int16 ticks;
 	};
 
-	struct s_hs_sound_impulse_args
+	struct s_hs_sound_impulse_start_args
 	{
 		char* sound;
-		int object_datum;
+		datum object;
 		float scale;
 	};
 
 	struct s_hs_ai_play_line_on_object_args
 	{
-		int object_datum;
+		datum object;
 		char* sound;
 	};
 
@@ -1150,17 +1153,34 @@ namespace hs
 	
 	struct s_hs_custom_animation_relative_args
 	{
-		int object_datum;
-		string_id animation_path;
+		datum object;
+		datum animation_path;
 		string_id animation;
 		bool interpolates_into_animation;
-		WORD object_name_index;
+		datum relative_object;
 	};
 
 	struct s_hs_object_cinematic_lod_args
 	{
-		WORD object_name; 
+		datum object; 
 		bool enable;
+	};
+
+	struct s_hs_device_animate_position_args
+	{
+		datum device;
+		float position; 
+		float time; 
+		float unk1; 
+		float unk2; 
+		bool interpolate;
+	};
+	
+	struct s_hs_device_set_position_track_args
+	{
+		datum device;
+		string_id animation;
+		float interpolation_time;
 	};
 
 	void UnitKill(datum unitDatum);
@@ -1172,6 +1192,7 @@ namespace hs
 	void PhysicsSetVelocityFrame(float unk1, float unk2, float unk3);
 	void RenderLightsEnableCinenaticShadow(bool unk1, datum objectDatum, string_id StringId, float unk2);
 	void ObjectDestroy(datum object_datum_index);
+	void __cdecl print_to_console(const char* output);
 
 	void CallNetworkedHSFunction(const s_networked_hs_function* data);
 	void Initialize();
