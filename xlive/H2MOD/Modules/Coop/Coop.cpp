@@ -18,7 +18,7 @@ namespace coop
 	{
 		if (!Memory::IsDedicatedServer())
 		{
-			//WriteValue<BYTE>(Memory::GetAddress(0x1F32E3), JMP_OP_CODE);
+			WriteValue<BYTE>(Memory::GetAddress(0x23EC55 + 1), 0);	// Prevent the game from pausing during the game
 		}
 	}
 }

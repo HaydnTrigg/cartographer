@@ -1,4 +1,5 @@
 #pragma once
+#include "Blam/Cache/DataTypes/DataRef.h"
 
 enum e_simulation_world_type
 {
@@ -22,3 +23,5 @@ enum e_simulation_world_state
 	_simulation_world_state_leaving = 0x6,
 	k_simulation_world_state_count = 0x7,
 };
+
+datum simulation_gamestate_entity_get_object_index(datum entity_seed);

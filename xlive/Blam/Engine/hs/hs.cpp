@@ -1,8 +1,10 @@
 #include "stdafx.h"
 #include "hs.h"
 
-#include "Blam/Engine/Players/Players.h"
+#include "Blam/Engine/Objects/Objects.h"
 #include "Blam/Engine/Networking/NetworkMessageTypeCollection.h"
+#include "Blam/Engine/Players/Players.h"
+#include "Blam/Engine/Simulation/simulation_world.h"
 #include "H2MOD.h"
 #include "H2MOD/Modules/OnScreenDebug/OnscreenDebug.h"
 #include "Util/Hooks/Hook.h"
@@ -138,35 +140,11 @@ namespace hs
 		p_cinematic_stop();
 	}
 
-	typedef void(__cdecl* custom_animation_relative_t)(const datum object_datum, const string_id animation_path, const string_id animation, const bool is_relative, const WORD object_name_index);
+	typedef bool(__cdecl* custom_animation_relative_t)(const datum object_datum, const datum animation_path, const string_id animation, const bool interpolates_into_animation, const datum relative_object);
 	custom_animation_relative_t p_custom_animation_relative;
-	void custom_animation_relative(const datum object_datum, const string_id animation_path, const string_id animation, const bool interpolates_into_animation, const WORD object_name_index)
+	bool custom_animation_relative(const datum object_datum, const datum animation_path, const string_id animation, const bool interpolates_into_animation, const datum relative_object)
 	{
-		return p_custom_animation_relative(object_datum, animation_path, animation, interpolates_into_animation, object_name_index);
-	}
-
-	typedef void(__cdecl* object_create_anew_t)(const WORD object_name_index);
-	object_create_anew_t p_object_create_anew;
-	void __cdecl object_create_anew(const WORD object_name_index)
-	{
-		typedef void(__cdecl* object_delete_t)(const datum object_index);
-		object_delete_t p_object_delete = Memory::GetAddress<object_delete_t>(0x136005, 0x124ED5);
-		typedef datum(__cdecl* object_create_t)(const datum object_name_index, bool some_bool);
-		object_create_t p_object_create = Memory::GetAddress<object_create_t>(0x138369, 0x127239);
-		typedef bool(__cdecl* is_object_player_or_horse_t)(const datum object_index);
-		is_object_player_or_horse_t p_is_object_player_or_horse = Memory::GetAddress<is_object_player_or_horse_t>(0x1347FB, 0x1236CB);
-		typedef datum(__cdecl* object_index_from_name_index_t)(const WORD object_name_index);
-		object_index_from_name_index_t p_object_index_from_name_index = Memory::GetAddress<object_index_from_name_index_t>(0x1335FB, 0x1224CB);
-
-		datum object_index;
-
-		if (object_name_index != 0xFFFF)
-		{
-			object_index = p_object_index_from_name_index(object_name_index);
-			if (object_index != 0xFFFFFFFF && !p_is_object_player_or_horse(object_index))
-				p_object_delete(object_index);
-			object_index = p_object_create(object_name_index, false);
-		}
+		return p_custom_animation_relative(object_datum, animation_path, animation, interpolates_into_animation, relative_object);
 	}
 
 	typedef void(__cdecl* object_cinematic_lod_t)(const WORD object_name_index, bool enable);
@@ -176,47 +154,135 @@ namespace hs
 		p_object_cinematic_lod(object_name_index, enable);
 	}
 
+	typedef void(__cdecl* device_animate_position_t)(const datum device_datum, const float position, const float time, const float unk1, const float unk2, const bool interpolate);
+	device_animate_position_t p_device_animate_position;
+	void device_animate_position(const datum device_datum, const float position, const float time, const float unk1, const float unk2, const bool interpolate)
+	{
+		p_device_animate_position(device_datum, position, time, unk1, unk2, interpolate);
+	}
+
+	typedef bool(__cdecl* device_set_position_track_t)(const datum device, const string_id animation, const float interpolation_time);
+	device_set_position_track_t p_device_set_position_track;
+	bool device_set_position_track(const datum device, const string_id animation, const float interpolation_time)
+	{
+		return p_device_set_position_track(device, animation, interpolation_time);
+	}
+
+	typedef void(__cdecl* switch_bsp_t)(const __int16 bsp_index);
+	switch_bsp_t p_switch_bsp;
+	void switch_bsp(const __int16 bsp_index)
+	{
+		p_switch_bsp(bsp_index);
+	}
+
+
 	void __cdecl print_to_console(const char* output)
 	{
 		std::string finalOutput("[HSC Print] "); finalOutput += output;
 		addDebugText(finalOutput.c_str());
 	}
 
-	void* __cdecl hs_arguments_evaluate(__int16 op_code, unsigned __int16 thread_id, bool unk_bool)
+	// Modifies the arguments sent to the client depending on the script operation being executed
+	void modify_sent_arguments(void* old_args, byte* new_args, unsigned __int16 op_code)
+	{
+		memcpy(new_args, old_args, HS_SENT_BUFFER_SIZE);
+
+		switch (op_code)
+		{
+		// Send the entity index instead of the object index since object index isnt the same on the client
+		case e_hs_function_device_set_position_track:
+		{
+			s_hs_device_set_position_track_args* args = (s_hs_device_set_position_track_args*)new_args;
+			const s_object_data_definition* device_object = object_get_fast_unsafe(args->device);
+			
+			args->device = device_object->simulation_entity_index;
+			break;
+		}
+		// Send the entity index instead of the object index since object index isnt the same on the client
+		case e_hs_function_device_animate_position:
+		{
+			s_hs_device_animate_position_args* args = (s_hs_device_animate_position_args*)new_args;
+			const s_object_data_definition* device_object = object_get_fast_unsafe(args->device);
+
+			args->device = device_object->simulation_entity_index;
+			break;
+		}
+		// Send the entity index instead of the object index since object index isnt the same on the client
+		case e_hs_function_object_cinematic_lod:
+		{
+			s_hs_object_cinematic_lod_args* args = (s_hs_object_cinematic_lod_args*)new_args;
+			const s_object_data_definition* object = object_get_fast_unsafe(args->object);
+
+			args->object = object->simulation_entity_index;
+			break;
+		}
+		// Send the entity index instead of the object index since object index isnt the same on the client
+		case e_hs_function_custom_animation_relative:
+		{
+			s_hs_custom_animation_relative_args* args = (s_hs_custom_animation_relative_args*)new_args;
+			const s_object_data_definition* object = object_get_fast_unsafe(args->object);
+			const s_object_data_definition* relative_object = object_get_fast_unsafe(args->relative_object);
+
+			args->object = object->simulation_entity_index;
+			args->relative_object = relative_object->simulation_entity_index;
+			break;
+		}
+		// Send the entity index instead of the object index since object index isnt the same on the client
+		case e_hs_function_ai_play_line_on_object:
+		{
+			s_hs_ai_play_line_on_object_args* args = (s_hs_ai_play_line_on_object_args*)new_args;
+			const s_object_data_definition* object = object_get_fast_unsafe(args->object);
+
+			args->object = object->simulation_entity_index;
+			break;
+		}
+		}
+	}
+
+	void send_script_arguments_to_clients(void* args, unsigned __int16 op_code)
+	{
+		bool found = false;
+		byte new_args_buffer[HS_SENT_BUFFER_SIZE];
+		void* new_args = &new_args_buffer;
+
+		//If host send out the packets
+		if (h2mod->GetEngineType() == _single_player && NetworkSession::LocalPeerIsSessionHost())
+		{
+			for (unsigned short i = 0; i < HS_SYNC_TABLE_SIZE; i++)
+			{
+				if (hs_sync_table[i] == op_code)
+				{
+					found = true;
+				}
+			}
+
+			if (!found || !args) { return; }
+
+			modify_sent_arguments(args, new_args_buffer, op_code);
+
+			for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
+			{
+				if (NetworkSession::PlayerIsActive(i))
+				{
+					NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), (e_hs_function)op_code, sizeof(s_networked_hs_function::arg_buffer), new_args);
+				}
+			}
+			return;
+		}
+	}
+
+	void* __cdecl hs_arguments_evaluate(unsigned __int16 op_code, unsigned __int16 thread_id, bool unk_bool)
 	{
 		typedef void* (__cdecl* hs_evaluate_t)(unsigned __int16 thread_id, __int16 arg_count, int arg_array, bool unk_bool);
 		hs_evaluate_t p_hs_evaluate = Memory::GetAddress<hs_evaluate_t>(0x956FA, 0xAA8FA);
 		HaloScriptCommand** hs_function_table = Memory::GetAddress<HaloScriptCommand**>(0x41C5B0, 0x3C0028);
 
-		bool found = false;
 		void* args = p_hs_evaluate(thread_id, hs_function_table[op_code]->arg_count, (int)hs_function_table[op_code]->arg_array, unk_bool);
 
+		// Added for script syncing in coop
 		if (NetworkSession::GetLocalSessionState() != _network_session_state_none)
 		{
-			LOG_ERROR_GAME("[{}] {}", __FUNCTION__, op_code);
-
-			//If host send out the packets
-			if (h2mod->GetEngineType() == _single_player && NetworkSession::LocalPeerIsSessionHost())
-			{
-				for (unsigned short i = 0; i < HS_SYNC_TABLE_SIZE; i++)
-				{
-					if (hs_sync_table[i] == op_code)
-					{
-						found = true;
-					}
-				}
-
-				if (!found || !args) { return args; }
-
-				for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
-				{
-					if (NetworkSession::PlayerIsActive(i))
-					{
-						NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), (e_hs_function)op_code, sizeof(s_networked_hs_function::arg_buffer), args);
-					}
-				}
-				return args;
-			}
+			send_script_arguments_to_clients(args, op_code);
 		}
 
 		return args;
@@ -264,14 +330,18 @@ namespace hs
 		}
 		case e_hs_function_sound_impulse_start:
 		{
-			const s_hs_sound_impulse_args* args = (const s_hs_sound_impulse_args*)data->arg_buffer;
-			sound_impulse_start(args->sound, args->object_datum, args->scale);
+			s_hs_sound_impulse_start_args* args = (s_hs_sound_impulse_start_args*)data->arg_buffer;
+			args->object = simulation_gamestate_entity_get_object_index(args->object);
+
+			sound_impulse_start(args->sound, args->object, args->scale);
 			break;
 		}
 		case e_hs_function_ai_play_line_on_object:
 		{
-			const s_hs_ai_play_line_on_object_args* args = (const s_hs_ai_play_line_on_object_args*)data->arg_buffer;
-			ai_play_line_on_object(args->object_datum, args->sound);
+			s_hs_ai_play_line_on_object_args* args = (s_hs_ai_play_line_on_object_args*)data->arg_buffer;
+			args->object = simulation_gamestate_entity_get_object_index(args->object);
+
+			ai_play_line_on_object(args->object, args->sound);
 			break;
 		}
 		case e_hs_function_camera_set_animation_relative:
@@ -292,23 +362,52 @@ namespace hs
 		}
 		case e_hs_function_custom_animation_relative:
 		{
-			const s_hs_custom_animation_relative_args* args = (const s_hs_custom_animation_relative_args*)data->arg_buffer;
-			custom_animation_relative(args->object_datum, args->animation_path, args->animation, args->interpolates_into_animation, args->object_name_index);
-			break;
-		}
-		case e_hs_function_object_create_anew:
-		{
-			const WORD* object_name_index = (const WORD*)data->arg_buffer;
-			object_create_anew(*object_name_index);
+			s_hs_custom_animation_relative_args* args = (s_hs_custom_animation_relative_args*)data->arg_buffer;
+			args->object = simulation_gamestate_entity_get_object_index(args->object);
+			args->relative_object = simulation_gamestate_entity_get_object_index(args->relative_object);
+
+			if (!custom_animation_relative(args->object, args->animation_path, args->animation, args->interpolates_into_animation, args->relative_object))
+			{
+				print_to_console("custom_animation_relative returned false on clients, this is very bad!!!!");
+			}
+
 			break;
 		}
 		case e_hs_function_object_cinematic_lod:
 		{
-			const s_hs_object_cinematic_lod_args* args = (const s_hs_object_cinematic_lod_args*)data->arg_buffer;
-			object_cinematic_lod(args->object_name, args->enable);
+			s_hs_object_cinematic_lod_args* args = (s_hs_object_cinematic_lod_args*)data->arg_buffer;
+			args->object = simulation_gamestate_entity_get_object_index(args->object);
+
+			object_cinematic_lod((unsigned __int16)args->object, args->enable);
 			break;
 		}
+		case e_hs_function_device_animate_position:
+		{
+			s_hs_device_animate_position_args* args = (s_hs_device_animate_position_args*)data->arg_buffer;
+			args->device = simulation_gamestate_entity_get_object_index(args->device);
 
+			device_animate_position(args->device, args->position, args->time, args->unk1, args->unk2, args->interpolate);
+			break;
+		}
+		case e_hs_function_device_set_position_track:
+		{
+			s_hs_device_set_position_track_args* args = (s_hs_device_set_position_track_args*)data->arg_buffer;
+			args->device = simulation_gamestate_entity_get_object_index(args->device);
+
+			p_device_set_position_track = Memory::GetAddress<device_set_position_track_t>(0x164257);
+			if (!device_set_position_track(args->device, args->animation, args->interpolation_time))
+			{
+				print_to_console("device_set_position_track returned false on clients, this is very bad!!!!");
+			}
+			break;
+		}
+		case e_hs_function_switch_bsp:
+		case e_hs_function_switch_bsp_by_name:
+		{			
+			const __int16* bsp_index = (const __int16*)data->arg_buffer;
+			switch_bsp(*bsp_index);
+			break;
+		}
 		default:
 		{
 			print_to_console("HS FUNCTION WITH TYPE THAT DOSENT EXIST SENT");
@@ -321,7 +420,6 @@ namespace hs
 		// Hook arguments evaluate function so we can add our functionality for syncing the scripts
 		DETOUR_BEGIN();
 		DETOUR_ATTACH(p_hs_arguments_evaluate, Memory::GetAddress<hs_arguments_evaluate_t>(0x9581D, 0xAAA1D), hs_arguments_evaluate);
-		DETOUR_ATTACH(p_object_create_anew, Memory::GetAddress<object_create_anew_t>(0xFE444, 0xE5280), object_create_anew);
 		DETOUR_COMMIT();
 
 
@@ -361,6 +459,10 @@ namespace hs
 			p_cinematic_stop = Memory::GetAddress<cinematic_stop_t>(0x3A8C9);
 			p_custom_animation_relative = Memory::GetAddress<custom_animation_relative_t>(0x978BC);
 			p_object_cinematic_lod = Memory::GetAddress<object_cinematic_lod_t>(0x133BE1);
+			p_device_animate_position = Memory::GetAddress<device_animate_position_t>(0x163911);
+			p_device_set_position_track = Memory::GetAddress<device_set_position_track_t>(0x164257);
+			p_device_set_position_track = Memory::GetAddress<device_set_position_track_t>(0x164257);
+			p_switch_bsp = Memory::GetAddress<switch_bsp_t>(0x39563);
 		}
 	}
 }

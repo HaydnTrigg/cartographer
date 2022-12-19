@@ -237,6 +237,7 @@
     <ClInclude Include="Blam\Engine\Networking\NetworkCommon.h" />
     <ClCompile Include="Blam\Engine\Players\Players.cpp" />
     <ClCompile Include="Blam\Engine\render\render_cameras.cpp" />
+    <ClCompile Include="Blam\Engine\Simulation\simulation_world.cpp" />
     <ClCompile Include="Blam\LazyBlam\LazyBlamLoader.cpp" />
     <ClCompile Include="Blam\LazyBlam\LazyBlamRebase.cpp" />
     <ClCompile Include="Blam\Math\real_matrix4x3.cpp" />
@@ -563,7 +564,7 @@
     <ClInclude Include="Blam\Engine\Simulation\SimulationPlayers.h" />
     <ClInclude Include="Blam\Engine\Simulation\SimulationTypeCollection.h" />
     <ClInclude Include="Blam\Engine\Simulation\SimulationView.h" />
-    <ClInclude Include="Blam\Engine\Simulation\SimulationWorld.h" />
+    <ClInclude Include="Blam\Engine\Simulation\simulation_world.h" />
     <ClInclude Include="Blam\Engine\Simulation\UnitControl.h" />
     <ClInclude Include="Blam\Enums\HaloStrings.h" />
     <ClInclude Include="Blam\Engine\camera\camera.h" />
