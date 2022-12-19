@@ -1091,7 +1091,7 @@ namespace hs
 		e_hs_function_camera_set_animation_relative,
 		e_hs_function_cinematic_start,
 		e_hs_function_cinematic_stop,
-		//e_hs_function_custom_animation_relative,
+		e_hs_function_custom_animation_relative,
 		//e_hs_function_object_cinematic_lod,
 		e_hs_function_device_animate_position,
 		e_hs_function_device_set_position_track,
