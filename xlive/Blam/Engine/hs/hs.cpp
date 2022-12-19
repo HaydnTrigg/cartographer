@@ -457,10 +457,9 @@ namespace hs
 			p_camera_set_animation_relative = Memory::GetAddress<camera_set_animation_relative_t>(0x978BC);
 			p_cinematic_start = Memory::GetAddress<cinematic_start_t>(0x3A6D0);
 			p_cinematic_stop = Memory::GetAddress<cinematic_stop_t>(0x3A8C9);
-			p_custom_animation_relative = Memory::GetAddress<custom_animation_relative_t>(0x978BC);
+			p_custom_animation_relative = Memory::GetAddress<custom_animation_relative_t>(0x18565F);
 			p_object_cinematic_lod = Memory::GetAddress<object_cinematic_lod_t>(0x133BE1);
 			p_device_animate_position = Memory::GetAddress<device_animate_position_t>(0x163911);
-			p_device_set_position_track = Memory::GetAddress<device_set_position_track_t>(0x164257);
 			p_device_set_position_track = Memory::GetAddress<device_set_position_track_t>(0x164257);
 			p_switch_bsp = Memory::GetAddress<switch_bsp_t>(0x39563);
 		}
