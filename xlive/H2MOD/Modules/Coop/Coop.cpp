@@ -11,6 +11,7 @@ namespace coop
 		{
 			game_options->m_engine_type = _single_player;
 			game_options->coop = 1;
+			game_options->m_game_variant.variant_game_engine_index = _game_engine_campaign;
 		}
 	}
 

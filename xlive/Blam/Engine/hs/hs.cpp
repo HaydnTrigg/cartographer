@@ -13,6 +13,8 @@ namespace hs
 {
 	typedef void* (__cdecl* hs_arguments_evaluate_t)(__int16 op_code, unsigned __int16 thread_id, bool unk_bool);
 	hs_arguments_evaluate_t p_hs_arguments_evaluate;
+	typedef char* (__cdecl hs_return_t)(int a1, int a2);
+	hs_return_t* p_hs_return;
 
 	typedef int(__cdecl unit_kill_t)(datum unitDatum);
 	unit_kill_t* p_unit_kill;
@@ -112,9 +114,9 @@ namespace hs
 		p_sound_impulse_start(sound, object_datum, scale);
 	}
 
-	typedef int(__cdecl* ai_play_line_on_object_t)(int object_datum, char* sound);
+	typedef float (__cdecl* ai_play_line_on_object_t)(int object_datum, string_id sound);
 	ai_play_line_on_object_t p_ai_play_line_on_object;
-	int __cdecl ai_play_line_on_object(int object_datum, char* sound)
+	float __cdecl ai_play_line_on_object(int object_datum, string_id sound)
 	{
 		return p_ai_play_line_on_object(object_datum, sound);
 	}
@@ -133,11 +135,39 @@ namespace hs
 		p_cinematic_start();
 	}
 
+	void* __cdecl cinematic_start_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool)
+	{
+		for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
+		{
+			if (NetworkSession::PlayerIsActive(i))
+			{
+				NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), e_hs_function_cinematic_start, sizeof(s_networked_hs_function::arg_buffer), nullptr);
+			}
+		}
+		cinematic_start();
+
+		return p_hs_return(thread_id, 0);
+	}
+
 	typedef void(__cdecl* cinematic_stop_t)();
 	cinematic_stop_t p_cinematic_stop;
 	void cinematic_stop()
 	{
 		p_cinematic_stop();
+	}
+
+	void* __cdecl cinematic_stop_evaluate(__int16 op_code, int thread_id, char unk_bool)
+	{
+		for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
+		{
+			if (NetworkSession::PlayerIsActive(i))
+			{
+				NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), e_hs_function_cinematic_stop, sizeof(s_networked_hs_function::arg_buffer), nullptr);
+			}
+		}
+		cinematic_stop();
+
+		return p_hs_return(thread_id, 0);
 	}
 
 	typedef bool(__cdecl* custom_animation_relative_t)(const datum object_datum, const datum animation_path, const string_id animation, const bool interpolates_into_animation, const datum relative_object);
@@ -175,6 +205,128 @@ namespace hs
 		p_switch_bsp(bsp_index);
 	}
 
+	typedef bool(__cdecl* custom_animation_loop_t)(const datum object_datum, const datum animation_path, const string_id animation, const bool interpolates_into_animation);
+	custom_animation_loop_t p_custom_animation_loop;
+	bool custom_animation_loop(const datum object_datum, const datum animation_path, const string_id animation, const bool interpolates_into_animation)
+	{
+		return p_custom_animation_loop(object_datum, animation_path, animation, interpolates_into_animation);
+	}
+
+	typedef void(__cdecl* camera_set_field_of_view_t)(const float fov, const short ticks);
+	camera_set_field_of_view_t p_camera_set_field_of_view;
+	void camera_set_field_of_view(const float fov, const short ticks)
+	{
+		p_camera_set_field_of_view(fov, ticks);
+	}
+
+	typedef void(__cdecl* objects_attach_t)(const datum parent_object, const string_id parent_marker, const datum child_object, const string_id child_marker);
+	objects_attach_t p_objects_attach;
+	void objects_attach(const datum parent_object, const string_id parent_marker, const datum child_object, const string_id child_marker)
+	{
+		p_objects_attach(parent_object, parent_marker, child_object, child_marker);
+	}
+
+	typedef void(__cdecl* object_hide_t)(const datum object, const bool hidden);
+	object_hide_t p_object_hide;
+	void object_hide(const datum object, const bool hidden)
+	{
+		p_object_hide(object, hidden);
+	}
+
+	typedef void(__cdecl* game_save_cinematic_skip_t)();
+	game_save_cinematic_skip_t p_game_save_cinematic_skip;
+	void game_save_cinematic_skip()
+	{
+		p_game_save_cinematic_skip();
+	}
+
+	void* __cdecl game_save_cinematic_skip_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool)
+	{
+		for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
+		{
+			if (NetworkSession::PlayerIsActive(i))
+			{
+				NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), e_hs_function_game_save_cinematic_skip, sizeof(s_networked_hs_function::arg_buffer), nullptr);
+			}
+		}
+		game_save_cinematic_skip();
+
+		return p_hs_return(thread_id, 0);
+	}
+
+	typedef void(__cdecl* cinematic_lighting_set_primary_light_t)(const float pitch, const float yaw, const float r, const float g, const float b);
+	cinematic_lighting_set_primary_light_t p_cinematic_lighting_set_primary_light;
+	void cinematic_lighting_set_primary_light(const float pitch, const float yaw, const float r, const float g, const float b)
+	{
+		p_cinematic_lighting_set_primary_light(pitch, yaw, r, g, b);
+	}
+
+	typedef void(__cdecl* cinematic_lighting_set_secondary_light_t)(const float pitch, const float yaw, const float r, const float g, const float b);
+	cinematic_lighting_set_secondary_light_t p_cinematic_lighting_set_secondary_light;
+	void cinematic_lighting_set_secondary_light(const float pitch, const float yaw, const float r, const float g, const float b)
+	{
+		p_cinematic_lighting_set_secondary_light(pitch, yaw, r, g, b);
+	}
+
+	typedef void(__cdecl* cinematic_lighting_set_ambient_light_t)(const float r, const float g, const float b);
+	cinematic_lighting_set_ambient_light_t p_cinematic_lighting_set_ambient_light;
+	void cinematic_lighting_set_ambient_light(const float r, const float g, const float b)
+	{
+		p_cinematic_lighting_set_ambient_light(r, g, b);
+	}
+
+	typedef void(__cdecl* object_uses_cinematic_lighting_t)(const datum object, const bool enabled);
+	object_uses_cinematic_lighting_t p_object_uses_cinematic_lighting;
+	void object_uses_cinematic_lighting(const datum object, const bool enabled)
+	{
+		p_object_uses_cinematic_lighting(object, enabled);
+	}
+
+	void pvs_set_object(const datum object)
+	{
+		if (object == DATUM_INDEX_NONE)
+		{
+			s_game_globals::get()->pvs_object_is_set = 0;
+		}
+		else
+		{
+			s_game_globals::get()->pvs_object_is_set = 1;
+			s_game_globals::get()->pvs_object_datum = object;
+		}
+	}
+
+	void pvs_clear()
+	{
+		s_game_globals::get()->pvs_object_is_set = 0;
+	}
+
+	void* __cdecl pvs_clear_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool)
+	{
+		for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
+		{
+			if (NetworkSession::PlayerIsActive(i))
+			{
+				NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), e_hs_function_pvs_clear, sizeof(s_networked_hs_function::arg_buffer), nullptr);
+			}
+		}
+		pvs_clear();
+
+		return p_hs_return(thread_id, 0);
+	}
+
+	typedef bool(__cdecl* device_set_overlay_track_t)(const datum device, const string_id animation);
+	device_set_overlay_track_t p_device_set_overlay_track;
+	bool device_set_overlay_track(const datum device, const string_id animation)
+	{
+		return p_device_set_overlay_track(device, animation);
+	}
+
+	typedef void(__cdecl* device_animate_overlay_t)(const datum device_datum, const float position, const float time, const float unk1, const float unk2);
+	device_animate_overlay_t p_device_animate_overlay;
+	void device_animate_overlay(const datum device_datum, const float position, const float time, const float unk1, const float unk2)
+	{
+		p_device_animate_overlay(device_datum, position, time, unk1, unk2);
+	}
 
 	void __cdecl print_to_console(const char* output)
 	{
@@ -195,6 +347,8 @@ namespace hs
 			s_hs_device_set_position_track_args* args = (s_hs_device_set_position_track_args*)new_args;
 			const s_object_data_definition* device_object = object_get_fast_unsafe(args->device);
 			
+			if (args->device == DATUM_INDEX_NONE) { break; }
+
 			args->device = device_object->simulation_entity_index;
 			break;
 		}
@@ -204,6 +358,8 @@ namespace hs
 			s_hs_device_animate_position_args* args = (s_hs_device_animate_position_args*)new_args;
 			const s_object_data_definition* device_object = object_get_fast_unsafe(args->device);
 
+			if (args->device == DATUM_INDEX_NONE) { break; }
+
 			args->device = device_object->simulation_entity_index;
 			break;
 		}
@@ -212,6 +368,8 @@ namespace hs
 		{
 			s_hs_object_cinematic_lod_args* args = (s_hs_object_cinematic_lod_args*)new_args;
 			const s_object_data_definition* object = object_get_fast_unsafe(args->object);
+
+			if (args->object == DATUM_INDEX_NONE) { break; }
 
 			args->object = object->simulation_entity_index;
 			break;
@@ -223,7 +381,10 @@ namespace hs
 			const s_object_data_definition* object = object_get_fast_unsafe(args->object);
 			const s_object_data_definition* relative_object = object_get_fast_unsafe(args->relative_object);
 
+			if (args->object == DATUM_INDEX_NONE) { break; }
 			args->object = object->simulation_entity_index;
+
+			if (args->relative_object == DATUM_INDEX_NONE) { break; }
 			args->relative_object = relative_object->simulation_entity_index;
 			break;
 		}
@@ -233,7 +394,82 @@ namespace hs
 			s_hs_ai_play_line_on_object_args* args = (s_hs_ai_play_line_on_object_args*)new_args;
 			const s_object_data_definition* object = object_get_fast_unsafe(args->object);
 
+			if (args->object == DATUM_INDEX_NONE) { break; }
+
 			args->object = object->simulation_entity_index;
+			break;
+		}
+		case e_hs_function_custom_animation_loop:
+		{
+			s_hs_custom_animation_args* args = (s_hs_custom_animation_args*)new_args;
+			const s_object_data_definition* object = object_get_fast_unsafe(args->object);
+
+			if (args->object == DATUM_INDEX_NONE) { break; }
+
+			args->object = object->simulation_entity_index;
+			break;
+		}
+		case e_hs_function_objects_attach:
+		{
+			s_hs_objects_attach_args* args = (s_hs_objects_attach_args*)new_args;
+			const s_object_data_definition* parent_object = object_get_fast_unsafe(args->parent_object);
+			const s_object_data_definition* child_object = object_get_fast_unsafe(args->child_object);
+
+			if (args->parent_object == DATUM_INDEX_NONE || args->child_object == DATUM_INDEX_NONE) { break; }
+
+			args->parent_object = parent_object->simulation_entity_index;
+			args->child_object = child_object->simulation_entity_index;
+			break;
+		}
+		case e_hs_function_object_hide:
+		{			
+			s_hs_object_hide_args* args = (s_hs_object_hide_args*)new_args;
+			const s_object_data_definition* object = object_get_fast_unsafe(args->object);
+
+			if (args->object == DATUM_INDEX_NONE) { break; }
+
+			args->object = object->simulation_entity_index;
+			break;
+		}
+		case e_hs_function_object_uses_cinematic_lighting:
+		{
+			s_hs_object_uses_cinematic_lighting_args* args = (s_hs_object_uses_cinematic_lighting_args*)new_args;
+			const s_object_data_definition* object = object_get_fast_unsafe(args->object);
+
+			if (args->object == DATUM_INDEX_NONE) { break; }
+
+			args->object =  object->simulation_entity_index;
+			break;
+		}
+		case e_hs_function_pvs_set_object:
+		{
+			datum* object_datum = (datum*)new_args;
+			const s_object_data_definition* object = object_get_fast_unsafe(*object_datum);
+
+			if (*object_datum == DATUM_INDEX_NONE) { break; }
+
+			*object_datum = object->simulation_entity_index;
+			break;
+		}
+		case e_hs_function_device_set_overlay_track:
+		{
+			s_hs_device_set_overlay_track_args* args = (s_hs_device_set_overlay_track_args*)new_args;
+			const s_object_data_definition* device_object = object_get_fast_unsafe(args->device);
+
+			if (args->device == DATUM_INDEX_NONE) { break; }
+
+			args->device = device_object->simulation_entity_index;
+			break;
+		}
+		// Send the entity index instead of the object index since object index isnt the same on the client
+		case e_hs_function_device_animate_overlay:
+		{
+			s_hs_device_animate_overlay_args* args = (s_hs_device_animate_overlay_args*)new_args;
+			const s_object_data_definition* device_object = object_get_fast_unsafe(args->device);
+
+			if (args->device == DATUM_INDEX_NONE) { break; }
+
+			args->device = device_object->simulation_entity_index;
 			break;
 		}
 		}
@@ -339,7 +575,7 @@ namespace hs
 		case e_hs_function_ai_play_line_on_object:
 		{
 			s_hs_ai_play_line_on_object_args* args = (s_hs_ai_play_line_on_object_args*)data->arg_buffer;
-			args->object = simulation_gamestate_entity_get_object_index(args->object);
+			args->object = (args->object == NULL ? NULL : simulation_gamestate_entity_get_object_index(args->object));
 
 			ai_play_line_on_object(args->object, args->sound);
 			break;
@@ -370,7 +606,6 @@ namespace hs
 			{
 				print_to_console("custom_animation_relative returned false on clients, this is very bad!!!!");
 			}
-
 			break;
 		}
 		case e_hs_function_object_cinematic_lod:
@@ -394,18 +629,108 @@ namespace hs
 			s_hs_device_set_position_track_args* args = (s_hs_device_set_position_track_args*)data->arg_buffer;
 			args->device = simulation_gamestate_entity_get_object_index(args->device);
 
-			p_device_set_position_track = Memory::GetAddress<device_set_position_track_t>(0x164257);
-			if (!device_set_position_track(args->device, args->animation, args->interpolation_time))
-			{
-				print_to_console("device_set_position_track returned false on clients, this is very bad!!!!");
-			}
+			device_set_position_track(args->device, args->animation, args->interpolation_time);
 			break;
 		}
 		case e_hs_function_switch_bsp:
 		case e_hs_function_switch_bsp_by_name:
-		{			
+		{
 			const __int16* bsp_index = (const __int16*)data->arg_buffer;
 			switch_bsp(*bsp_index);
+			break;
+		}
+		case e_hs_function_custom_animation_loop:
+		{
+			s_hs_custom_animation_args* args = (s_hs_custom_animation_args*)data->arg_buffer;
+			args->object = simulation_gamestate_entity_get_object_index(args->object);
+
+			if (!custom_animation_loop(args->object, args->animation_path, args->animation, args->interpolates_into_animation))
+			{
+				print_to_console("custom_animation_loop returned false on clients, this is very bad!!!!");
+			}
+			break;
+		}
+		case e_hs_function_camera_set_field_of_view:
+		{
+			const s_hs_camera_set_field_of_view_args* args = (const s_hs_camera_set_field_of_view_args*)data->arg_buffer;
+			camera_set_field_of_view(args->fov, args->ticks);
+			break;
+		}
+		case e_hs_function_objects_attach:
+		{
+			s_hs_objects_attach_args* args = (s_hs_objects_attach_args*)data->arg_buffer;
+			args->parent_object = simulation_gamestate_entity_get_object_index(args->parent_object);
+			args->child_object = simulation_gamestate_entity_get_object_index(args->child_object);
+
+			objects_attach(args->parent_object, args->parent_marker, args->child_object, args->child_marker);
+			break;
+		}
+		case e_hs_function_object_hide:
+		{
+			s_hs_object_hide_args* args = (s_hs_object_hide_args*)data->arg_buffer;
+			args->object = simulation_gamestate_entity_get_object_index(args->object);
+
+			object_hide(args->object, args->hidden);
+			break;
+		}
+		case e_hs_function_game_save_cinematic_skip:
+		{
+			game_save_cinematic_skip();
+			break;
+		}
+		case e_hs_function_cinematic_lighting_set_primary_light:
+		{
+			const s_hs_cinematic_lighting_set_light_args* args = (const s_hs_cinematic_lighting_set_light_args*)data->arg_buffer;
+			cinematic_lighting_set_primary_light(args->pitch, args->yaw, args->r, args->g, args->b);
+			break;
+		}
+		case e_hs_function_cinematic_lighting_set_secondary_light:
+		{
+			const s_hs_cinematic_lighting_set_light_args* args = (const s_hs_cinematic_lighting_set_light_args*)data->arg_buffer;
+			cinematic_lighting_set_secondary_light(args->pitch, args->yaw, args->r, args->g, args->b);
+			break;
+		}
+		case e_hs_function_cinematic_lighting_set_ambient_light:
+		{
+			const s_hs_cinematic_lighting_set_ambient_light_args* args = (const s_hs_cinematic_lighting_set_ambient_light_args*)data->arg_buffer;
+			cinematic_lighting_set_ambient_light(args->r, args->g, args->b);
+			break;
+		}
+		case e_hs_function_object_uses_cinematic_lighting:
+		{
+			s_hs_object_uses_cinematic_lighting_args* args = (s_hs_object_uses_cinematic_lighting_args*)data->arg_buffer;
+			args->object = simulation_gamestate_entity_get_object_index(args->object);
+
+			object_uses_cinematic_lighting(args->object, args->enabled);
+			break;
+		}
+		case e_hs_function_pvs_set_object:
+		{
+			datum* object_datum = (datum*)data->arg_buffer;
+			*object_datum = simulation_gamestate_entity_get_object_index(*object_datum);
+
+			pvs_set_object(*object_datum);
+			break;
+		}
+		case e_hs_function_pvs_clear:
+		{
+			pvs_clear();
+			break;
+		}
+		case e_hs_function_device_set_overlay_track:
+		{
+			s_hs_device_set_overlay_track_args* args = (s_hs_device_set_overlay_track_args*)data->arg_buffer;
+			args->device = simulation_gamestate_entity_get_object_index(args->device);
+
+			device_set_overlay_track(args->device, args->animation);
+			break;
+		}
+		case e_hs_function_device_animate_overlay:
+		{
+			s_hs_device_animate_overlay_args* args = (s_hs_device_animate_overlay_args*)data->arg_buffer;
+			args->device = simulation_gamestate_entity_get_object_index(args->device);
+
+			device_animate_overlay(args->device, args->position, args->time, args->unk1, args->unk2);
 			break;
 		}
 		default:
@@ -421,8 +746,13 @@ namespace hs
 		DETOUR_BEGIN();
 		DETOUR_ATTACH(p_hs_arguments_evaluate, Memory::GetAddress<hs_arguments_evaluate_t>(0x9581D, 0xAAA1D), hs_arguments_evaluate);
 		DETOUR_COMMIT();
-
-
+		
+		// Write pointers for script functions that have no arguments
+		WritePointer(Memory::GetAddress(0x3C0CD4, 0x37D5EC), cinematic_start_evaluate);
+		WritePointer(Memory::GetAddress(0x3C0CE4, 0x37D5FC), cinematic_stop_evaluate);
+		WritePointer(Memory::GetAddress(0x3C25AC, 0x37EEC4), game_save_cinematic_skip_evaluate);
+		WritePointer(Memory::GetAddress(0x3C071C, 0x37D034), pvs_clear_evaluate);
+		
 		// hook the print command to redirect the output to our console
 		if (!Memory::IsDedicatedServer())
 		{
@@ -435,6 +765,7 @@ namespace hs
 		ApplyHooks();
 
 		p_hs_arguments_evaluate = Memory::GetAddress<hs_arguments_evaluate_t>(0x9581D, 0xAAA1D);
+		p_hs_return = Memory::GetAddress<hs_return_t*>(0x9505D, 0xAA25D);
 
 		p_unit_kill = Memory::GetAddress<unit_kill_t*>(0x13B514, 0x12A363);
 		p_unit_in_vehicle = Memory::GetAddress<unit_in_vehicle_t*>(0x1846D9, 0x16E775);
@@ -462,6 +793,17 @@ namespace hs
 			p_device_animate_position = Memory::GetAddress<device_animate_position_t>(0x163911);
 			p_device_set_position_track = Memory::GetAddress<device_set_position_track_t>(0x164257);
 			p_switch_bsp = Memory::GetAddress<switch_bsp_t>(0x39563);
+			p_custom_animation_loop = Memory::GetAddress<custom_animation_loop_t>(0x18563E);
+			p_camera_set_field_of_view = Memory::GetAddress<camera_set_field_of_view_t>(0x97F38);
+			p_objects_attach = Memory::GetAddress<objects_attach_t>(0x14B7DC);
+			p_object_hide = Memory::GetAddress<object_hide_t>(0xFDD52);
+			p_game_save_cinematic_skip = Memory::GetAddress<game_save_cinematic_skip_t>(0x9E46B);
+			p_cinematic_lighting_set_primary_light = Memory::GetAddress<cinematic_lighting_set_primary_light_t>(0x130900);
+			p_cinematic_lighting_set_secondary_light = Memory::GetAddress<cinematic_lighting_set_secondary_light_t>(0x1309BE);
+			p_cinematic_lighting_set_ambient_light = Memory::GetAddress<cinematic_lighting_set_ambient_light_t>(0x130A52);
+			p_object_uses_cinematic_lighting = Memory::GetAddress<object_uses_cinematic_lighting_t>(0x133C17);
+			p_device_set_overlay_track = Memory::GetAddress<device_set_overlay_track_t>(0x1648E7);
+			p_device_animate_overlay = Memory::GetAddress<device_animate_overlay_t>(0x1639A5);
 		}
 	}
 }

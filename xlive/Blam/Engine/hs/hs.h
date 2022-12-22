@@ -2,7 +2,7 @@
 #include "Blam/Cache/DataTypes/StringID.h"
 #include "Blam/Math/real_math.h"
 
-#define HS_SYNC_TABLE_SIZE 16
+#define HS_SYNC_TABLE_SIZE 30
 #define HS_SENT_BUFFER_SIZE 128
 
 namespace hs
@@ -1096,7 +1096,20 @@ namespace hs
 		e_hs_function_device_animate_position,
 		e_hs_function_device_set_position_track,
 		e_hs_function_switch_bsp,
-		e_hs_function_switch_bsp_by_name
+		e_hs_function_switch_bsp_by_name,
+		e_hs_function_custom_animation_loop,
+		e_hs_function_camera_set_field_of_view,
+		e_hs_function_objects_attach,
+		e_hs_function_object_hide,
+		e_hs_function_game_save_cinematic_skip,
+		e_hs_function_cinematic_lighting_set_primary_light,
+		e_hs_function_cinematic_lighting_set_secondary_light,
+		e_hs_function_cinematic_lighting_set_ambient_light,
+		e_hs_function_object_uses_cinematic_lighting,
+		e_hs_function_pvs_set_object,
+		e_hs_function_pvs_clear,
+		e_hs_function_device_set_overlay_track,
+		e_hs_function_device_animate_overlay
 	};
 
 	struct HaloScriptGlobal
@@ -1140,7 +1153,7 @@ namespace hs
 	struct s_hs_ai_play_line_on_object_args
 	{
 		datum object;
-		char* sound;
+		string_id sound;
 	};
 
 	struct s_hs_camera_set_animation_relative_args
@@ -1181,6 +1194,71 @@ namespace hs
 		datum device;
 		string_id animation;
 		float interpolation_time;
+	};
+	
+	struct s_hs_custom_animation_args
+	{
+		datum object;
+		datum animation_path;
+		string_id animation;
+		bool interpolates_into_animation;
+	};
+
+	struct s_hs_camera_set_field_of_view_args
+	{
+		float fov;
+		short ticks;
+	};
+
+	struct s_hs_objects_attach_args
+	{
+		datum parent_object;
+		string_id parent_marker;
+		datum child_object;
+		string_id child_marker;
+	};
+	
+	struct s_hs_object_hide_args
+	{
+		datum object;
+		bool hidden;
+	};
+
+	struct s_hs_cinematic_lighting_set_light_args
+	{
+		float pitch;
+		float yaw;
+		float r;
+		float g;
+		float b;
+	};
+
+	struct s_hs_cinematic_lighting_set_ambient_light_args
+	{
+		float r;
+		float g;
+		float b;
+	};
+
+	struct s_hs_object_uses_cinematic_lighting_args
+	{
+		datum object;
+		bool enabled;
+	};
+
+	struct s_hs_device_set_overlay_track_args
+	{
+		datum device;
+		string_id animation;
+	};
+
+	struct s_hs_device_animate_overlay_args
+	{
+		datum device;
+		float position;
+		float time;
+		float unk1;
+		float unk2;
 	};
 
 	void UnitKill(datum unitDatum);

@@ -1,5 +1,6 @@
 #pragma once
-#include "Blam/Cache/DataTypes/BlamDataTypes.h"
+
+#include "Blam/Cache/DataTypes/BlamPrimitiveType.h"
 #include "Blam/Engine/Game/GameOptions.h"
 #include "Blam/Engine/structures/structures.h"
 

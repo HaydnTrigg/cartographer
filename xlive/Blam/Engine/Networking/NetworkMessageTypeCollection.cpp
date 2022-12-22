@@ -413,20 +413,24 @@ void NetworkMessage::SendHSFunction(int peerIdx, hs::e_hs_function function_type
 
 		hs::s_networked_hs_function data;
 		data.function_type = function_type;
-		memset(data.arg_buffer, 0, sizeof(data.arg_buffer));
-		switch (function_type)
+
+		if (args != nullptr)
 		{
-		case hs::e_hs_function::e_hs_function_print:
-		{
-			const char* text = *(const char**)args;
-			memcpy(data.arg_buffer, text, argSize);
-			break;
-		}
-		default:
-		{
-			memcpy(data.arg_buffer, args, argSize);
-			break;
-		}
+			memset(data.arg_buffer, 0, sizeof(data.arg_buffer));
+			switch (function_type)
+			{
+			case hs::e_hs_function::e_hs_function_print:
+			{
+				const char* text = *(const char**)args;
+				memcpy(data.arg_buffer, text, argSize);
+				break;
+			}
+			default:
+			{
+				memcpy(data.arg_buffer, args, argSize);
+				break;
+			}
+			}
 		}
 
 		if (peerIdx != -1 && !NetworkSession::PeerIndexLocal(peerIdx))
