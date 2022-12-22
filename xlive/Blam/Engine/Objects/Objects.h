@@ -219,8 +219,6 @@ struct s_weapon_data_definition : s_object_data_definition
 };
 CHECK_STRUCT_SIZE(s_weapon_data_definition, 0x25C);
 
-
-
 enum e_object_header_flag :BYTE
 {
 	_object_header_active_bit = 0x1,
@@ -232,7 +230,6 @@ enum e_object_header_flag :BYTE
 	_object_header_child_bit = 0x40,
 };
 
-
 struct s_object_header {
 	__int16 datum_salt; //0x00
 	e_object_header_flag flags; // 0x02
@@ -242,6 +239,35 @@ struct s_object_header {
 	char* object; //0x08 -
 };
 CHECK_STRUCT_SIZE(s_object_header, 0xC);
+
+struct s_object_globals
+{
+	bool initialized;
+	byte b_collecting_garbage;
+	byte b_unsafe_garbage_collection;
+	byte b_objects_updating;
+	__int16 ticks;
+	WORD unk6;
+	DWORD unk8;
+	DWORD unkC;
+	DWORD unk10;
+	int total_game_time_ticks;
+	DWORD unk18;
+	real_color_rgb cinematic_ambient_light_color;
+	real_color_rgb cinematic_light_vector;
+	float unkfloat1;
+	float unkfloat2;
+	real_color_rgb cinematic_primary_light_color;
+	real_vector3d cinematic_primary_light_vector;
+	real_color_rgb cinematic_secondary_light_color;
+	real_vector3d cinematic_secondary_light_vector;
+	WORD unk6C;
+	float global_object_functions[4];
+	bool b_custom_animations_hold_on_last_frame;
+	bool b_custom_animations_prevent_lipsync_head_movement;
+	bool b_warthog_chaingun_light_on;
+	bool pad83;
+};
 
 static s_data_array* get_objects_header()
 {
