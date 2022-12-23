@@ -32,6 +32,7 @@
 #include "H2MOD/Modules/Input/Mouseinput.h"
 #include "H2MOD/Modules/Input/PlayerControl.h"
 #include "H2MOD/Modules/KantTesting/KantTesting.h"
+#include "H2MOD/Modules/MapManager/MapManager.h"
 #include "H2MOD/Modules/MainMenu/MapSlots.h"
 #include "H2MOD/Modules/MainMenu/Ranks.h"
 #include "H2MOD/Modules/ObserverMode/ObserverMode.h"
