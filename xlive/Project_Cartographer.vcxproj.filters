@@ -178,6 +178,7 @@
     <ClCompile Include="Blam\Engine\objects\reference_lists.cpp" />
     <ClCompile Include="H2MOD\Modules\Coop\Coop.cpp" />
     <ClCompile Include="Blam\Engine\Simulation\simulation_world.cpp" />
+    <ClCompile Include="Blam\Engine\hs\networked_hs_handler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdparty\discord\discord_register.h" />
@@ -547,6 +548,8 @@
     <ClInclude Include="Blam\Engine\objects\objects.h" />
     <ClInclude Include="Blam\Engine\objects\reference_lists.h" />
     <ClInclude Include="H2MOD\Modules\Coop\Coop.h" />
+    <ClInclude Include="Blam\Engine\hs\networked_hs_handler.h" />
+    <ClInclude Include="Blam\Engine\hs\hs_function.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc" />

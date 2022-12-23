@@ -82,7 +82,7 @@ void GraveRobber::PickupSkull(datum playerIdx, datum skullDatum)
 		p_update_player_score(player_score_data, playerIdx, 0, 1, -1, 0);
 	}
 	
-	hs::ObjectDestroy(skullDatum);
+	object_destroy(skullDatum);
 
 	if (!Memory::IsDedicatedServer())
 	{
