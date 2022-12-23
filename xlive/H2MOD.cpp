@@ -1154,7 +1154,7 @@ void H2MOD::Initialize()
 	MeleeFix::Initialize();
 	TagFixes::Initalize();
 	MapSlots::Initialize();
-	hs::Initialize();
+	hs_initialize();
 	KantTesting::Initialize();
 	H2X::ApplyPatches();
 	H2MOD::ApplyHooks();
