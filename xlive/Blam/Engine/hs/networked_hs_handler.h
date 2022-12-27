@@ -2,11 +2,14 @@
 #include "hs_function.h"
 
 #define HS_SENT_BUFFER_SIZE 128
-#define HS_SYNC_TABLE_SIZE 30
+#define HS_SYNC_TABLE_SIZE 34
+
+extern long g_next_script_id;
 
 struct s_networked_hs_function
 {
 	e_hs_function function_type;
+	unsigned long script_id;
 	char arg_buffer[HS_SENT_BUFFER_SIZE];
 };
 
@@ -41,9 +44,16 @@ const e_hs_function hs_sync_table[HS_SYNC_TABLE_SIZE]
 	e_hs_function_pvs_set_object,
 	e_hs_function_pvs_clear,
 	e_hs_function_device_set_overlay_track,
-	e_hs_function_device_animate_overlay
+	e_hs_function_device_animate_overlay,
+	e_hs_function_object_dynamic_simulation_disable,
+	e_hs_function_game_save,
+	e_hs_function_game_revert,
+	e_hs_function_cinematic_skip_start_internal,
+	e_hs_function_cinematic_skip_stop_internal
 };
 
 void modify_sent_arguments(void* old_args, byte* new_args, unsigned __int16 op_code);
 void send_script_arguments_to_clients(void* args, unsigned __int16 op_code);
 void call_networked_hs_function(const s_networked_hs_function* data);
+void execute_stored_hs_commands();
+void store_hs_commands(const s_networked_hs_function* data);

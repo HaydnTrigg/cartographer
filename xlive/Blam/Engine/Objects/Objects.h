@@ -215,7 +215,7 @@ CHECK_STRUCT_SIZE(s_biped_data_definition, 0x480 + 4);
 
 struct s_weapon_data_definition : s_object_data_definition
 {
-	PAD(0x25C - sizeof(s_object_data_definition));
+	PAD(304);
 };
 CHECK_STRUCT_SIZE(s_weapon_data_definition, 0x25C);
 

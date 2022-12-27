@@ -86,11 +86,13 @@ bool __cdecl decode_anti_cheat_message(bitstream* stream, int a2, s_anti_cheat* 
 void __cdecl encode_hs_function_message(bitstream* stream, int a2, s_networked_hs_function* data)
 {
 	stream->data_encode_integer("hs-function-type", data->function_type, sizeof(e_hs_function) * 8);
+	stream->data_encode_integer("hs-script-id", g_next_script_id, sizeof(g_next_script_id) * 8);
 	stream->data_encode_bits("hs-function-args", data->arg_buffer, sizeof(data->arg_buffer) * 8);
 }
 bool __cdecl decode_hs_function_message(bitstream* stream, int a2, s_networked_hs_function* data)
 {
 	data->function_type = (e_hs_function)stream->data_decode_integer("hs-function-type", sizeof(e_hs_function) * 8);
+	data->script_id = stream->data_decode_integer("hs-script-id", sizeof(data->script_id) * 8);
 	stream->data_decode_bits("hs-function-args", data->arg_buffer, sizeof(data->arg_buffer) * 8);
 	return stream->overflow() == false;
 }
@@ -285,7 +287,7 @@ void __stdcall handle_channel_message_hook(void *thisx, int network_channel_inde
 		if (peer_network_channel->channel_state == s_network_channel::e_channel_state::unk_state_5)
 		{
 			const s_networked_hs_function* recieved_data = (s_networked_hs_function*)packet;
-			call_networked_hs_function(recieved_data);
+			store_hs_commands(recieved_data);
 		}
 		break;
 	}

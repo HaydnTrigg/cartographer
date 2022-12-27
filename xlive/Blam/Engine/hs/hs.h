@@ -50,7 +50,14 @@ void pvs_clear();
 void* __cdecl pvs_clear_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool);
 bool device_set_overlay_track(const datum device, const string_id animation);
 void device_animate_overlay(const datum device_datum, const float position, const float time, const float unk1, const float unk2);
+void __cdecl object_dynamic_simulation_disable(const datum object, bool disable_dynamic_simulation);
 void __cdecl print_to_console(const char* output);
+void game_save();
+void* __cdecl game_save_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool);
+void game_revert();
+void* __cdecl game_revert_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool);
+void* __cdecl cinematic_skip_start_internal_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool);
+void* __cdecl cinematic_skip_stop_internal_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool);
 #pragma endregion
 
 void hs_initialize();
