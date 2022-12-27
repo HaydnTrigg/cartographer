@@ -2,16 +2,19 @@
 #include "hs.h"
 #include "networked_hs_handler.h"
 
+#include "Blam/Engine/cutscene/cinematics.h"
 #include "Blam/Engine/Networking/NetworkMessageTypeCollection.h"
 #include "Blam/Engine/Objects/Objects.h"
 #include "Blam/Engine/Players/Players.h"
 #include "H2MOD/Modules/OnScreenDebug/OnscreenDebug.h"
+#include "H2MOD/Modules/EventHandler/EventHandler.hpp"
 #include "Util/Hooks/Hook.h"
 
 typedef void* (__cdecl* hs_arguments_evaluate_t)(__int16 op_code, unsigned __int16 thread_id, bool unk_bool);
 hs_arguments_evaluate_t p_hs_arguments_evaluate;
 typedef char* (__cdecl hs_return_t)(int a1, int a2);
 hs_return_t* p_hs_return;
+typedef void(__cdecl* no_arg_hs_function_t)();
 
 typedef int(__cdecl unit_kill_t)(datum unitDatum);
 unit_kill_t* p_unit_kill;
@@ -125,8 +128,7 @@ void __cdecl camera_set_animation_relative(const char* animation_path, const cha
 	p_camera_set_animation_relative(animation_path, animation, unit, cutscene_flag_index);
 }
 
-typedef void(__cdecl* cinematic_start_t)();
-cinematic_start_t p_cinematic_start;
+no_arg_hs_function_t p_cinematic_start;
 void cinematic_start()
 {
 	p_cinematic_start();
@@ -142,12 +144,12 @@ void* __cdecl cinematic_start_evaluate(const __int16 op_code, const int thread_i
 		}
 	}
 	cinematic_start();
+	g_next_script_id++;
 
 	return p_hs_return(thread_id, 0);
 }
 
-typedef void(__cdecl* cinematic_stop_t)();
-cinematic_stop_t p_cinematic_stop;
+no_arg_hs_function_t p_cinematic_stop;
 void cinematic_stop()
 {
 	p_cinematic_stop();
@@ -163,6 +165,7 @@ void* __cdecl cinematic_stop_evaluate(__int16 op_code, int thread_id, char unk_b
 		}
 	}
 	cinematic_stop();
+	g_next_script_id++;
 
 	return p_hs_return(thread_id, 0);
 }
@@ -230,8 +233,7 @@ void object_hide(const datum object, const bool hidden)
 	p_object_hide(object, hidden);
 }
 
-typedef void(__cdecl* game_save_cinematic_skip_t)();
-game_save_cinematic_skip_t p_game_save_cinematic_skip;
+no_arg_hs_function_t p_game_save_cinematic_skip;
 void game_save_cinematic_skip()
 {
 	p_game_save_cinematic_skip();
@@ -247,6 +249,7 @@ void* __cdecl game_save_cinematic_skip_evaluate(const __int16 op_code, const int
 		}
 	}
 	game_save_cinematic_skip();
+	g_next_script_id++;
 
 	return p_hs_return(thread_id, 0);
 }
@@ -307,6 +310,7 @@ void* __cdecl pvs_clear_evaluate(const __int16 op_code, const int thread_id, con
 		}
 	}
 	pvs_clear();
+	g_next_script_id++;
 
 	return p_hs_return(thread_id, 0);
 }
@@ -324,6 +328,87 @@ void device_animate_overlay(const datum device_datum, const float position, cons
 {
 	p_device_animate_overlay(device_datum, position, time, unk1, unk2);
 }
+
+
+typedef void(__cdecl* object_dynamic_simulation_disable_t)(const datum object, bool disable_dynamic_simulation);
+object_dynamic_simulation_disable_t p_object_dynamic_simulation_disable;
+void __cdecl object_dynamic_simulation_disable(const datum object, bool disable_dynamic_simulation)
+{
+	p_object_dynamic_simulation_disable(object, disable_dynamic_simulation);
+}
+
+no_arg_hs_function_t p_game_save;
+void game_save()
+{
+	p_game_save();
+}
+
+void* __cdecl game_save_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool)
+{
+	for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
+	{
+		if (NetworkSession::PlayerIsActive(i))
+		{
+			NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), e_hs_function_game_save, HS_SENT_BUFFER_SIZE, nullptr);
+		}
+	}
+	game_save();
+	g_next_script_id++;
+
+	return p_hs_return(thread_id, 0);
+}
+
+no_arg_hs_function_t p_game_revert;
+void game_revert()
+{
+	p_game_revert();
+}
+
+void* __cdecl game_revert_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool)
+{
+	for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
+	{
+		if (NetworkSession::PlayerIsActive(i))
+		{
+			NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), e_hs_function_game_revert, HS_SENT_BUFFER_SIZE, nullptr);
+		}
+	}
+	game_revert();
+	g_next_script_id++;
+
+	return p_hs_return(thread_id, 0);
+}
+
+void* __cdecl cinematic_skip_start_internal_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool)
+{
+	for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
+	{
+		if (NetworkSession::PlayerIsActive(i))
+		{
+			NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), e_hs_function_cinematic_skip_start_internal, HS_SENT_BUFFER_SIZE, nullptr);
+		}
+	}
+	s_cinematic_globals::cinematic_skip_start_internal();
+	g_next_script_id++;
+
+	return p_hs_return(thread_id, 0);
+}
+
+void* __cdecl cinematic_skip_stop_internal_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool)
+{
+	for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
+	{
+		if (NetworkSession::PlayerIsActive(i))
+		{
+			NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), e_hs_function_cinematic_skip_stop_internal, HS_SENT_BUFFER_SIZE, nullptr);
+		}
+	}
+	s_cinematic_globals::cinematic_skip_stop_internal();
+	g_next_script_id++;
+
+	return p_hs_return(thread_id, 0);
+}
+
 
 void __cdecl print_to_console(const char* output)
 {
@@ -348,8 +433,26 @@ void* __cdecl hs_arguments_evaluate(unsigned __int16 op_code, unsigned __int16 t
 	return args;
 }
 
+typedef void(__cdecl* hs_update_main_t)();
+hs_update_main_t p_hs_update_main;
+void __cdecl hs_update()
+{
+	p_hs_update_main();
+	execute_stored_hs_commands();
+}
+
+void on_map_load()
+{
+	g_next_script_id = 0;
+}
+
 void ApplyHooks()
 {
+	EventHandler::register_callback(on_map_load, EventType::map_load, EventExecutionType::execute_after);
+
+	// Hook hs_update function so we execute the stored hs functions recieved from the network in the proper area
+	PatchCall(Memory::GetAddress(0x4A523, 0x437A1), hs_update);
+
 	// Hook arguments evaluate function so we can add our functionality for syncing the scripts
 	DETOUR_BEGIN();
 	DETOUR_ATTACH(p_hs_arguments_evaluate, Memory::GetAddress<hs_arguments_evaluate_t>(0x9581D, 0xAAA1D), hs_arguments_evaluate);
@@ -360,6 +463,10 @@ void ApplyHooks()
 	WritePointer(Memory::GetAddress(0x3C0CE4, 0x37D5FC), cinematic_stop_evaluate);
 	WritePointer(Memory::GetAddress(0x3C25AC, 0x37EEC4), game_save_cinematic_skip_evaluate);
 	WritePointer(Memory::GetAddress(0x3C071C, 0x37D034), pvs_clear_evaluate);
+	WritePointer(Memory::GetAddress(0x3C0F34, 0x37D84C), game_save_evaluate);
+	WritePointer(Memory::GetAddress(0x3C0DD4, 0x37D6EC), game_revert_evaluate);
+	WritePointer(Memory::GetAddress(0x3C0CF4, 0x37D60C), cinematic_skip_start_internal_evaluate);
+	WritePointer(Memory::GetAddress(0x3C0D04, 0x37D61C), cinematic_skip_stop_internal_evaluate);
 	
 	// hook the print command to redirect the output to our console
 	if (!Memory::IsDedicatedServer())
@@ -373,6 +480,8 @@ void hs_initialize()
 	ApplyHooks();
 	p_hs_arguments_evaluate = Memory::GetAddress<hs_arguments_evaluate_t>(0x9581D, 0xAAA1D);
 	p_hs_return = Memory::GetAddress<hs_return_t*>(0x9505D, 0xAA25D);
+	p_hs_update_main = Memory::GetAddress<hs_update_main_t>(0x96DF7, 0xABFF7);
+
 	p_unit_kill = Memory::GetAddress<unit_kill_t*>(0x13B514, 0x12A363);
 	p_unit_in_vehicle = Memory::GetAddress<unit_in_vehicle_t*>(0x1846D9, 0x16E775);
 	p_unit_get_health = Memory::GetAddress<unit_get_health_t*>(0x184477, 0x165E13);
@@ -392,8 +501,8 @@ void hs_initialize()
 		p_sound_impulse_start = Memory::GetAddress<sound_impulse_start_t>(0x8A825);
 		p_ai_play_line_on_object = Memory::GetAddress<ai_play_line_on_object_t>(0x30F886);
 		p_camera_set_animation_relative = Memory::GetAddress<camera_set_animation_relative_t>(0x978BC);
-		p_cinematic_start = Memory::GetAddress<cinematic_start_t>(0x3A6D0);
-		p_cinematic_stop = Memory::GetAddress<cinematic_stop_t>(0x3A8C9);
+		p_cinematic_start = Memory::GetAddress<no_arg_hs_function_t>(0x3A6D0);
+		p_cinematic_stop = Memory::GetAddress<no_arg_hs_function_t>(0x3A8C9);
 		p_custom_animation_relative = Memory::GetAddress<custom_animation_relative_t>(0x18565F);
 		p_object_cinematic_lod = Memory::GetAddress<object_cinematic_lod_t>(0x133BE1);
 		p_device_animate_position = Memory::GetAddress<device_animate_position_t>(0x163911);
@@ -403,12 +512,15 @@ void hs_initialize()
 		p_camera_set_field_of_view = Memory::GetAddress<camera_set_field_of_view_t>(0x97F38);
 		p_objects_attach = Memory::GetAddress<objects_attach_t>(0x14B7DC);
 		p_object_hide = Memory::GetAddress<object_hide_t>(0xFDD52);
-		p_game_save_cinematic_skip = Memory::GetAddress<game_save_cinematic_skip_t>(0x9E46B);
+		p_game_save_cinematic_skip = Memory::GetAddress<no_arg_hs_function_t>(0x9E46B);
 		p_cinematic_lighting_set_primary_light = Memory::GetAddress<cinematic_lighting_set_primary_light_t>(0x130900);
 		p_cinematic_lighting_set_secondary_light = Memory::GetAddress<cinematic_lighting_set_secondary_light_t>(0x1309BE);
 		p_cinematic_lighting_set_ambient_light = Memory::GetAddress<cinematic_lighting_set_ambient_light_t>(0x130A52);
 		p_object_uses_cinematic_lighting = Memory::GetAddress<object_uses_cinematic_lighting_t>(0x133C17);
 		p_device_set_overlay_track = Memory::GetAddress<device_set_overlay_track_t>(0x1648E7);
 		p_device_animate_overlay = Memory::GetAddress<device_animate_overlay_t>(0x1639A5);
+		p_object_dynamic_simulation_disable = Memory::GetAddress<object_dynamic_simulation_disable_t>(0x14B4E0);
+		p_game_save = Memory::GetAddress<no_arg_hs_function_t>(0x9E4FB);
+		p_game_revert = Memory::GetAddress<no_arg_hs_function_t>(0x3951E);
 	}
 }

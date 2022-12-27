@@ -3,10 +3,16 @@
 #include "networked_hs_handler.h"
 
 #include "Blam/Cache/DataTypes/BlamPrimitiveType.h"
+#include "Blam/Engine/cutscene/cinematics.h"
 #include "Blam/Engine/Game/GameGlobals.h"
+#include "Blam/Engine/Game/GameTimeGlobals.h"
 #include "Blam/Engine/Networking/NetworkMessageTypeCollection.h"
 #include "Blam/Engine/Objects/Objects.h"
 #include "Blam/Engine/Simulation/simulation_world.h"
+#include "H2MOD/Modules/OnScreenDebug/OnscreenDebug.h"
+
+std::list<s_networked_hs_function> g_hs_function_backlog;
+long g_next_script_id = 0;
 
 // Modifies the arguments sent to the client depending on the script operation being executed
 void modify_sent_arguments(void* old_args, byte* new_args, unsigned __int16 op_code)
@@ -146,6 +152,15 @@ void modify_sent_arguments(void* old_args, byte* new_args, unsigned __int16 op_c
 		args->device = device_object->simulation_entity_index;
 		break;
 	}
+	case e_hs_function_object_dynamic_simulation_disable:
+	{
+		s_hs_object_dynamic_simulation_disable_args* args = (s_hs_object_dynamic_simulation_disable_args*)new_args;
+		const s_object_data_definition* device_object = object_get_fast_unsafe(args->object);
+
+		if (args->object == DATUM_INDEX_NONE) { break; }
+		args->object = device_object->simulation_entity_index;
+		break;
+	}
 	}
 }
 
@@ -177,12 +192,15 @@ void send_script_arguments_to_clients(void* args, unsigned __int16 op_code)
 				NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), (e_hs_function)op_code, sizeof(s_networked_hs_function::arg_buffer), new_args);
 			}
 		}
+		g_next_script_id++;
 		return;
 	}
 }
 
 void call_networked_hs_function(const s_networked_hs_function* data)
 {
+	LOG_INFO_GAME("halo script function: {} executed on the client", hs_function_strings[data->function_type]);
+
 	switch (data->function_type)
 	{
 	case e_hs_function_fade_out:
@@ -285,6 +303,7 @@ void call_networked_hs_function(const s_networked_hs_function* data)
 	{
 		s_hs_device_set_position_track_args* args = (s_hs_device_set_position_track_args*)data->arg_buffer;
 		args->device = simulation_gamestate_entity_get_object_index(args->device);
+		uint32_t string_id = args->animation.get_id();
 
 		device_set_position_track(args->device, args->animation, args->interpolation_time);
 		break;
@@ -390,10 +409,61 @@ void call_networked_hs_function(const s_networked_hs_function* data)
 		device_animate_overlay(args->device, args->position, args->time, args->unk1, args->unk2);
 		break;
 	}
+	case e_hs_function_object_dynamic_simulation_disable:
+	{
+		s_hs_object_dynamic_simulation_disable_args* args = (s_hs_object_dynamic_simulation_disable_args*)data->arg_buffer;
+		args->object = simulation_gamestate_entity_get_object_index(args->object);
+
+		object_dynamic_simulation_disable(args->object, args->disable_dynamic_simulation);
+		break;
+	}
+	case e_hs_function_game_save:
+	{
+		game_save();
+		break;
+	}
+	case e_hs_function_game_revert:
+	{
+		game_revert();
+		break;
+	}
+	case e_hs_function_cinematic_skip_start_internal:
+	{
+		s_cinematic_globals::cinematic_skip_start_internal();
+		break;
+	}
+	case e_hs_function_cinematic_skip_stop_internal:
+	{
+		s_cinematic_globals::cinematic_skip_stop_internal();
+		break;
+	}
 	default:
 	{
 		print_to_console("HS FUNCTION WITH TYPE THAT DOSENT EXIST SENT");
 		break;
 	}
 	}
+}
+
+void execute_stored_hs_commands()
+{
+	//if ((time_globals::get_game_time() % 2) != 0) { return; }
+
+	// loops through the backlogged functions and if one matches the next script id to be executred call it
+	for (auto it = g_hs_function_backlog.begin(); it != g_hs_function_backlog.end(); it++)
+	{
+		if (it->script_id == g_next_script_id)
+		{
+			g_next_script_id++;
+
+			call_networked_hs_function(&*it);
+			g_hs_function_backlog.erase(it);
+			return;
+		}
+	}
+}
+
+void store_hs_commands(const s_networked_hs_function* data)
+{
+	g_hs_function_backlog.push_back(*data);
 }
