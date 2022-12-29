@@ -14,3 +14,4 @@ struct c_animation_channel
 	float speed;
 	float animation_ticks_remaining;
 };
+CHECK_STRUCT_SIZE(c_animation_channel, 32);

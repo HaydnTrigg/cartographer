@@ -1,5 +1,6 @@
 #pragma once
 #include "Blam/Engine/animations/animation_channel.h"
+#include "Blam/Engine/Objects/Objects.h"
 #include "Blam/Math/real_math.h"
 
 struct s_device_data_group : s_object_data_definition
