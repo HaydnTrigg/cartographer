@@ -48,8 +48,11 @@ const e_hs_function hs_sync_table[HS_SYNC_TABLE_SIZE]
 	e_hs_function_object_dynamic_simulation_disable,
 	e_hs_function_game_save,
 	e_hs_function_game_revert,
-	e_hs_function_cinematic_skip_start_internal,
-	e_hs_function_cinematic_skip_stop_internal
+	//e_hs_function_cinematic_skip_start_internal,
+	//e_hs_function_cinematic_skip_stop_internal
+	e_hs_function_device_set_power,
+	e_hs_function_device_set_position
+
 };
 
 void modify_sent_arguments(void* old_args, byte* new_args, unsigned __int16 op_code);

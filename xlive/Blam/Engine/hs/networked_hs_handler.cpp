@@ -4,6 +4,7 @@
 
 #include "Blam/Cache/DataTypes/BlamPrimitiveType.h"
 #include "Blam/Engine/cutscene/cinematics.h"
+#include "Blam/Engine/devices/devices.h"
 #include "Blam/Engine/Game/GameGlobals.h"
 #include "Blam/Engine/Game/GameTimeGlobals.h"
 #include "Blam/Engine/Networking/NetworkMessageTypeCollection.h"
@@ -155,10 +156,20 @@ void modify_sent_arguments(void* old_args, byte* new_args, unsigned __int16 op_c
 	case e_hs_function_object_dynamic_simulation_disable:
 	{
 		s_hs_object_dynamic_simulation_disable_args* args = (s_hs_object_dynamic_simulation_disable_args*)new_args;
-		const s_object_data_definition* device_object = object_get_fast_unsafe(args->object);
+		const s_object_data_definition* object = object_get_fast_unsafe(args->object);
 
 		if (args->object == DATUM_INDEX_NONE) { break; }
-		args->object = device_object->simulation_entity_index;
+		args->object = object->simulation_entity_index;
+		break;
+	}
+	case e_hs_function_device_set_power:
+	case e_hs_function_device_set_position:
+	{
+		s_hs_device_set_pos_or_power_args* args = (s_hs_device_set_pos_or_power_args*)new_args;
+		const s_object_data_definition* device_object = object_get_fast_unsafe(args->device);
+
+		if (args->device == DATUM_INDEX_NONE) { break; }
+		args->device = device_object->simulation_entity_index;
 		break;
 	}
 	}
@@ -304,7 +315,7 @@ void call_networked_hs_function(const s_networked_hs_function* data)
 		s_hs_device_set_position_track_args* args = (s_hs_device_set_position_track_args*)data->arg_buffer;
 		args->device = simulation_gamestate_entity_get_object_index(args->device);
 		uint32_t string_id = args->animation.get_id();
-
+		
 		device_set_position_track(args->device, args->animation, args->interpolation_time);
 		break;
 	}
@@ -435,6 +446,14 @@ void call_networked_hs_function(const s_networked_hs_function* data)
 	case e_hs_function_cinematic_skip_stop_internal:
 	{
 		s_cinematic_globals::cinematic_skip_stop_internal();
+		break;
+	}
+	case e_hs_function_device_set_power:
+	{
+		s_hs_device_set_pos_or_power_args* args = (s_hs_device_set_pos_or_power_args*)data->arg_buffer;
+		args->device = simulation_gamestate_entity_get_object_index(args->device);
+
+		device_set_power(args->device, args->power_or_pos);
 		break;
 	}
 	default:
