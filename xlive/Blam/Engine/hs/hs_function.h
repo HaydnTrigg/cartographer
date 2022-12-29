@@ -2146,4 +2146,10 @@ struct s_hs_object_dynamic_simulation_disable_args
 	datum object;
 	bool disable_dynamic_simulation;
 };
+
+struct s_hs_device_set_pos_or_power_args
+{
+	datum device;
+	float power_or_pos;
+};
 #pragma endregion

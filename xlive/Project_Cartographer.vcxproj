@@ -231,6 +231,7 @@
     <ClCompile Include="Blam\Engine\animations\interpolator_control.cpp" />
     <ClCompile Include="Blam\Engine\cutscene\cinematics.cpp" />
     <ClCompile Include="Blam\Engine\DataArray\TagDataIterator.cpp" />
+    <ClCompile Include="Blam\Engine\devices\devices.cpp" />
     <ClCompile Include="Blam\Engine\Game\GameEngineGlobals.cpp" />
     <ClCompile Include="Blam\Engine\Game\GameGlobals.cpp" />
     <ClCompile Include="Blam\Engine\Game\GameTimeGlobals.cpp" />
@@ -247,9 +248,8 @@
     <ClInclude Include="Blam\Cache\TagGroups\collision_model_definition.hpp" />
     <ClInclude Include="Blam\Cache\TagGroups\sound_classes_definition.hpp" />
     <ClInclude Include="Blam\Engine\animations\animation_channel.h" />
-    <ClInclude Include="Blam\Engine\animations\animation_manager.h" />
-    <ClInclude Include="Blam\Engine\animations\interpolator_control.h" />
     <ClInclude Include="Blam\Engine\cutscene\cinematics.h" />
+    <ClInclude Include="Blam\Engine\devices\devices.h" />
     <ClInclude Include="Blam\Engine\hs\hs_function.h" />
     <ClInclude Include="Blam\Engine\hs\networked_hs_handler.h" />
     <ClInclude Include="Blam\Engine\IceCreamFlavor\IceCreamFlavor.h" />
