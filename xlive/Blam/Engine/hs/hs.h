@@ -58,6 +58,8 @@ void game_revert();
 void* __cdecl game_revert_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool);
 void* __cdecl cinematic_skip_start_internal_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool);
 void* __cdecl cinematic_skip_stop_internal_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool);
+
+char* hs_return(int a1, int a2);
 #pragma endregion
 
 void hs_initialize();

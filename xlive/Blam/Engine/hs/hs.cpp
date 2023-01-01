@@ -10,11 +10,13 @@
 #include "H2MOD/Modules/EventHandler/EventHandler.hpp"
 #include "Util/Hooks/Hook.h"
 
+static s_networked_hs_function g_hs_function_to_send;	// Stores function details to send to client
+
 typedef void* (__cdecl* hs_arguments_evaluate_t)(__int16 op_code, unsigned __int16 thread_id, bool unk_bool);
-hs_arguments_evaluate_t p_hs_arguments_evaluate;
-typedef char* (__cdecl hs_return_t)(int a1, int a2);
-hs_return_t* p_hs_return;
+typedef char* (__cdecl* hs_return_t)(int a1, int a2);
 typedef void(__cdecl* no_arg_hs_function_t)();
+hs_arguments_evaluate_t p_hs_arguments_evaluate;
+hs_return_t p_hs_return;
 
 typedef int(__cdecl unit_kill_t)(datum unitDatum);
 unit_kill_t* p_unit_kill;
@@ -136,17 +138,16 @@ void cinematic_start()
 
 void* __cdecl cinematic_start_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool)
 {
+	cinematic_start();
 	for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
 	{
 		if (NetworkSession::PlayerIsActive(i))
 		{
-			NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), e_hs_function_cinematic_start, sizeof(s_networked_hs_function::arg_buffer), nullptr);
+			g_hs_function_to_send = populate_networked_hs_function(nullptr, (const e_hs_function)op_code);
 		}
 	}
-	cinematic_start();
-	g_next_script_id++;
 
-	return p_hs_return(thread_id, 0);
+	return hs_return(thread_id, 0);
 }
 
 no_arg_hs_function_t p_cinematic_stop;
@@ -157,17 +158,16 @@ void cinematic_stop()
 
 void* __cdecl cinematic_stop_evaluate(__int16 op_code, int thread_id, char unk_bool)
 {
+	cinematic_stop();
 	for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
 	{
 		if (NetworkSession::PlayerIsActive(i))
 		{
-			NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), e_hs_function_cinematic_stop, sizeof(s_networked_hs_function::arg_buffer), nullptr);
+			g_hs_function_to_send = populate_networked_hs_function(nullptr, (const e_hs_function)op_code);
 		}
 	}
-	cinematic_stop();
-	g_next_script_id++;
 
-	return p_hs_return(thread_id, 0);
+	return hs_return(thread_id, 0);
 }
 
 typedef bool(__cdecl* custom_animation_relative_t)(const datum object_datum, const datum animation_path, const string_id animation, const bool interpolates_into_animation, const datum relative_object);
@@ -241,17 +241,16 @@ void game_save_cinematic_skip()
 
 void* __cdecl game_save_cinematic_skip_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool)
 {
+	game_save_cinematic_skip();
 	for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
 	{
 		if (NetworkSession::PlayerIsActive(i))
 		{
-			NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), e_hs_function_game_save_cinematic_skip, HS_SENT_BUFFER_SIZE, nullptr);
+			g_hs_function_to_send = populate_networked_hs_function(nullptr, (const e_hs_function)op_code);
 		}
 	}
-	game_save_cinematic_skip();
-	g_next_script_id++;
 
-	return p_hs_return(thread_id, 0);
+	return hs_return(thread_id, 0);
 }
 
 typedef void(__cdecl* cinematic_lighting_set_primary_light_t)(const float pitch, const float yaw, const float r, const float g, const float b);
@@ -302,17 +301,16 @@ void pvs_set_object(const datum object)
 
 void* __cdecl pvs_clear_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool)
 {
+	pvs_clear();
 	for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
 	{
 		if (NetworkSession::PlayerIsActive(i))
 		{
-			NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), e_hs_function_pvs_clear, HS_SENT_BUFFER_SIZE, nullptr);
+			g_hs_function_to_send = populate_networked_hs_function(nullptr, (const e_hs_function)op_code);
 		}
 	}
-	pvs_clear();
-	g_next_script_id++;
 
-	return p_hs_return(thread_id, 0);
+	return hs_return(thread_id, 0);
 }
 
 typedef bool(__cdecl* device_set_overlay_track_t)(const datum device, const string_id animation);
@@ -345,17 +343,16 @@ void game_save()
 
 void* __cdecl game_save_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool)
 {
+	game_save();
 	for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
 	{
 		if (NetworkSession::PlayerIsActive(i))
 		{
-			NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), e_hs_function_game_save, HS_SENT_BUFFER_SIZE, nullptr);
+			g_hs_function_to_send = populate_networked_hs_function(nullptr, (const e_hs_function)op_code);
 		}
 	}
-	game_save();
-	g_next_script_id++;
 
-	return p_hs_return(thread_id, 0);
+	return hs_return(thread_id, 0);
 }
 
 no_arg_hs_function_t p_game_revert;
@@ -366,47 +363,44 @@ void game_revert()
 
 void* __cdecl game_revert_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool)
 {
+	game_revert();
 	for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
 	{
 		if (NetworkSession::PlayerIsActive(i))
 		{
-			NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), e_hs_function_game_revert, HS_SENT_BUFFER_SIZE, nullptr);
+			g_hs_function_to_send = populate_networked_hs_function(nullptr, (const e_hs_function)op_code);
 		}
 	}
-	game_revert();
-	g_next_script_id++;
 
-	return p_hs_return(thread_id, 0);
+	return hs_return(thread_id, 0);
 }
 
 void* __cdecl cinematic_skip_start_internal_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool)
 {
+	s_cinematic_globals::cinematic_skip_start_internal();
 	for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
 	{
 		if (NetworkSession::PlayerIsActive(i))
 		{
-			NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), e_hs_function_cinematic_skip_start_internal, HS_SENT_BUFFER_SIZE, nullptr);
+			g_hs_function_to_send = populate_networked_hs_function(nullptr, (const e_hs_function)op_code);
 		}
 	}
-	s_cinematic_globals::cinematic_skip_start_internal();
-	g_next_script_id++;
 
-	return p_hs_return(thread_id, 0);
+	return hs_return(thread_id, 0);
 }
 
 void* __cdecl cinematic_skip_stop_internal_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool)
 {
+	s_cinematic_globals::cinematic_skip_stop_internal();
 	for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
 	{
 		if (NetworkSession::PlayerIsActive(i))
 		{
-			NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), e_hs_function_cinematic_skip_stop_internal, HS_SENT_BUFFER_SIZE, nullptr);
+			g_hs_function_to_send = populate_networked_hs_function(nullptr, (const e_hs_function)op_code);
 		}
 	}
-	s_cinematic_globals::cinematic_skip_stop_internal();
-	g_next_script_id++;
 
-	return p_hs_return(thread_id, 0);
+	return hs_return(thread_id, 0);
 }
 
 
@@ -421,16 +415,28 @@ void* __cdecl hs_arguments_evaluate(unsigned __int16 op_code, unsigned __int16 t
 	typedef void* (__cdecl* hs_evaluate_t)(unsigned __int16 thread_id, __int16 arg_count, int arg_array, bool unk_bool);
 	hs_evaluate_t p_hs_evaluate = Memory::GetAddress<hs_evaluate_t>(0x956FA, 0xAA8FA);
 	HaloScriptCommand** hs_function_table = Memory::GetAddress<HaloScriptCommand**>(0x41C5B0, 0x3C0028);
+	s_networked_hs_function function_details;
 
 	void* args = p_hs_evaluate(thread_id, hs_function_table[op_code]->arg_count, (int)hs_function_table[op_code]->arg_array, unk_bool);
-
+	
 	// Added for script syncing in coop
 	if (NetworkSession::GetLocalSessionState() != _network_session_state_none)
 	{
-		send_script_arguments_to_clients(args, op_code);
+		g_hs_function_to_send = populate_networked_hs_function(args, (const e_hs_function)op_code);
 	}
 
 	return args;
+}
+
+
+char* hs_return(int a1, int a2)
+{
+	if (NetworkSession::GetLocalSessionState() != _network_session_state_none)
+	{
+		send_hs_function_to_clients(&g_hs_function_to_send);
+	}
+
+	return p_hs_return(a1, a2);
 }
 
 typedef void(__cdecl* hs_update_main_t)();
@@ -438,12 +444,19 @@ hs_update_main_t p_hs_update_main;
 void __cdecl hs_update()
 {
 	p_hs_update_main();
-	execute_stored_hs_commands();
+
+	if (!s_game_globals::game_is_campaign()) { return; }
+
+	// If we are the client, run stored script args
+	if (!NetworkSession::LocalPeerIsSessionHost())
+	{
+		client_execute_stored_hs_commands();
+	}
 }
 
 void on_map_load()
 {
-	g_next_script_id = 0;
+	g_next_hs_function_id = 0;
 }
 
 void ApplyHooks()
@@ -456,6 +469,7 @@ void ApplyHooks()
 	// Hook arguments evaluate function so we can add our functionality for syncing the scripts
 	DETOUR_BEGIN();
 	DETOUR_ATTACH(p_hs_arguments_evaluate, Memory::GetAddress<hs_arguments_evaluate_t>(0x9581D, 0xAAA1D), hs_arguments_evaluate);
+	DETOUR_ATTACH(p_hs_return, Memory::GetAddress<hs_return_t>(0x9505D, 0xAA25D), hs_return);
 	DETOUR_COMMIT();
 		
 	// Write pointers for script functions that have no arguments
@@ -478,8 +492,6 @@ void ApplyHooks()
 void hs_initialize()
 {
 	ApplyHooks();
-	p_hs_arguments_evaluate = Memory::GetAddress<hs_arguments_evaluate_t>(0x9581D, 0xAAA1D);
-	p_hs_return = Memory::GetAddress<hs_return_t*>(0x9505D, 0xAA25D);
 	p_hs_update_main = Memory::GetAddress<hs_update_main_t>(0x96DF7, 0xABFF7);
 
 	p_unit_kill = Memory::GetAddress<unit_kill_t*>(0x13B514, 0x12A363);
