@@ -154,10 +154,12 @@
     <ClCompile Include="H2MOD\Variants\GraveRobber\GraveRobber.cpp" />
     <ClCompile Include="H2MOD\Modules\Coop\Coop.cpp" />
     <ClCompile Include="Blam\Engine\Simulation\simulation_world.cpp" />
-    <ClCompile Include="Blam\Engine\hs\networked_hs_handler.cpp" />
+    <ClCompile Include="Blam\Engine\hs\networked_hs_handler\networked_hs_handler.cpp" />
     <ClCompile Include="Blam\Engine\cutscene\cinematics.cpp" />
     <ClCompile Include="Blam\Engine\devices\devices.cpp" />
     <ClCompile Include="Blam\Engine\animations\animation_channel.cpp" />
+    <ClCompile Include="Blam\Engine\hs\networked_hs_handler\networked_hs_handler_client.cpp" />
+    <ClCompile Include="Blam\Engine\hs\networked_hs_handler\networked_hs_handler_host.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdparty\discord\discord_register.h" />
@@ -501,11 +503,13 @@
     <ClInclude Include="H2MOD\Variants\GraveRobber\GraveRobber.h" />
     <ClInclude Include="Blam\Cache\TagGroups\sound_classes_definition.hpp" />
     <ClInclude Include="H2MOD\Modules\Coop\Coop.h" />
-    <ClInclude Include="Blam\Engine\hs\networked_hs_handler.h" />
+    <ClInclude Include="Blam\Engine\hs\networked_hs_handler\networked_hs_handler.h" />
     <ClInclude Include="Blam\Engine\hs\hs_function.h" />
     <ClInclude Include="Blam\Engine\cutscene\cinematics.h" />
     <ClInclude Include="Blam\Engine\devices\devices.h" />
     <ClInclude Include="Blam\Engine\animations\animation_channel.h" />
+    <ClInclude Include="Blam\Engine\hs\networked_hs_handler\networked_hs_handler_client.h" />
+    <ClInclude Include="Blam\Engine\hs\networked_hs_handler\networked_hs_handler_host.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc" />

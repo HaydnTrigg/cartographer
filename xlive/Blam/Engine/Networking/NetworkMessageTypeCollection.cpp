@@ -1,7 +1,8 @@
 #include "stdafx.h"
 #include "NetworkMessageTypeCollection.h"
 
-#include "Blam/Engine/hs/networked_hs_handler.h"
+#include "Blam/Engine/hs/networked_hs_handler/networked_hs_handler.h"
+#include "Blam/Engine/hs/networked_hs_handler/networked_hs_handler_client.h"
 #include "Blam/Engine/Memory/bitstream.h"
 #include "H2MOD/Modules/Shell/Config.h"
 #include "H2MOD/Modules/CustomVariantSettings/CustomVariantSettings.h"

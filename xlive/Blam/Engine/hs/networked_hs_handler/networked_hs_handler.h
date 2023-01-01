@@ -1,5 +1,6 @@
 #pragma once
-#include "hs_function.h"
+#include "../hs_function.h"
+#include <list>
 
 #define HS_SENT_BUFFER_SIZE 128
 #define HS_SYNC_TABLE_SIZE 34
@@ -50,29 +51,9 @@ const e_hs_function hs_sync_table[HS_SYNC_TABLE_SIZE]
 	e_hs_function_game_revert,
 	//e_hs_function_cinematic_skip_start_internal, (clients have control over the cutscene skip, dosent apply for host)
 	//e_hs_function_cinematic_skip_stop_internal, (clients have control over the cutscene skip, dosent apply for host)
-	e_hs_function_device_set_power,
+	e_hs_function_device_set_power
 	//e_hs_function_device_set_position (this is already synced by the host)
 };
 
-// Gets ready to send a script function to all the clients in a match
-// Modifies the arguments sent depending on the hs function called
-void send_hs_function_to_clients(s_networked_hs_function* function);
-
-// Modifies the arguments sent to the client depending on the script operation being executed
-void modify_sent_arguments(s_networked_hs_function* function);
-
-// Sends a packet to a client with the hs function data
-void send_hs_function_packet(int peerIdx, s_networked_hs_function* data);
-
 // Returns a s_networked_hs_function struct with arguments (or lack of) and the function type
 s_networked_hs_function populate_networked_hs_function(const void* args_src, const e_hs_function function_type);
-
-// Stores recieved hs functions in a list to be executed later on hs_update
-void store_hs_functions(const s_networked_hs_function* data);
-
-/* Calls the hs function based on the s_networked_hs_function provided
-Only executes something if we manually add the function to the hs_sync_table and add logic to handle it here*/
-void call_networked_hs_function(const s_networked_hs_function* data);
-
-// Loops through the stored functions and if one matches the next script id to be executred call it
-void client_execute_stored_hs_commands();
