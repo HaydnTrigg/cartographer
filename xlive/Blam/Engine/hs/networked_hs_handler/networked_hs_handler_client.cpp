@@ -48,7 +48,7 @@ void client_execute_stored_hs_commands()
 	}
 }
 
-networked_hs_functions_table_t get_networked_hs_lamda_function(e_hs_function function_type)
+networked_hs_functions_table_t get_networked_hs_lamda_function(const e_hs_function function_type)
 {
 	switch (function_type)
 	{
