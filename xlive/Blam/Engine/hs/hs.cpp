@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "hs.h"
-#include "networked_hs_handler.h"
+#include "networked_hs_handler/networked_hs_handler.h"
+#include "networked_hs_handler/networked_hs_handler_client.h"
+#include "networked_hs_handler/networked_hs_handler_host.h"
 
 #include "Blam/Engine/cutscene/cinematics.h"
 #include "Blam/Engine/Networking/NetworkMessageTypeCollection.h"
