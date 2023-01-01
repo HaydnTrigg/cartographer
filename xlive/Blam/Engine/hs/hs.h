@@ -10,6 +10,10 @@ struct HaloScriptGlobal
 };
 
 #pragma region Halo Script Functions
+typedef void* (__cdecl* hs_arguments_evaluate_t)(__int16 op_code, unsigned __int16 thread_id, bool unk_bool);
+typedef char* (__cdecl* hs_return_t)(int a1, int a2);
+typedef void(__cdecl* no_arg_hs_function_t)();
+
 void unit_kill(datum unitDatum);
 bool unit_in_vehicle(datum unitDatum);
 float unit_get_health(datum unitDatum);

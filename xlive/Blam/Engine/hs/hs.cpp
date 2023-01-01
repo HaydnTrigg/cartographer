@@ -14,9 +14,6 @@
 
 static s_networked_hs_function g_hs_function_to_send;	// Stores function details to send to client
 
-typedef void* (__cdecl* hs_arguments_evaluate_t)(__int16 op_code, unsigned __int16 thread_id, bool unk_bool);
-typedef char* (__cdecl* hs_return_t)(int a1, int a2);
-typedef void(__cdecl* no_arg_hs_function_t)();
 hs_arguments_evaluate_t p_hs_arguments_evaluate;
 hs_return_t p_hs_return;
 
@@ -494,6 +491,7 @@ void ApplyHooks()
 void hs_initialize()
 {
 	ApplyHooks();
+	initialize_modify_hs_arguments_table();
 	initialize_networked_hs_function_table();
 	p_hs_update_main = Memory::GetAddress<hs_update_main_t>(0x96DF7, 0xABFF7);
 
