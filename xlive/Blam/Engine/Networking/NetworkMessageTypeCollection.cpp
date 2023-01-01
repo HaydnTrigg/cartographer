@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "NetworkMessageTypeCollection.h"
 
-#include "Blam/Engine/Memory/bitstream.h"
 #include "Blam/Engine/hs/networked_hs_handler.h"
+#include "Blam/Engine/Memory/bitstream.h"
 #include "H2MOD/Modules/Shell/Config.h"
 #include "H2MOD/Modules/CustomVariantSettings/CustomVariantSettings.h"
 #include "H2MOD/Modules/EventHandler/EventHandler.hpp"
@@ -85,15 +85,15 @@ bool __cdecl decode_anti_cheat_message(bitstream* stream, int a2, s_anti_cheat* 
 
 void __cdecl encode_hs_function_message(bitstream* stream, int a2, s_networked_hs_function* data)
 {
-	stream->data_encode_integer("hs-function-type", data->function_type, sizeof(e_hs_function) * 8);
-	stream->data_encode_integer("hs-script-id", g_next_script_id, sizeof(g_next_script_id) * 8);
-	stream->data_encode_bits("hs-function-args", data->arg_buffer, sizeof(data->arg_buffer) * 8);
+	stream->data_encode_integer("hs-function-type", data->function_type, (sizeof(e_hs_function) * 8));
+	stream->data_encode_integer("hs-script-id", g_next_hs_function_id, sizeof(g_next_hs_function_id) * 8);
+	stream->data_encode_bits("hs-function-args", data->arg_buffer, HS_SENT_BUFFER_SIZE * 8);
 }
 bool __cdecl decode_hs_function_message(bitstream* stream, int a2, s_networked_hs_function* data)
 {
-	data->function_type = (e_hs_function)stream->data_decode_integer("hs-function-type", sizeof(e_hs_function) * 8);
+	data->function_type = (e_hs_function)stream->data_decode_integer("hs-function-type", (sizeof(e_hs_function) * 8));
 	data->script_id = stream->data_decode_integer("hs-script-id", sizeof(data->script_id) * 8);
-	stream->data_decode_bits("hs-function-args", data->arg_buffer, sizeof(data->arg_buffer) * 8);
+	stream->data_decode_bits("hs-function-args", data->arg_buffer, HS_SENT_BUFFER_SIZE * 8);
 	return stream->overflow() == false;
 }
 
@@ -122,7 +122,7 @@ void register_custom_network_message(void* network_messages)
 	register_network_message(network_messages, _custom_variant_settings, "variant-settings", 0, CustomVariantSettingsPacketSize, CustomVariantSettingsPacketSize,
 		(void*)CustomVariantSettings::EncodeVariantSettings, (void*)CustomVariantSettings::DecodeVariantSettings, NULL);
 
-	register_network_message(network_messages, _hs_function, "hs-function-data", 0, sizeof(s_networked_hs_function), sizeof(s_networked_hs_function),
+	register_network_message(network_messages, _hs_function, "hs-function", 0, sizeof(s_networked_hs_function), sizeof(s_networked_hs_function),
 		(void*)encode_hs_function_message, (void*)decode_hs_function_message, NULL);
 }
 
@@ -287,7 +287,7 @@ void __stdcall handle_channel_message_hook(void *thisx, int network_channel_inde
 		if (peer_network_channel->channel_state == s_network_channel::e_channel_state::unk_state_5)
 		{
 			const s_networked_hs_function* recieved_data = (s_networked_hs_function*)packet;
-			store_hs_commands(recieved_data);
+			store_hs_functions(recieved_data);
 		}
 		break;
 	}
@@ -405,49 +405,6 @@ void NetworkMessage::SendAntiCheat(int peerIdx)
 		}
 	}
 }
-
-void NetworkMessage::SendHSFunction(int peerIdx, e_hs_function function_type, byte argSize, void* args)
-{
-	s_network_session* session = NetworkSession::GetCurrentNetworkSession();
-
-	if (NetworkSession::LocalPeerIsSessionHost())
-	{
-		s_network_observer* observer = session->p_network_observer;
-		s_peer_observer_channel* observer_channel = NetworkSession::GetPeerObserverChannel(peerIdx);
-
-		s_networked_hs_function data;
-		data.function_type = function_type;
-
-		if (args != nullptr)
-		{
-			memset(data.arg_buffer, 0, sizeof(data.arg_buffer));
-			switch (function_type)
-			{
-			case e_hs_function::e_hs_function_print:
-			{
-				const char* text = *(const char**)args;
-				memcpy(data.arg_buffer, text, argSize);
-				break;
-			}
-			default:
-			{
-				memcpy(data.arg_buffer, args, argSize);
-				break;
-			}
-			}
-		}
-
-		if (peerIdx != -1 && !NetworkSession::PeerIndexLocal(peerIdx))
-		{
-			if (observer_channel->field_1)
-			{
-				observer->sendNetworkMessage(session->session_index, observer_channel->observer_index, s_network_observer::e_network_message_send_protocol::in_band,
-					_hs_function, sizeof(s_networked_hs_function), &data);
-			}
-		}
-	}
-}
-
 
 void NetworkMessage::ApplyGamePatches()
 {

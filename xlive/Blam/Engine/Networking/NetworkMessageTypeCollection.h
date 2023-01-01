@@ -1,5 +1,4 @@
 #pragma once
-#include "Blam/Engine/hs/hs_function.h"
 #include "Blam/Engine/Networking/Session/NetworkSession.h"
 
 #define player_identifier_size_bits (sizeof(unsigned long long) * CHAR_BIT)
@@ -184,5 +183,4 @@ namespace NetworkMessage
 	void SendTeamChange(int peerIdx, int teamIdx);
 	void SendRankChange(int peerIdx, BYTE rank);
 	void SendAntiCheat(int peerIdx);
-	void SendHSFunction(int peerIdx, e_hs_function function_type, byte argSize, void* args);
 }

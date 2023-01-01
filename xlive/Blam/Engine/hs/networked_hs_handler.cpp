@@ -1,6 +1,6 @@
 #include "stdafx.h"
-#include "hs.h"
 #include "networked_hs_handler.h"
+#include "hs.h"
 
 #include "Blam/Cache/DataTypes/BlamPrimitiveType.h"
 #include "Blam/Engine/cutscene/cinematics.h"
@@ -12,20 +12,47 @@
 #include "Blam/Engine/Simulation/simulation_world.h"
 #include "H2MOD/Modules/OnScreenDebug/OnscreenDebug.h"
 
-std::list<s_networked_hs_function> g_hs_function_backlog;
-long g_next_script_id = 0;
+std::list<s_networked_hs_function> g_hs_client_function_backlog;	// Stores all the functions recieved from the host
+long g_next_hs_function_id = 0;										// The next id for a hs function we want to execute
 
-// Modifies the arguments sent to the client depending on the script operation being executed
-void modify_sent_arguments(void* old_args, byte* new_args, unsigned __int16 op_code)
+void send_hs_function_to_clients(s_networked_hs_function* function)
 {
-	memcpy(new_args, old_args, HS_SENT_BUFFER_SIZE);
+	bool found = false;
 
-	switch (op_code)
+	//If host send out the packets
+	if (!s_game_globals::game_is_campaign() || !NetworkSession::LocalPeerIsSessionHost()) { return; }
+
+	for (unsigned short i = 0; i < HS_SYNC_TABLE_SIZE; i++)
 	{
-		// Send the entity index instead of the object index since object index isnt the same on the client
+		if (hs_sync_table[i] == function->function_type)
+		{
+			found = true;
+		}
+	}
+
+	if (!found) { return; }
+
+	modify_sent_arguments(function);
+
+	for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
+	{
+		if (NetworkSession::PlayerIsActive(i))
+		{
+			send_hs_function_packet(NetworkSession::GetPeerIndex(i), function);
+		}
+	}
+	g_next_hs_function_id++;
+
+	memset(function, 0, sizeof(s_networked_hs_function));
+}
+
+void modify_sent_arguments(s_networked_hs_function* function)
+{
+	switch (function->function_type)
+	{
 	case e_hs_function_device_set_position_track:
 	{
-		s_hs_device_set_position_track_args* args = (s_hs_device_set_position_track_args*)new_args;
+		s_hs_device_set_position_track_args* args = (s_hs_device_set_position_track_args*)function->arg_buffer;
 		const s_object_data_definition* device_object = object_get_fast_unsafe(args->device);
 
 		if (args->device == DATUM_INDEX_NONE) { break; }
@@ -33,10 +60,9 @@ void modify_sent_arguments(void* old_args, byte* new_args, unsigned __int16 op_c
 		args->device = device_object->simulation_entity_index;
 		break;
 	}
-	// Send the entity index instead of the object index since object index isnt the same on the client
 	case e_hs_function_device_animate_position:
 	{
-		s_hs_device_animate_position_args* args = (s_hs_device_animate_position_args*)new_args;
+		s_hs_device_animate_position_args* args = (s_hs_device_animate_position_args*)function->arg_buffer;
 		const s_object_data_definition* device_object = object_get_fast_unsafe(args->device);
 
 		if (args->device == DATUM_INDEX_NONE) { break; }
@@ -44,10 +70,9 @@ void modify_sent_arguments(void* old_args, byte* new_args, unsigned __int16 op_c
 		args->device = device_object->simulation_entity_index;
 		break;
 	}
-	// Send the entity index instead of the object index since object index isnt the same on the client
 	case e_hs_function_object_cinematic_lod:
 	{
-		s_hs_object_cinematic_lod_args* args = (s_hs_object_cinematic_lod_args*)new_args;
+		s_hs_object_cinematic_lod_args* args = (s_hs_object_cinematic_lod_args*)function->arg_buffer;
 		const s_object_data_definition* object = object_get_fast_unsafe(args->object);
 
 		if (args->object == DATUM_INDEX_NONE) { break; }
@@ -55,10 +80,9 @@ void modify_sent_arguments(void* old_args, byte* new_args, unsigned __int16 op_c
 		args->object = object->simulation_entity_index;
 		break;
 	}
-	// Send the entity index instead of the object index since object index isnt the same on the client
 	case e_hs_function_custom_animation_relative:
 	{
-		s_hs_custom_animation_relative_args* args = (s_hs_custom_animation_relative_args*)new_args;
+		s_hs_custom_animation_relative_args* args = (s_hs_custom_animation_relative_args*)function->arg_buffer;
 		const s_object_data_definition* object = object_get_fast_unsafe(args->object);
 		const s_object_data_definition* relative_object = object_get_fast_unsafe(args->relative_object);
 
@@ -69,10 +93,9 @@ void modify_sent_arguments(void* old_args, byte* new_args, unsigned __int16 op_c
 		args->relative_object = relative_object->simulation_entity_index;
 		break;
 	}
-	// Send the entity index instead of the object index since object index isnt the same on the client
 	case e_hs_function_ai_play_line_on_object:
 	{
-		s_hs_ai_play_line_on_object_args* args = (s_hs_ai_play_line_on_object_args*)new_args;
+		s_hs_ai_play_line_on_object_args* args = (s_hs_ai_play_line_on_object_args*)function->arg_buffer;
 		const s_object_data_definition* object = object_get_fast_unsafe(args->object);
 
 		if (args->object == DATUM_INDEX_NONE) { break; }
@@ -82,7 +105,7 @@ void modify_sent_arguments(void* old_args, byte* new_args, unsigned __int16 op_c
 	}
 	case e_hs_function_custom_animation_loop:
 	{
-		s_hs_custom_animation_args* args = (s_hs_custom_animation_args*)new_args;
+		s_hs_custom_animation_args* args = (s_hs_custom_animation_args*)function->arg_buffer;
 		const s_object_data_definition* object = object_get_fast_unsafe(args->object);
 
 		if (args->object == DATUM_INDEX_NONE) { break; }
@@ -92,7 +115,7 @@ void modify_sent_arguments(void* old_args, byte* new_args, unsigned __int16 op_c
 	}
 	case e_hs_function_objects_attach:
 	{
-		s_hs_objects_attach_args* args = (s_hs_objects_attach_args*)new_args;
+		s_hs_objects_attach_args* args = (s_hs_objects_attach_args*)function->arg_buffer;
 		const s_object_data_definition* parent_object = object_get_fast_unsafe(args->parent_object);
 		const s_object_data_definition* child_object = object_get_fast_unsafe(args->child_object);
 
@@ -104,7 +127,7 @@ void modify_sent_arguments(void* old_args, byte* new_args, unsigned __int16 op_c
 	}
 	case e_hs_function_object_hide:
 	{
-		s_hs_object_hide_args* args = (s_hs_object_hide_args*)new_args;
+		s_hs_object_hide_args* args = (s_hs_object_hide_args*)function->arg_buffer;
 		const s_object_data_definition* object = object_get_fast_unsafe(args->object);
 
 		if (args->object == DATUM_INDEX_NONE) { break; }
@@ -114,7 +137,7 @@ void modify_sent_arguments(void* old_args, byte* new_args, unsigned __int16 op_c
 	}
 	case e_hs_function_object_uses_cinematic_lighting:
 	{
-		s_hs_object_uses_cinematic_lighting_args* args = (s_hs_object_uses_cinematic_lighting_args*)new_args;
+		s_hs_object_uses_cinematic_lighting_args* args = (s_hs_object_uses_cinematic_lighting_args*)function->arg_buffer;
 		const s_object_data_definition* object = object_get_fast_unsafe(args->object);
 
 		if (args->object == DATUM_INDEX_NONE) { break; }
@@ -124,7 +147,7 @@ void modify_sent_arguments(void* old_args, byte* new_args, unsigned __int16 op_c
 	}
 	case e_hs_function_pvs_set_object:
 	{
-		datum* object_datum = (datum*)new_args;
+		datum* object_datum = (datum*)function->arg_buffer;
 		const s_object_data_definition* object = object_get_fast_unsafe(*object_datum);
 
 		if (*object_datum == DATUM_INDEX_NONE) { break; }
@@ -134,7 +157,7 @@ void modify_sent_arguments(void* old_args, byte* new_args, unsigned __int16 op_c
 	}
 	case e_hs_function_device_set_overlay_track:
 	{
-		s_hs_device_set_overlay_track_args* args = (s_hs_device_set_overlay_track_args*)new_args;
+		s_hs_device_set_overlay_track_args* args = (s_hs_device_set_overlay_track_args*)function->arg_buffer;
 		const s_object_data_definition* device_object = object_get_fast_unsafe(args->device);
 
 		if (args->device == DATUM_INDEX_NONE) { break; }
@@ -145,7 +168,7 @@ void modify_sent_arguments(void* old_args, byte* new_args, unsigned __int16 op_c
 	// Send the entity index instead of the object index since object index isnt the same on the client
 	case e_hs_function_device_animate_overlay:
 	{
-		s_hs_device_animate_overlay_args* args = (s_hs_device_animate_overlay_args*)new_args;
+		s_hs_device_animate_overlay_args* args = (s_hs_device_animate_overlay_args*)function->arg_buffer;
 		const s_object_data_definition* device_object = object_get_fast_unsafe(args->device);
 
 		if (args->device == DATUM_INDEX_NONE) { break; }
@@ -155,7 +178,7 @@ void modify_sent_arguments(void* old_args, byte* new_args, unsigned __int16 op_c
 	}
 	case e_hs_function_object_dynamic_simulation_disable:
 	{
-		s_hs_object_dynamic_simulation_disable_args* args = (s_hs_object_dynamic_simulation_disable_args*)new_args;
+		s_hs_object_dynamic_simulation_disable_args* args = (s_hs_object_dynamic_simulation_disable_args*)function->arg_buffer;
 		const s_object_data_definition* object = object_get_fast_unsafe(args->object);
 
 		if (args->object == DATUM_INDEX_NONE) { break; }
@@ -165,47 +188,65 @@ void modify_sent_arguments(void* old_args, byte* new_args, unsigned __int16 op_c
 	case e_hs_function_device_set_power:
 	case e_hs_function_device_set_position:
 	{
-		s_hs_device_set_pos_or_power_args* args = (s_hs_device_set_pos_or_power_args*)new_args;
+		s_hs_device_set_pos_or_power_args* args = (s_hs_device_set_pos_or_power_args*)function->arg_buffer;
 		const s_object_data_definition* device_object = object_get_fast_unsafe(args->device);
 
 		if (args->device == DATUM_INDEX_NONE) { break; }
 		args->device = device_object->simulation_entity_index;
 		break;
 	}
+	default:
+	{
+		break;
+	}
 	}
 }
 
-void send_script_arguments_to_clients(void* args, unsigned __int16 op_code)
+void send_hs_function_packet(int peerIdx, s_networked_hs_function* data)
 {
-	bool found = false;
-	byte new_args_buffer[HS_SENT_BUFFER_SIZE];
-	void* new_args = &new_args_buffer;
+	s_network_session* session = NetworkSession::GetCurrentNetworkSession();
 
-	//If host send out the packets
-	if (s_game_globals::game_is_campaign() && NetworkSession::LocalPeerIsSessionHost())
+	s_network_observer* observer = session->p_network_observer;
+	s_peer_observer_channel* observer_channel = NetworkSession::GetPeerObserverChannel(peerIdx);
+
+	if (!NetworkSession::LocalPeerIsSessionHost()) { return; }
+
+	if (peerIdx != -1 && !NetworkSession::PeerIndexLocal(peerIdx))
 	{
-		for (unsigned short i = 0; i < HS_SYNC_TABLE_SIZE; i++)
+		if (observer_channel->field_1)
 		{
-			if (hs_sync_table[i] == op_code)
-			{
-				found = true;
-			}
+			observer->sendNetworkMessage(session->session_index, observer_channel->observer_index, s_network_observer::e_network_message_send_protocol::in_band,
+				_hs_function, sizeof(s_networked_hs_function), data);
 		}
-
-		if (!found || !args) { return; }
-
-		modify_sent_arguments(args, new_args_buffer, op_code);
-
-		for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
-		{
-			if (NetworkSession::PlayerIsActive(i))
-			{
-				NetworkMessage::SendHSFunction(NetworkSession::GetPeerIndex(i), (e_hs_function)op_code, sizeof(s_networked_hs_function::arg_buffer), new_args);
-			}
-		}
-		g_next_script_id++;
-		return;
 	}
+}
+
+s_networked_hs_function populate_networked_hs_function(const void* args_src, const e_hs_function function_type)
+{
+	s_networked_hs_function args_dest;
+
+	args_dest.function_type = function_type;
+	memset(args_dest.arg_buffer, 0, HS_SENT_BUFFER_SIZE);
+
+	if (args_src != nullptr)
+	{
+		if (function_type == e_hs_function::e_hs_function_print)
+		{
+			const char* text = *(const char**)args_src;
+			memcpy(args_dest.arg_buffer, text, HS_SENT_BUFFER_SIZE);
+		}
+		else
+		{
+			memcpy(args_dest.arg_buffer, args_src, HS_SENT_BUFFER_SIZE);
+		}
+	}
+
+	return args_dest;
+}
+
+void store_hs_functions(const s_networked_hs_function* data)
+{
+	g_hs_client_function_backlog.push_back(*data);
 }
 
 void call_networked_hs_function(const s_networked_hs_function* data)
@@ -315,7 +356,7 @@ void call_networked_hs_function(const s_networked_hs_function* data)
 		s_hs_device_set_position_track_args* args = (s_hs_device_set_position_track_args*)data->arg_buffer;
 		args->device = simulation_gamestate_entity_get_object_index(args->device);
 		uint32_t string_id = args->animation.get_id();
-		
+
 		device_set_position_track(args->device, args->animation, args->interpolation_time);
 		break;
 	}
@@ -458,31 +499,23 @@ void call_networked_hs_function(const s_networked_hs_function* data)
 	}
 	default:
 	{
-		print_to_console("HS FUNCTION WITH TYPE THAT DOSENT EXIST SENT");
+		LOG_INFO_GAME("HS FUNCTION WITH TYPE THAT DOSENT EXIST SENT");
 		break;
 	}
 	}
 }
 
-void execute_stored_hs_commands()
+void client_execute_stored_hs_commands()
 {
-	//if ((time_globals::get_game_time() % 2) != 0) { return; }
-
-	// loops through the backlogged functions and if one matches the next script id to be executred call it
-	for (auto it = g_hs_function_backlog.begin(); it != g_hs_function_backlog.end(); it++)
+	for (auto it = g_hs_client_function_backlog.begin(); it != g_hs_client_function_backlog.end(); it++)
 	{
-		if (it->script_id == g_next_script_id)
+		if (it->script_id == g_next_hs_function_id)
 		{
-			g_next_script_id++;
+			g_next_hs_function_id++;
 
 			call_networked_hs_function(&*it);
-			g_hs_function_backlog.erase(it);
+			g_hs_client_function_backlog.erase(it);
 			return;
 		}
 	}
-}
-
-void store_hs_commands(const s_networked_hs_function* data)
-{
-	g_hs_function_backlog.push_back(*data);
 }
