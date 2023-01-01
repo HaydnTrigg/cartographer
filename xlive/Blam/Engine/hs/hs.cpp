@@ -494,6 +494,7 @@ void ApplyHooks()
 void hs_initialize()
 {
 	ApplyHooks();
+	initialize_networked_hs_function_table();
 	p_hs_update_main = Memory::GetAddress<hs_update_main_t>(0x96DF7, 0xABFF7);
 
 	p_unit_kill = Memory::GetAddress<unit_kill_t*>(0x13B514, 0x12A363);

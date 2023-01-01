@@ -1082,7 +1082,9 @@ enum e_hs_function : unsigned short
 	e_hs_function_rasterizer_debug_frame_usage,
 	e_hs_function_rasterizer_debug_crap_pixel_shader,
 	e_hs_function_enable_render_light_suppressor,
-	e_hs_function_disable_render_light_suppressor
+	e_hs_function_disable_render_light_suppressor,
+	
+	_e_hs_function_size
 };
 
 static const char* hs_function_strings[] =
