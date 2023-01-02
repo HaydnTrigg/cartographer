@@ -140,7 +140,6 @@
     <ClCompile Include="H2MOD\Modules\MainLoopPatches\Interpolation\FirstPersonInterpolate.cpp" />
     <ClCompile Include="H2MOD\Modules\MainLoopPatches\Interpolation\Interpolation.cpp" />
     <ClCompile Include="H2MOD\Modules\MainLoopPatches\Interpolation\ObjectInterpolate.cpp" />
-    <ClCompile Include="Blam\Math\real_matrix4x3.cpp" />
     <ClCompile Include="Blam\Engine\render\render_cameras.cpp" />
     <ClCompile Include="H2MOD\Variants\GraveRobber\GraveRobber.cpp" />
     <ClCompile Include="3rdparty\imgui\backends\imgui_impl_dx9.cpp" />
@@ -184,6 +183,7 @@
     <ClCompile Include="Blam\Engine\animations\animation_channel.cpp" />
     <ClCompile Include="Blam\Engine\hs\networked_hs_handler\networked_hs_handler_client.cpp" />
     <ClCompile Include="Blam\Engine\hs\networked_hs_handler\networked_hs_handler_host.cpp" />
+    <ClCompile Include="Blam\Engine\math\matrix_math.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdparty\discord\discord_register.h" />
@@ -507,7 +507,6 @@
     <ClInclude Include="Blam\Engine\Players\LocalPlayers.h" />
     <ClInclude Include="H2MOD\Modules\MainLoopPatches\Interpolation\Interpolation.h" />
     <ClInclude Include="H2MOD\Modules\MainLoopPatches\Interpolation\ObjectInterpolate.h" />
-    <ClInclude Include="Blam\Math\real_matrix4x3.h" />
     <ClInclude Include="Blam\Cache\TagGroups\collision_model_definition.hpp" />
     <ClInclude Include="H2MOD\Modules\SpecialEvents\Events\MapObjectPlacements\Halloween\Lockout.h" />
     <ClInclude Include="H2MOD\Modules\SpecialEvents\Events\MapObjectPlacements\Halloween\Coagulation.h" />
@@ -560,6 +559,7 @@
     <ClInclude Include="Blam\Engine\animations\animation_channel.h" />
     <ClInclude Include="Blam\Engine\hs\networked_hs_handler\networked_hs_handler_client.h" />
     <ClInclude Include="Blam\Engine\hs\networked_hs_handler\networked_hs_handler_host.h" />
+    <ClInclude Include="Blam\Engine\math\matrix_math.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc" />

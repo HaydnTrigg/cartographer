@@ -260,6 +260,7 @@
     <ClInclude Include="Blam\Engine\math\real_math.h" />
     <ClInclude Include="Blam\Engine\memory\data.h" />
     <ClInclude Include="Blam\Engine\memory\memory_pool.h" />
+    <ClInclude Include="Blam\Engine\math\matrix_math.h" />
     <ClInclude Include="Blam\Engine\Networking\NetworkCommon.h" />
     <ClCompile Include="Blam\Engine\math\color_math.cpp" />
     <ClCompile Include="Blam\Engine\math\convex_hulls.cpp" />
@@ -277,6 +278,7 @@
     <ClCompile Include="Blam\Engine\hs\networked_hs_handler\networked_hs_handler.cpp" />
     <ClCompile Include="Blam\Engine\hs\networked_hs_handler\networked_hs_handler_client.cpp" />
     <ClCompile Include="Blam\Engine\hs\networked_hs_handler\networked_hs_handler_host.cpp" />
+    <ClCompile Include="Blam\Engine\math\matrix_math.cpp" />
     <ClCompile Include="Blam\Engine\Players\Players.cpp" />
     <ClCompile Include="Blam\Engine\render\render_cameras.cpp" />
     <ClCompile Include="Blam\Engine\scenario\scenario.cpp" />
@@ -285,7 +287,6 @@
     <ClCompile Include="Blam\Engine\structures\structures.cpp" />
     <ClCompile Include="Blam\LazyBlam\LazyBlamLoader.cpp" />
     <ClCompile Include="Blam\LazyBlam\LazyBlamRebase.cpp" />
-    <ClCompile Include="Blam\Math\real_matrix4x3.cpp" />
     <ClCompile Include="Blam\Math\real_vector3d.cpp" />
     <ClCompile Include="H2MOD\Engine\Engine.cpp" />
     <ClCompile Include="H2MOD\Engine\Unit.cpp" />
@@ -625,7 +626,6 @@
     <ClInclude Include="Blam\Cache\DataTypes\DataRef.h" />
     <ClInclude Include="Blam\Math\integer_math.h" />
     <ClInclude Include="Blam\Engine\DataArray\DataArray.h" />
-    <ClInclude Include="Blam\Math\real_matrix4x3.h" />
     <ClInclude Include="Blam\Math\real_vector3d.h" />
     <ClInclude Include="CartographerDllConf.h" />
     <ClInclude Include="H2MOD\Engine\Engine.h" />
