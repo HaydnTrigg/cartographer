@@ -1,9 +1,10 @@
 #pragma once
 
-#include "Blam\Math\BlamMath.h"
-#include "Blam\Engine\DataArray\DataArray.h"
-#include "Blam\Engine\Players\PlayerActions.h"
-#include "Blam\Engine\Objects\ObjectPlacementData.h"
+#include "Blam/Math/BlamMath.h"
+#include "Blam/Engine/DataArray/DataArray.h"
+#include "Blam/Engine/math/matrix_math.h"
+#include "Blam/Engine/Players/PlayerActions.h"
+#include "Blam/Engine/Objects/ObjectPlacementData.h"
 
 enum e_object_team : BYTE
 {
@@ -144,11 +145,14 @@ struct s_object_data_definition
 	WORD body_stun_ticks;
 	char gap_108[2];
 	WORD field_10A;		//(field_10A & 4) != 0 -- > object_is_dead
-	PAD(8);
+	byte pad[2];
+	__int16 original_orientation_datum;
+	WORD word110;
+	__int16 node_orientation_datum;
 	__int16 node_buffer_size;
 	__int16 nodes_offset;
-	PAD(20);
-	// PAD(32);
+	PAD(18);
+	__int16 animation_manager_index;
 };
 #pragma pack(pop)
 CHECK_STRUCT_OFFSET(s_object_data_definition, node_buffer_size, 0x114);
@@ -311,6 +315,9 @@ namespace Engine::Objects
 	void apply_biped_object_definition_patches();
 	void simulation_action_object_create(datum object_idx);
 	void object_destroy(datum object_idx);
+	bool object_has_animation_manager(const datum object_index);
+	bool object_can_interpolate(unsigned __int16 object_index);
+
 	int object_get_count();
 	int object_count_from_iter();
 }

@@ -51,6 +51,16 @@ namespace Engine::Objects
 		p_object_destroy(object_idx);
 	}
 
+	bool object_has_animation_manager(const datum object_index)
+	{
+		 return (object_get_fast_unsafe(object_index)->animation_manager_index != 0xFFFF);
+	}
+
+	bool object_can_interpolate(unsigned __int16 object_index)
+	{
+		return (object_get_fast_unsafe(object_index)->node_orientation_datum != 0xFFFF);
+	}
+
 #pragma region Biped variant patches
 	void update_biped_object_variant_data(datum object_idx, int variant_index)
 	{
