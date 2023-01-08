@@ -2064,10 +2064,10 @@ struct s_hs_object_cinematic_lod_args
 struct s_hs_device_animate_position_args
 {
 	datum device;
-	float position;
-	float time;
-	float unk1;
-	float unk2;
+	float target_pos;
+	float total_time;
+	float acceleration_time;
+	float deceleration_time;
 	bool interpolate;
 };
 

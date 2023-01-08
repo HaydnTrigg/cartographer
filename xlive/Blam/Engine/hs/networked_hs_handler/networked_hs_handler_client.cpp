@@ -173,7 +173,7 @@ networked_hs_functions_table_t get_networked_hs_lamda_function(const e_hs_functi
 			s_hs_device_animate_position_args* args = (s_hs_device_animate_position_args*)data->arg_buffer;
 			args->device = simulation_gamestate_entity_get_object_index(args->device);
 
-			device_animate_position(args->device, args->position, args->time, args->unk1, args->unk2, args->interpolate);
+			device_animate_position(args->device, args->target_pos, args->total_time, args->acceleration_time, args->deceleration_time, args->interpolate);
 		};
 	}
 	case e_hs_function_device_set_position_track:
@@ -183,6 +183,8 @@ networked_hs_functions_table_t get_networked_hs_lamda_function(const e_hs_functi
 			s_hs_device_set_position_track_args* args = (s_hs_device_set_position_track_args*)data->arg_buffer;
 			args->device = simulation_gamestate_entity_get_object_index(args->device);
 			uint32_t string_id = args->animation.get_id();
+
+			if (args->device == DATUM_INDEX_NONE) { return; }
 
 			device_set_position_track(args->device, args->animation, args->interpolation_time);
 		};
