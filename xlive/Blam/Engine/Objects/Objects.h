@@ -105,7 +105,7 @@ struct s_object_data_definition
 	DWORD location[2];
 	real_point3d center;
 	float radius;
-	DWORD gap_3[9];
+	real_matrix3x3 vectors;
 	real_point3d position;
 	real_vector3d orientation;
 	real_vector3d up;
@@ -146,9 +146,9 @@ struct s_object_data_definition
 	char gap_108[2];
 	WORD field_10A;		//(field_10A & 4) != 0 -- > object_is_dead
 	byte pad[2];
-	__int16 original_orientation_datum;
+	__int16 original_orientation_offset;
 	WORD word110;
-	__int16 node_orientation_datum;
+	__int16 node_orientation_offset;
 	__int16 node_buffer_size;
 	__int16 nodes_offset;
 	PAD(18);
@@ -315,8 +315,8 @@ namespace Engine::Objects
 	void apply_biped_object_definition_patches();
 	void simulation_action_object_create(datum object_idx);
 	void object_destroy(datum object_idx);
+	void object_wake(const datum object_datum);
 	bool object_has_animation_manager(const datum object_index);
-	bool object_can_interpolate(unsigned __int16 object_index);
 
 	int object_get_count();
 	int object_count_from_iter();

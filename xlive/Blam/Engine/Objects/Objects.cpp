@@ -51,14 +51,17 @@ namespace Engine::Objects
 		p_object_destroy(object_idx);
 	}
 
-	bool object_has_animation_manager(const datum object_index)
+	void object_wake(const datum object_datum)
 	{
-		 return (object_get_fast_unsafe(object_index)->animation_manager_index != 0xFFFF);
+		typedef void(__cdecl* object_wake_t)(const datum object_datum);
+		auto object_wake = Memory::GetAddress<object_wake_t>(0x12FA1E);
+
+		object_wake(object_datum);
 	}
 
-	bool object_can_interpolate(unsigned __int16 object_index)
+	bool object_has_animation_manager(const datum object_index)
 	{
-		return (object_get_fast_unsafe(object_index)->node_orientation_datum != 0xFFFF);
+		return (object_get_fast_unsafe(object_index)->animation_manager_index != 0xFFFF);
 	}
 
 #pragma region Biped variant patches

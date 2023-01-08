@@ -5,6 +5,7 @@
 #include "networked_hs_handler/networked_hs_handler_host.h"
 
 #include "Blam/Engine/cutscene/cinematics.h"
+#include "Blam/Engine/devices/devices.h"
 #include "Blam/Engine/Networking/NetworkMessageTypeCollection.h"
 #include "Blam/Engine/Objects/Objects.h"
 #include "Blam/Engine/Players/Players.h"
@@ -183,20 +184,6 @@ void object_cinematic_lod(const WORD object_name_index, bool enable)
 	p_object_cinematic_lod(object_name_index, enable);
 }
 
-typedef void(__cdecl* device_animate_position_t)(const datum device_datum, const float position, const float time, const float unk1, const float unk2, const bool interpolate);
-device_animate_position_t p_device_animate_position;
-void device_animate_position(const datum device_datum, const float position, const float time, const float unk1, const float unk2, const bool interpolate)
-{
-	p_device_animate_position(device_datum, position, time, unk1, unk2, interpolate);
-}
-
-typedef bool(__cdecl* device_set_position_track_t)(const datum device, const string_id animation, const float interpolation_time);
-device_set_position_track_t p_device_set_position_track;
-bool device_set_position_track(const datum device, const string_id animation, const float interpolation_time)
-{
-	return p_device_set_position_track(device, animation, interpolation_time);
-}
-
 typedef void(__cdecl* switch_bsp_t)(const __int16 bsp_index);
 switch_bsp_t p_switch_bsp;
 void switch_bsp(const __int16 bsp_index)
@@ -319,14 +306,6 @@ bool device_set_overlay_track(const datum device, const string_id animation)
 	return p_device_set_overlay_track(device, animation);
 }
 
-typedef void(__cdecl* device_animate_overlay_t)(const datum device_datum, const float position, const float time, const float unk1, const float unk2);
-device_animate_overlay_t p_device_animate_overlay;
-void device_animate_overlay(const datum device_datum, const float position, const float time, const float unk1, const float unk2)
-{
-	p_device_animate_overlay(device_datum, position, time, unk1, unk2);
-}
-
-
 typedef void(__cdecl* object_dynamic_simulation_disable_t)(const datum object, bool disable_dynamic_simulation);
 object_dynamic_simulation_disable_t p_object_dynamic_simulation_disable;
 void __cdecl object_dynamic_simulation_disable(const datum object, bool disable_dynamic_simulation)
@@ -447,7 +426,7 @@ void __cdecl hs_update()
 	if (!s_game_globals::game_is_campaign()) { return; }
 
 	// If we are the client, run stored script args
-	if (!NetworkSession::LocalPeerIsSessionHost())
+	if (!NetworkSession::LocalPeerIsSessionHost() && NetworkSession::GetLocalSessionState() != _network_session_state_none)
 	{
 		client_execute_stored_hs_commands();
 	}
@@ -461,6 +440,11 @@ void on_map_load()
 void ApplyHooks()
 {
 	EventHandler::register_callback(on_map_load, EventType::map_load, EventExecutionType::execute_after);
+
+	// Rewriten HS functions
+	PatchCall(Memory::GetAddress(0xECB98, 0xEBDA2), device_set_position_track);
+	PatchCall(Memory::GetAddress(0xECC3A, 0xEBE44), device_animate_position);
+	PatchCall(Memory::GetAddress(0xECC89, 0xEBE93), device_animate_overlay);
 
 	// Hook hs_update function so we execute the stored hs functions recieved from the network in the proper area
 	PatchCall(Memory::GetAddress(0x4A523, 0x437A1), hs_update);
@@ -518,8 +502,6 @@ void hs_initialize()
 		p_cinematic_stop = Memory::GetAddress<no_arg_hs_function_t>(0x3A8C9);
 		p_custom_animation_relative = Memory::GetAddress<custom_animation_relative_t>(0x18565F);
 		p_object_cinematic_lod = Memory::GetAddress<object_cinematic_lod_t>(0x133BE1);
-		p_device_animate_position = Memory::GetAddress<device_animate_position_t>(0x163911);
-		p_device_set_position_track = Memory::GetAddress<device_set_position_track_t>(0x164257);
 		p_switch_bsp = Memory::GetAddress<switch_bsp_t>(0x39563);
 		p_custom_animation_loop = Memory::GetAddress<custom_animation_loop_t>(0x18563E);
 		p_camera_set_field_of_view = Memory::GetAddress<camera_set_field_of_view_t>(0x97F38);
@@ -531,7 +513,6 @@ void hs_initialize()
 		p_cinematic_lighting_set_ambient_light = Memory::GetAddress<cinematic_lighting_set_ambient_light_t>(0x130A52);
 		p_object_uses_cinematic_lighting = Memory::GetAddress<object_uses_cinematic_lighting_t>(0x133C17);
 		p_device_set_overlay_track = Memory::GetAddress<device_set_overlay_track_t>(0x1648E7);
-		p_device_animate_overlay = Memory::GetAddress<device_animate_overlay_t>(0x1639A5);
 		p_object_dynamic_simulation_disable = Memory::GetAddress<object_dynamic_simulation_disable_t>(0x14B4E0);
 		p_game_save = Memory::GetAddress<no_arg_hs_function_t>(0x9E4FB);
 		p_game_revert = Memory::GetAddress<no_arg_hs_function_t>(0x3951E);

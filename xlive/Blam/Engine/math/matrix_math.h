@@ -60,7 +60,7 @@ CHECK_STRUCT_SIZE(real_matrix4x3, 52);
 
 void __fastcall cross_product3d(const real_vector3d* up, const real_vector3d* forward, real_vector3d* out);
 void __fastcall matrix3x3_rotation_to_quaternion(const real_matrix3x3* matrix, real_orientation* orientation);
-void __fastcall matrix4x3_to_orientation(real_matrix4x3* matrix, real_orientation* orientation);
+void __fastcall matrix4x3_to_orientation(const real_matrix4x3* matrix, real_orientation* orientation);
 void __fastcall matrix4x3_rotation_from_vectors(real_matrix4x3* matrix, const real_vector3d* forward, const real_vector3d* up);
 void __fastcall matrix4x3_from_point_and_vectors(real_matrix4x3* matrix, const real_point3d* position, const real_vector3d* forward, const real_vector3d* up);
 void __fastcall matrix4x3_inverse(const real_matrix4x3* input, real_matrix4x3* out);
