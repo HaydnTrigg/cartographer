@@ -315,7 +315,7 @@ namespace Engine::Objects
 	void apply_biped_object_definition_patches();
 	void simulation_action_object_create(datum object_idx);
 	void object_destroy(datum object_idx);
-	void object_wake(const datum object_datum);
+	void object_wake(const unsigned __int16 object_datum);
 	bool object_has_animation_manager(const datum object_index);
 
 	int object_get_count();

@@ -2,7 +2,7 @@
 #include "matrix_math.h"
 #include "Blam/Math/real_vector3d.h"
 
-void __fastcall cross_product3d(const real_vector3d* up, const real_vector3d* forward, real_vector3d* out)
+void cross_product3d(const real_vector3d* up, const real_vector3d* forward, real_vector3d* out)
 {
     out->i = (up->j * forward->k) - (up->k * forward->j);
     out->j = (up->k * forward->i) - (up->i * forward->k);
@@ -10,7 +10,7 @@ void __fastcall cross_product3d(const real_vector3d* up, const real_vector3d* fo
 }
 
 // TODO Reimplement properly later
-void __fastcall matrix3x3_rotation_to_quaternion(const real_matrix3x3* matrix, real_orientation* orientation)
+void matrix3x3_rotation_to_quaternion(const real_matrix3x3* matrix, real_orientation* orientation)
 {
     typedef void(__cdecl* matrix3x3_rotation_to_quaternion_t)(const real_matrix3x3* matrix, real_orientation* orientation);
     auto p_matrix3x3_rotation_to_quaternion = Memory::GetAddress<matrix3x3_rotation_to_quaternion_t>(0x78FFA);
@@ -18,7 +18,7 @@ void __fastcall matrix3x3_rotation_to_quaternion(const real_matrix3x3* matrix, r
     p_matrix3x3_rotation_to_quaternion(matrix, orientation);
 }
 
-void __fastcall matrix4x3_rotation_from_vectors(real_matrix4x3* matrix, const real_vector3d* forward, const real_vector3d* up)
+void matrix4x3_rotation_from_vectors(real_matrix4x3* matrix, const real_vector3d* forward, const real_vector3d* up)
 {
     matrix->scale = 1.0;
     matrix->vectors.forward = *forward;
@@ -27,45 +27,46 @@ void __fastcall matrix4x3_rotation_from_vectors(real_matrix4x3* matrix, const re
     matrix->position = {0.0f, 0.0f, 0.0f};
 }
 
-void __fastcall matrix4x3_from_point_and_vectors(real_matrix4x3* matrix, const real_point3d* position, const real_vector3d* forward, const real_vector3d* up)
+void matrix4x3_from_point_and_vectors(real_matrix4x3* matrix, const real_point3d* position, const real_vector3d* forward, const real_vector3d* up)
 {
     matrix4x3_rotation_from_vectors(matrix, forward, up);
     matrix->position = *position;
 }
 
-void __fastcall matrix4x3_inverse(const real_matrix4x3* input, real_matrix4x3* out)
+void matrix4x3_inverse(const real_matrix4x3* input, real_matrix4x3* out)
 {
-    float temp_float;
     real_point3d inverse_pos;
 
-    if (input->scale == 1.0)
+    if (input->scale == 0.0)
     {
-        out->scale = 1.0;
+        memset(out, 0, sizeof(real_matrix4x3));
     }
     else
     {
-        if (input->scale < 0.0)
+        inverse_pos.x = -input->position.x;
+        inverse_pos.y = -input->position.y;
+        inverse_pos.z = -input->position.z;
+        if (input->scale == 1.0)
         {
-            temp_float = (input->scale <= -0.000099999997f ? input->scale : -0.000099999997f);
+            out->scale = 1.0;
         }
         else
         {
-            temp_float = (input->scale <= 0.000099999997f ? 0.000099999997f : input->scale);
+            out->scale = 1.0f / input->scale;
+            inverse_pos.x = -input->position.x * input->scale;
+            inverse_pos.y = -input->position.y * input->scale;
+            inverse_pos.z = -input->position.z * input->scale;
         }
-        out->scale = 1.0f / temp_float;
-        inverse_pos.x = -input->position.x * out->scale;
-        inverse_pos.y = -input->position.y * out->scale;
-        inverse_pos.z = -input->position.z * out->scale;
-    }
-    out->vectors = input->vectors;
-    out->inverse_rotation();
+        out->vectors = input->vectors;
+        out->inverse_rotation();
 
-    out->position.x = ((inverse_pos.x * out->vectors.forward.i) + (inverse_pos.y * out->vectors.left.i)) + (inverse_pos.z * out->vectors.up.i);
-    out->position.y = ((inverse_pos.x * out->vectors.forward.j) + (inverse_pos.y * out->vectors.left.j)) + (inverse_pos.z * out->vectors.up.j);
-    out->position.z = ((inverse_pos.x * out->vectors.forward.k) + (inverse_pos.y * out->vectors.left.k)) + (inverse_pos.z * out->vectors.up.k);
+        out->position.x = ((inverse_pos.x * out->vectors.forward.i) + (inverse_pos.y * out->vectors.left.i)) + (inverse_pos.z * out->vectors.up.i);
+        out->position.y = ((inverse_pos.x * out->vectors.forward.j) + (inverse_pos.y * out->vectors.left.j)) + (inverse_pos.z * out->vectors.up.j);
+        out->position.z = ((inverse_pos.x * out->vectors.forward.k) + (inverse_pos.y * out->vectors.up.j)) + (inverse_pos.z * out->vectors.up.k);
+    }
 }
 
-void __fastcall matrix4x3_multiply(const real_matrix4x3* matrix1, const real_matrix4x3* matrix2, real_matrix4x3* out)
+void matrix4x3_multiply(const real_matrix4x3* matrix1, const real_matrix4x3* matrix2, real_matrix4x3* out)
 {
     real_matrix4x3 matrix;
     const real_matrix4x3* p_matrix1;
@@ -128,7 +129,7 @@ void __fastcall matrix4x3_multiply(const real_matrix4x3* matrix1, const real_mat
     out->scale = p_matrix1->scale * p_matrix2->scale;
 }
 
-void __fastcall matrix4x3_to_orientation(const real_matrix4x3* matrix, real_orientation* orientation)
+void matrix4x3_to_orientation(const real_matrix4x3* matrix, real_orientation* orientation)
 {
     matrix3x3_rotation_to_quaternion(&matrix->vectors, orientation);
     orientation[1].i = matrix->position.x;

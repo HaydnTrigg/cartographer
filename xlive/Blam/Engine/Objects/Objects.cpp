@@ -51,9 +51,9 @@ namespace Engine::Objects
 		p_object_destroy(object_idx);
 	}
 
-	void object_wake(const datum object_datum)
+	void object_wake(const unsigned __int16 object_datum)
 	{
-		typedef void(__cdecl* object_wake_t)(const datum object_datum);
+		typedef void(__cdecl* object_wake_t)(const unsigned __int16 object_datum);
 		auto object_wake = Memory::GetAddress<object_wake_t>(0x12FA1E);
 
 		object_wake(object_datum);
