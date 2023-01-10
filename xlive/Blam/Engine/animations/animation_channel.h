@@ -30,7 +30,7 @@ struct c_channel_base
 	//string_id animation_string;
 	char mixing_board_parent_slider_type;
 	byte unk;
-	byte pad[2];
+	short pad;
 	float field14;
 	float speed;
 	float animation_ticks_remaining;
