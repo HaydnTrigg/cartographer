@@ -184,15 +184,12 @@ CHECK_STRUCT_SIZE(real_plane3d, sizeof(real_vector3d) + sizeof(float));
 
 struct real_quaternion
 {
-	union
-	{
-		float v[4];
-		float i, j, k, w;
-	};
+	real_vector3d vector;
+	float w;
 
 	inline float get_square_length() const
 	{
-		return i * i + j * j + k * k + w * w;
+		return vector.i * vector.i + vector.j * vector.j + vector.k * vector.k + w * w;
 	}
 };
 CHECK_STRUCT_SIZE(real_quaternion, sizeof(float) * 4);
