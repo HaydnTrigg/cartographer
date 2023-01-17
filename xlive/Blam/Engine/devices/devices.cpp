@@ -44,8 +44,8 @@ bool __cdecl device_set_position_track(datum device_datum, const string_id anima
     auto c_animation_manager__animation_get_root_matrix = Memory::GetAddress<animation_get_root_matrix_t>(0xF4364);
     typedef datum(__thiscall* find_node_t)(void* _this, string_id string);
     auto c_animation_manager__find_node = Memory::GetAddress<find_node_t>(0xF427A);
-    typedef void (__cdecl* object_set_position_t)(datum object, const real_point3d *position, const real_vector3d *forward, const real_vector3d *up, const void *location);
-    auto object_set_position = Memory::GetAddress<object_set_position_t>(0x136B7F);
+    typedef void (__cdecl* object_set_position_direct_t)(datum object, const real_point3d *position, const real_vector3d *forward, const real_vector3d *up, const void *location);
+    auto object_set_position_direct = Memory::GetAddress<object_set_position_direct_t>(0x136B7F);
     typedef void(__cdecl* object_start_interpolation_t)(const datum object_datum, const float time);
     auto object_start_interpolation = Memory::GetAddress<object_start_interpolation_t>(0x132D5C);
     typedef double(__thiscall* get_authored_duration_t)(void* _this);
@@ -143,7 +143,7 @@ bool __cdecl device_set_position_track(datum device_datum, const string_id anima
             || fabs(object_matrix_current_animation.vectors.up.j - up.j) >= 0.000099999997
             || fabs(object_matrix_current_animation.vectors.up.k - up.k) >= 0.000099999997)
         {   
-            object_set_position(device_datum, &initial_device_matrix.position, &forward, &up, 0);
+            object_set_position_direct(device_datum, &initial_device_matrix.position, &forward, &up, 0);
             if (object_can_interpolate(device_datum))
             {
                 real_orientation orientation[2];
@@ -158,8 +158,6 @@ bool __cdecl device_set_position_track(datum device_datum, const string_id anima
                 matrix4x3_to_orientation(&matrix_initial_inversed, orientation);
                 orientations_multiply(orientation, node_orientations, node_orientations);
                 orientations_multiply(orientation, original_orientations, original_orientations);
-
-                *orientation = *orientation;
             }
         }
     }

@@ -12,6 +12,7 @@ void quaternion_transform_point(const real_quaternion* in, const real_point3d* p
     float point_and_quad_multiplied_times_two = (((point->x * local_quaternion.vector.i) + (local_point.y * local_quaternion.vector.j)) + (point->z * local_quaternion.vector.k)) * 2.0f;
     float double_w = local_quaternion.w * 2.0f;
     float xz_difference = (local_point.x * local_quaternion.vector.k) - (local_quaternion.vector.i * point->z);
+
     out->x = (
                 (
                     (
@@ -33,24 +34,54 @@ void quaternion_transform_point(const real_quaternion* in, const real_point3d* p
 
 void quaternions_multiply(const real_quaternion* in, const real_quaternion* in2, real_quaternion* out)
 {
-    out->vector.i = (((in2->w * in->vector.i) + (in2->vector.k * in->vector.j)) + (in->w * in2->vector.i)) - (in2->vector.j * in->vector.k);
-    out->vector.j = (((in->vector.k * in2->vector.i) + (in2->w * in->vector.j)) + (in->w * in2->vector.j)) - (in->vector.i * in2->vector.k);
-    out->vector.k = (((in2->w * in->vector.k) + (in2->vector.j * in->vector.i)) + (in->w * in2->vector.k)) - (in2->vector.i * in->vector.j);
-    out->w = (((in2->w * in->w) - (in->vector.i * in2->vector.i)) - (in2->vector.j * in->vector.j)) - (in->vector.k * in2->vector.k);
+    // Move inputs to local variables in case one of our inputs is also an output
+    real_quaternion temp[2];
+    const real_quaternion* p_in = in;
+    if (in == out)
+    {
+        memcpy(temp, in, sizeof(temp));
+        p_in = temp;
+    }
+    const real_quaternion* p_in2 = in2;
+    if (in2 == out)
+    {
+        memcpy(temp, in2, sizeof(temp));
+        p_in2 = temp;
+    }
+
+    out->vector.i = (((p_in2->w * p_in->vector.i) + (p_in2->vector.k * p_in->vector.j)) + (p_in->w * p_in2->vector.i)) - (p_in2->vector.j * p_in->vector.k);
+    out->vector.j = (((p_in->vector.k * p_in2->vector.i) + (p_in2->w * p_in->vector.j)) + (p_in->w * p_in2->vector.j)) - (p_in->vector.i * p_in2->vector.k);
+    out->vector.k = (((p_in2->w * p_in->vector.k) + (p_in2->vector.j * p_in->vector.i)) + (p_in->w * p_in2->vector.k)) - (p_in2->vector.i * p_in->vector.j);
+    out->w = (((p_in2->w * p_in->w) - (p_in->vector.i * p_in2->vector.i)) - (p_in2->vector.j * p_in->vector.j)) - (p_in->vector.k * p_in2->vector.k);
 }
 
 void orientations_multiply(const real_orientation* in, const real_orientation* in2, real_orientation* out)
 {    
-    quaternions_multiply(in, in2, out);
-    quaternion_transform_point(in, &in2[1].vector, &out[1].vector);
-    if (in[1].w == 1.0f)
+    // Move inputs to local variables in case one of our inputs is also an output
+    real_orientation temp[2];
+    const real_orientation* p_in = in;
+    if (in == out)
     {
-        out[1].w = in2[1].w;
+        memcpy(temp, in, sizeof(temp));
+        p_in = temp;
+    }
+    const real_orientation* p_in2 = in2;
+    if (in2 == out)
+    {
+        memcpy(temp, in2, sizeof(temp));
+        p_in2 = temp;
+    }
+
+    quaternions_multiply(p_in, p_in2, out);
+    quaternion_transform_point(p_in, &p_in2[1].vector, &out[1].vector);
+    if (p_in[1].w == 1.0f)
+    {
+        out[1].w = p_in2[1].w;
     }
     else
     {
-        scale_vector3d(&out[1].vector, in[1].w, &out[1].vector);
-        out[1].w = in2[1].w * in[1].w;
+        scale_vector3d(&out[1].vector, p_in[1].w, &out[1].vector);
+        out[1].w = p_in2[1].w * p_in[1].w;
     }
-    add_vectors3d(&in[1].vector, &out[1].vector, &out[1].vector);
+    add_vectors3d(&p_in[1].vector, &out[1].vector, &out[1].vector);
 }
