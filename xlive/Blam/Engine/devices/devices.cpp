@@ -6,6 +6,7 @@
 #include "Blam/Cache/TagGroups/render_model_definition.hpp"
 #include "Blam/Engine/Game/GameTimeGlobals.h"
 #include "Blam/Engine/math/matrix_math.h"
+#include "Blam/Engine/math/real_math.h"
 #include "Blam/Engine/Networking/NetworkMessageTypeCollection.h"
 #include "Blam/Engine/Objects/Objects.h"
 #include "H2MOD/Tags/TagInterface.h"
@@ -43,20 +44,14 @@ bool __cdecl device_set_position_track(datum device_datum, const string_id anima
     auto c_animation_manager__animation_get_root_matrix = Memory::GetAddress<animation_get_root_matrix_t>(0xF4364);
     typedef datum(__thiscall* find_node_t)(void* _this, string_id string);
     auto c_animation_manager__find_node = Memory::GetAddress<find_node_t>(0xF427A);
-    typedef real_matrix4x3*(__cdecl* object_get_node_matrix_t)(datum object_datum, __int16 node_index);
-    auto object_get_node_matrix = Memory::GetAddress<object_get_node_matrix_t>(0x132547);
     typedef void (__cdecl* object_set_position_t)(datum object, const real_point3d *position, const real_vector3d *forward, const real_vector3d *up, const void *location);
     auto object_set_position = Memory::GetAddress<object_set_position_t>(0x136B7F);
-    typedef void(__cdecl* orientation_multiply_t)(const real_orientation* in1, const real_orientation* in2, real_orientation* out);
-    auto orientations_multiply = Memory::GetAddress<orientation_multiply_t>(0x3534D);
     typedef void(__cdecl* object_start_interpolation_t)(const datum object_datum, const float time);
     auto object_start_interpolation = Memory::GetAddress<object_start_interpolation_t>(0x132D5C);
     typedef double(__thiscall* get_authored_duration_t)(void* _this);
     auto c_animation_channel__get_authored_duration = Memory::GetAddress<get_authored_duration_t>(0x112AB4);
     typedef bool(__cdecl* object_can_interpolate_t)(unsigned __int16 a1);
     auto object_can_interpolate = Memory::GetAddress<object_can_interpolate_t>(0x1318B8);
-    typedef void(__cdecl* object_compute_node_matrices_with_children_t)(datum object_datum);
-    auto object_compute_node_matrices_with_children = Memory::GetAddress<object_compute_node_matrices_with_children_t>(0x136924);
     
     real_matrix4x3 temp_matrix;
     real_vector3d vector;
@@ -68,6 +63,9 @@ bool __cdecl device_set_position_track(datum device_datum, const string_id anima
     real_matrix4x3 object_matrix_current_animation;
     real_matrix4x3 animation_matrix_from_initial_and_current;
     real_matrix4x3 matrix_initial_inversed;
+
+    real_orientation* node_orientations;
+    real_orientation* original_orientations;
 
     if (device_datum == DATUM_INDEX_NONE) { return false; }
     s_device_data_group* device = object_try_and_get_and_verify_type<s_device_data_group>(device_datum, FLAG(e_object_type::light_fixture) | FLAG(e_object_type::machine) | FLAG(e_object_type::control));
@@ -84,7 +82,7 @@ bool __cdecl device_set_position_track(datum device_datum, const string_id anima
 
     void* animation_manager = (char*)device + device->animation_manager_index;
     matrix4x3_from_point_and_vectors(&object_matrix_current_animation, &device->position, &device->orientation, &device->up);
-    const real_matrix4x3 initial_device_matrix = object_matrix_current_animation;
+    real_matrix4x3 initial_device_matrix = object_matrix_current_animation;
 
     bool some_flag_is_true = (device->flags & 8) != 0;
     if (some_flag_is_true)
@@ -99,22 +97,22 @@ bool __cdecl device_set_position_track(datum device_datum, const string_id anima
         {
             matrix4x3_inverse(&animation_matrix_initial, &matrix_initial_inversed);
             matrix4x3_multiply(&matrix_current_animation_time, &matrix_initial_inversed, &animation_matrix_from_initial_and_current);
-            matrix4x3_multiply(&object_matrix_current_animation, &animation_matrix_from_initial_and_current, &object_matrix_current_animation);
+            matrix4x3_multiply(&initial_device_matrix, &animation_matrix_from_initial_and_current, &initial_device_matrix);
         }
         else
         {
-            memcpy(&object_matrix_current_animation, object_get_node_matrix(device_datum, node), sizeof(real_matrix4x3));
+            initial_device_matrix = *Engine::Objects::object_get_node_matrix(device_datum, node);
         }
-        double tick_length = time_globals::get_seconds_per_tick();
+        float tick_length = time_globals::get_seconds_per_tick();
         if (tick_length > 0.0)
         {
-            float authored_time_1 = authored_time - (float)tick_length;
+            float authored_time_1 = authored_time - tick_length;
             if (authored_time_1 > 0.0f)
             {
                 c_animation_manager__animation_get_root_matrix(animation_manager, animation_tagblock_index, authored_time_1, render_model_definition, &temp_matrix);
                 vector_from_points3d(&matrix_current_animation_time.position, &temp_matrix.position, &vector);
                 magnitude = (float)vector.magnitude_squared3d();
-                inverse_square_rate_of_anim = (magnitude > 0.0f ? sqrt(magnitude) / (float)tick_length : 0.0f);        
+                inverse_square_rate_of_anim = (magnitude > 0.0f ? sqrt(magnitude) / tick_length : 0.0f);        
             }
         }
     }
@@ -131,35 +129,37 @@ bool __cdecl device_set_position_track(datum device_datum, const string_id anima
 
     if (some_flag_is_true && device->parent_datum == -1)
     {
-        real_vector3d forward = object_matrix_current_animation.vectors.forward;
-        real_vector3d up = object_matrix_current_animation.vectors.up;
+        real_vector3d forward = initial_device_matrix.vectors.forward;
+        real_vector3d up = initial_device_matrix.vectors.up;
         normalize3d(&forward);
         normalize3d(&up);
-        if (fabs(initial_device_matrix.position.x - object_matrix_current_animation.position.x) >= 0.000099999997
-            || fabs(initial_device_matrix.position.y - object_matrix_current_animation.position.y) >= 0.000099999997
-            || fabs(initial_device_matrix.position.z - object_matrix_current_animation.position.z) >= 0.000099999997
-            || fabs(initial_device_matrix.vectors.forward.i - forward.i) >= 0.000099999997
-            || fabs(initial_device_matrix.vectors.forward.j - forward.j) >= 0.000099999997
-            || fabs(initial_device_matrix.vectors.forward.k - forward.k) >= 0.000099999997
-            || fabs(initial_device_matrix.vectors.up.i - up.i) >= 0.000099999997
-            || fabs(initial_device_matrix.vectors.up.j - up.j) >= 0.000099999997
-            || fabs(initial_device_matrix.vectors.up.k - up.k) >= 0.000099999997)
+        if (fabs(object_matrix_current_animation.position.x - initial_device_matrix.position.x) >= 0.000099999997
+            || fabs(object_matrix_current_animation.position.y - initial_device_matrix.position.y) >= 0.000099999997
+            || fabs(object_matrix_current_animation.position.z - initial_device_matrix.position.z) >= 0.000099999997
+            || fabs(object_matrix_current_animation.vectors.forward.i - forward.i) >= 0.000099999997
+            || fabs(object_matrix_current_animation.vectors.forward.j - forward.j) >= 0.000099999997
+            || fabs(object_matrix_current_animation.vectors.forward.k - forward.k) >= 0.000099999997
+            || fabs(object_matrix_current_animation.vectors.up.i - up.i) >= 0.000099999997
+            || fabs(object_matrix_current_animation.vectors.up.j - up.j) >= 0.000099999997
+            || fabs(object_matrix_current_animation.vectors.up.k - up.k) >= 0.000099999997)
         {   
-            object_set_position(device_datum, &object_matrix_current_animation.position, &forward, &up, 0);
+            object_set_position(device_datum, &initial_device_matrix.position, &forward, &up, 0);
             if (object_can_interpolate(device_datum))
             {
-                real_orientation orientation;
+                real_orientation orientation[2];
                 s_object_data_definition* object = object_get_fast_unsafe(device_datum);
-                real_orientation* node_orientations = (real_orientation*)((char*)object + object->node_orientation_offset);
-                real_orientation* original_orientations = (real_orientation*)((char*)object + object->original_orientation_offset);
-                matrix4x3_to_orientation(&initial_device_matrix, &orientation);
-                orientations_multiply(&orientation, node_orientations, node_orientations);
-                orientations_multiply(&orientation, original_orientations, original_orientations);
+                node_orientations = (real_orientation*)((char*)object + object->node_orientation_offset);
+                original_orientations = (real_orientation*)((char*)object + object->original_orientation_offset);
+                matrix4x3_to_orientation(&object_matrix_current_animation, orientation);
+                orientations_multiply(orientation, node_orientations, node_orientations);
+                orientations_multiply(orientation, original_orientations, original_orientations);
                 matrix4x3_from_point_and_vectors(&animation_matrix_from_initial_and_current, &device->position, &device->orientation, &device->up);
                 matrix4x3_inverse(&animation_matrix_from_initial_and_current, &matrix_initial_inversed);
-                matrix4x3_to_orientation(&matrix_initial_inversed, &orientation);
-                orientations_multiply(&orientation, node_orientations, node_orientations);
-                orientations_multiply(&orientation, original_orientations, original_orientations);
+                matrix4x3_to_orientation(&matrix_initial_inversed, orientation);
+                orientations_multiply(orientation, node_orientations, node_orientations);
+                orientations_multiply(orientation, original_orientations, original_orientations);
+
+                *orientation = *orientation;
             }
         }
     }
@@ -202,7 +202,7 @@ bool __cdecl device_set_position_track(datum device_datum, const string_id anima
         device_set_position_animation(device_datum, HS_POSITION);
     }
     Engine::Objects::object_wake(device_datum);
-    object_compute_node_matrices_with_children(device_datum);
+    Engine::Objects::object_compute_node_matrices_with_children(device_datum);
     device->flags |= 4u;
     if (animation_is_set)
         device->flags |= 8;

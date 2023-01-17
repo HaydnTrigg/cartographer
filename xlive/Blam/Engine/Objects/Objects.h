@@ -95,7 +95,7 @@ struct s_object_data_definition
 {
 	datum tag_definition_index;
 	DWORD object_flags;
-	char gap_8[4];
+	void* object_header_block;
 	datum next_index;
 	datum current_weapon_datum;		//maybe attachment or child
 	datum parent_datum;
@@ -105,7 +105,11 @@ struct s_object_data_definition
 	DWORD location[2];
 	real_point3d center;
 	float radius;
-	real_matrix3x3 vectors;
+	real_point3d shadow_origin_point;
+	float shadow_sphere_radius;
+	real_point3d dynamic_light_sphere_offset;
+	float dynamic_light_sphere_radius;
+	float unk5C;
 	real_point3d position;
 	real_vector3d orientation;
 	real_vector3d up;
@@ -123,7 +127,7 @@ struct s_object_data_definition
 	char gap_6[3];
 	datum havok_datum;
 	char gap_B8[8];
-	WORD field_C0;
+	WORD flags_C0;
 	WORD field_C2;
 	DWORD field_C4;
 	DWORD field_C8;
@@ -317,6 +321,8 @@ namespace Engine::Objects
 	void object_destroy(datum object_idx);
 	void object_wake(const unsigned __int16 object_datum);
 	bool object_has_animation_manager(const datum object_index);
+	void object_compute_node_matrices_with_children(const datum object_datum);
+	real_matrix4x3* object_get_node_matrix(const datum object_datum, const __int16 node_index);
 
 	int object_get_count();
 	int object_count_from_iter();

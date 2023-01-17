@@ -16,20 +16,20 @@ struct s_object_group_definition :TagGroup<'obje'>
 	WORD object_type;
 	enum e_object_flags : short
 	{
-		does_not_cast_shadow = FLAG(0),
-		search_cardinal_direction_lightmaps_on_failure = FLAG(1),
-		unused = FLAG(2),
-		not_a_pathfinding_obstacle = FLAG(3),
-		extension_of_parent = FLAG(4),
-		does_not_cause_collision_damage = FLAG(5),
-		early_mover = FLAG(6),
-		early_mover_localized_physics = FLAG(7),
-		use_static_massive_lightmap_sample = FLAG(8),
-		object_scales_attachments = FLAG(9),
-		inherits_players_appearance = FLAG(10),
-		dead_bipeds_cant_localize = FLAG(11),
-		attach_to_clusters_by_dynamic_sphere = FLAG(12),
-		effects_created_by_this_object_do_not_spawn_objects_in_multiplayer = FLAG(13),
+		does_not_cast_shadow = 0,
+		search_cardinal_direction_lightmaps_on_failure = 1,
+		unused = 2,
+		not_a_pathfinding_obstacle = 3,
+		extension_of_parent = 4,
+		does_not_cause_collision_damage = 5,
+		early_mover = 6,
+		early_mover_localized_physics = 7,
+		use_static_massive_lightmap_sample = 8,
+		object_scales_attachments = 9,
+		inherits_players_appearance = 10,
+		dead_bipeds_cant_localize = 11,
+		attach_to_clusters_by_dynamic_sphere = 12,
+		effects_created_by_this_object_do_not_spawn_objects_in_multiplayer = 13,
 	};
 	e_object_flags object_flags;
 	float bounding_radius;

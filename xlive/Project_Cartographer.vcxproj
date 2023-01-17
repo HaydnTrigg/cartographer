@@ -364,6 +364,7 @@
     <ClCompile Include="H2MOD\Modules\Shell\ServerConsole.cpp" />
     <ClCompile Include="Blam\LazyBlam\LazyBlam.cpp" />
     <ClCompile Include="H2MOD\Variants\GraveRobber\GraveRobber.cpp" />
+    <ClCompile Include="Blam\Engine\math\real_math.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -704,6 +705,7 @@
     <ClInclude Include="H2MOD\Tags\MetaLoader\meta_struct.h" />
     <ClInclude Include="H2MOD\Tags\MetaLoader\tag_loader.h" />
     <ClInclude Include="Blam\LazyBlam\LazyBlam.hpp" />
+    <ClInclude Include="Blam\Engine\math\real_math.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Blam\Engine\structures\structures.h" />
     <ClInclude Include="Util\curl-interface.h" />

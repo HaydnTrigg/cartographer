@@ -53,16 +53,16 @@ void matrix4x3_inverse(const real_matrix4x3* input, real_matrix4x3* out)
         else
         {
             out->scale = 1.0f / input->scale;
-            inverse_pos.x = -input->position.x * input->scale;
-            inverse_pos.y = -input->position.y * input->scale;
-            inverse_pos.z = -input->position.z * input->scale;
+            inverse_pos.x *= out->scale;
+            inverse_pos.y *= out->scale;
+            inverse_pos.z *= out->scale;
         }
         out->vectors = input->vectors;
         out->inverse_rotation();
 
         out->position.x = ((inverse_pos.x * out->vectors.forward.i) + (inverse_pos.y * out->vectors.left.i)) + (inverse_pos.z * out->vectors.up.i);
         out->position.y = ((inverse_pos.x * out->vectors.forward.j) + (inverse_pos.y * out->vectors.left.j)) + (inverse_pos.z * out->vectors.up.j);
-        out->position.z = ((inverse_pos.x * out->vectors.forward.k) + (inverse_pos.y * out->vectors.up.j)) + (inverse_pos.z * out->vectors.up.k);
+        out->position.z = ((inverse_pos.x * out->vectors.forward.k) + (inverse_pos.y * out->vectors.left.k)) + (inverse_pos.z * out->vectors.up.k);
     }
 }
 
@@ -132,9 +132,9 @@ void matrix4x3_multiply(const real_matrix4x3* matrix1, const real_matrix4x3* mat
 void matrix4x3_to_orientation(const real_matrix4x3* matrix, real_orientation* orientation)
 {
     matrix3x3_rotation_to_quaternion(&matrix->vectors, orientation);
-    orientation[1].i = matrix->position.x;
-    orientation[1].j = matrix->position.y;
-    orientation[1].k = matrix->position.z;
+    orientation[1].vector.i = matrix->position.x;
+    orientation[1].vector.j = matrix->position.y;
+    orientation[1].vector.k = matrix->position.z;
     orientation[1].w = matrix->scale;
 }
 

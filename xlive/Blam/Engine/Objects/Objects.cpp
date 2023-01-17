@@ -1,15 +1,16 @@
 #include "stdafx.h"
-
 #include "Objects.h"
 
-#include "Util\Hooks\Hook.h"
-
-#include "Blam\Engine\Memory\bitstream.h"
-#include "Blam\Engine\Objects\Objects.h"
-#include "Blam\Engine\Players\Players.h"
-#include "Blam\Engine\Simulation\GameInterface\SimulationGameUnits.h"
-#include "H2MOD\Modules\OnScreenDebug\OnscreenDebug.h"
-#include "H2MOD\Modules\PlayerRepresentation\PlayerRepresentation.h"
+#include "Blam/Cache/TagGroups/object_definition.hpp"
+#include "Blam/Engine/math/matrix_math.h"
+#include "Blam/Engine/Memory/bitstream.h"
+#include "Blam/Engine/Objects/Objects.h"
+#include "Blam/Engine/Players/Players.h"
+#include "Blam/Engine/Simulation/GameInterface/SimulationGameUnits.h"
+#include "H2MOD/Modules/OnScreenDebug/OnscreenDebug.h"
+#include "H2MOD/Modules/PlayerRepresentation/PlayerRepresentation.h"
+#include "H2MOD/Tags/TagInterface.h"
+#include "Util/Hooks/Hook.h"
 
 namespace Engine::Objects
 {
@@ -59,9 +60,34 @@ namespace Engine::Objects
 		object_wake(object_datum);
 	}
 
+	void object_compute_node_matrices_with_children(const datum object_datum)
+	{
+		typedef void(__cdecl* object_compute_node_matrices_non_recursive_t)(const datum object_datum);
+		auto object_compute_node_matrices_non_recursive = Memory::GetAddress<object_compute_node_matrices_non_recursive_t>(0x1353E6);
+		typedef bool(__cdecl* object_compute_node_matrices_locations_t)(const datum object_datum);
+		auto object_compute_node_matrices_locations = Memory::GetAddress<object_compute_node_matrices_locations_t>(0x1363D5);
+
+		const s_object_data_definition* object = object_get_fast_unsafe(object_datum);
+		s_object_data_definition* next_object = nullptr;
+		object_compute_node_matrices_non_recursive(object_datum);
+		object_compute_node_matrices_locations(object_datum);
+		for (unsigned long i = object->current_weapon_datum; i != -1; i = next_object->next_index)
+		{
+			next_object = object_get_fast_unsafe(i);
+			if (((1 << next_object->object_type) & 0x80u) == 0)
+				object_compute_node_matrices_with_children(i);
+		}
+	}
+
 	bool object_has_animation_manager(const datum object_index)
 	{
 		return (object_get_fast_unsafe(object_index)->animation_manager_index != 0xFFFF);
+	}
+
+	real_matrix4x3* object_get_node_matrix(const datum object_datum, const __int16 node_index)
+	{
+		const s_object_data_definition* object = object_get_fast_unsafe(object_datum);
+		return(real_matrix4x3*)((char*)object + 52 * node_index + object->nodes_offset);
 	}
 
 #pragma region Biped variant patches

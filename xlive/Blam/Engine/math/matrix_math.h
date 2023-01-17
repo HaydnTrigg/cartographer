@@ -40,16 +40,16 @@ struct real_matrix4x3
 		assert(square_len != 0.0f);
 		float s = 2.0f / square_len;
 
-		auto is = rotation.i * s;
-		auto js = rotation.j * s;
-		auto ks = rotation.k * s;
+		auto is = rotation.vector.i * s;
+		auto js = rotation.vector.j * s;
+		auto ks = rotation.vector.k * s;
 
 		auto iw = rotation.w * is;
 		auto jw = rotation.w * js;
 		auto kw = rotation.w * ks;
 
-		auto ii = rotation.i * is, jj = rotation.j * js, kk = rotation.k * ks;
-		auto ij = rotation.i * js, ik = rotation.i * ks, jk = rotation.j * ks;
+		auto ii = rotation.vector.i * is, jj = rotation.vector.j * js, kk = rotation.vector.k * ks;
+		auto ij = rotation.vector.i * js, ik = rotation.vector.i * ks, jk = rotation.vector.j * ks;
 
 		vectors.forward =	{ 1.0f - (jj + kk),  ij - kw,            ik + jw };
 		vectors.left =		{ ij + kw,           1.0f - (ii + kk),   jk - iw };
