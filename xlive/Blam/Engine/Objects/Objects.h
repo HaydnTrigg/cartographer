@@ -324,8 +324,19 @@ namespace Engine::Objects
 	void object_compute_node_matrices_with_children(const datum object_datum);
 	real_matrix4x3* object_get_node_matrix(const datum object_datum, const __int16 node_index);
 	void __cdecl object_type_fix_transform(const datum object, const real_point3d* position, const real_vector3d* up, const real_vector3d* forward);
-	void object_set_position(const real_vector3d* forward_ptr, const real_vector3d* up, const datum object_datum, const real_point3d* position, const void* location_struct, const bool some_bool);
-	void object_set_position_direct(const datum object_datum, const real_point3d* position, const real_vector3d* forward, const real_vector3d* up, const void* location);
+	void object_set_position(const real_vector3d* forward_ptr, 
+		const real_vector3d* up, 
+		const datum object_datum, 
+		const real_point3d* position, 
+		const void* location_struct, 
+		const bool some_bool, 
+		const bool b_dont_update_simulation = false);
+	void object_set_position_direct(const datum object_datum, 
+		const real_point3d* position, 
+		const real_vector3d* forward, 
+		const real_vector3d* up, 
+		const void* location,
+		const bool b_dont_update_simulation = false);
 	bool __cdecl object_set_position_internal(datum object_datum,
 		const real_point3d* object_placement,
 		const real_vector3d* forward,
@@ -334,7 +345,8 @@ namespace Engine::Objects
 		const bool b_compute_node_matricies,
 		const bool b_set_havok_position,
 		const bool bool2,
-		const bool b_shouldnt_reconnect_to_map);
+		const bool b_shouldnt_reconnect_to_map,
+		const bool b_dont_update_simulation = false);
 
 	int object_get_count();
 	int object_count_from_iter();

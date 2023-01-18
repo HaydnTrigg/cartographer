@@ -122,12 +122,13 @@ namespace Engine::Objects
 		const datum object_datum,
 		const real_point3d* position,
 		const void* location_struct,
-		const bool some_bool)
+		const bool some_bool,
+		const bool b_dont_update_simulation) // New field b_dont_update_simulation
 	{
-		real_vector3d forward_1; // rax
-		real_point3d position_copy; // [esp+10h] [ebp-24h] BYREF
-		real_vector3d up_copy; // [esp+1Ch] [ebp-18h] BYREF
-		real_vector3d forward_copy; // [esp+28h] [ebp-Ch] BYREF
+		real_vector3d forward_1;
+		real_point3d position_copy;
+		real_vector3d up_copy;
+		real_vector3d forward_copy;
 
 		if (position)
 		{
@@ -148,7 +149,7 @@ namespace Engine::Objects
 			up_copy.k = up->k;
 		}
 		object_type_fix_transform(object_datum, &position_copy, &forward_copy, &up_copy);
-		if (!object_set_position_internal(object_datum, &position_copy, &forward_copy, &up_copy, location_struct, true, true, some_bool, false)
+		if (!object_set_position_internal(object_datum, &position_copy, &forward_copy, &up_copy, location_struct, true, true, some_bool, false, b_dont_update_simulation)
 			&& !simulation_query_object_is_predicted(object_datum))
 		{
 			object_delete(object_datum);
@@ -156,9 +157,12 @@ namespace Engine::Objects
 		object_wake(object_datum);
 	}
 
-	void object_set_position_direct(const datum object_datum, const real_point3d* position, const real_vector3d* forward, const real_vector3d* up, const void* location)
+	void object_set_position_direct(const datum object_datum, const real_point3d* position, const real_vector3d* forward, const real_vector3d* up, 
+		const void* location, 
+		const bool b_dont_update_simulation)
+		// New field b_dont_update_simulation
 	{
-		object_set_position(up, forward, object_datum, position, location, false);
+		object_set_position(up, forward, object_datum, position, location, false, b_dont_update_simulation);
 	}
 
 	bool __cdecl object_set_position_internal(datum object_datum,
@@ -169,7 +173,8 @@ namespace Engine::Objects
 		const bool b_compute_node_matricies,
 		const bool b_set_havok_position,
 		const bool bool2,
-		const bool b_shouldnt_reconnect_to_map)
+		const bool b_shouldnt_reconnect_to_map,
+		const bool b_dont_update_simulation)	// New field b_dont_update_simulation
 	{
 
 		s_object_data_definition* object = object_get_fast_unsafe(object_datum);
@@ -189,14 +194,20 @@ namespace Engine::Objects
 			else
 			{
 				object->position = *object_placement;
-				simulation_action_object_update(object_datum, 2);
+				if (!b_dont_update_simulation)
+				{
+					simulation_action_object_update(object_datum, 2);
+				}
 			}
 		}
 		if (up)
 		{
 			object->orientation = *forward;
 			object->up = *up;
-			simulation_action_object_update(object_datum, 4);
+			if (!b_dont_update_simulation)
+			{
+				simulation_action_object_update(object_datum, 4);
+			}
 		}
 
 		if (b_set_havok_position) { havok_object_set_position(object_datum, object_placement == 0, bool2); }

@@ -143,7 +143,7 @@ bool __cdecl device_set_position_track(datum device_datum, const string_id anima
             || fabs(object_matrix_current_animation.vectors.up.k - up.k) >= 0.000099999997)
         {   
             
-            Engine::Objects::object_set_position_direct(device_datum, &initial_device_matrix.position, &forward, &up, nullptr);
+            Engine::Objects::object_set_position_direct(device_datum, &initial_device_matrix.position, &forward, &up, nullptr, true);
             if (object_can_interpolate(device_datum))
             {
                 real_orientation orientation[2];
