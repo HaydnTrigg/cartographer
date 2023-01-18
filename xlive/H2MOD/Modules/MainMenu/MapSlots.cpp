@@ -9,11 +9,13 @@
 
 namespace MapSlots
 {
-	const int FIRST_UNUSED_SLOT = 23;
+	const int MULTIPLAYER_FIRST_UNUSED_SLOT = 23;
 	const int MAX_SLOTS = 49;
 	const int MULTIPLAYER_SIZE = 3172;
+	const int SINGLEPLAYER_SIZE = 2896;
 
-	const int MapIndex = 3000;
+	int MapIndex = 3000;
+	int current_unused_slot = 0;
 	std::vector<std::string> AddedMaps;
 	std::vector<s_globals_group_definition::s_ui_level_data_block::s_multiplayer_levels_block> MapData;
 	std::map<datum, std::string> BitmapsToLoad;
@@ -91,11 +93,16 @@ namespace MapSlots
 				LOG_TRACE_GAME("[Map Slots]: Startup - Map File Missing {}", map);
 			}
 		}
+
 	}
 	void OnMapLoad()
 	{
 		if (h2mod->GetEngineType() == _main_menu)
 		{
+			//Reset variables.
+			MapIndex = 3000;
+			current_unused_slot = 0;
+
 			if (!AddedMaps.empty())
 			{
 				//Load all the added maps bitmaps
@@ -109,7 +116,6 @@ namespace MapSlots
 				//Grab the globals tag
 				auto matg_datum = tags::find_tag(blam_tag::tag_group_type::globals, "globals\\globals");
 				BYTE* matg_data = tags::get_tag<blam_tag::tag_group_type::globals, BYTE>(matg_datum);
-
 				if (matg_data != nullptr)
 				{
 					//Grab the tag block for UI Level Data
@@ -123,12 +129,11 @@ namespace MapSlots
 						{
 							auto mul_levels = tags::get_tag_data() + p_mul_levels->block_data_offset;
 
-							int i = 0;
 							for (const auto& newSlot : MapData)
 							{
-								if (FIRST_UNUSED_SLOT + i < MAX_SLOTS) {
+								if (MULTIPLAYER_FIRST_UNUSED_SLOT + current_unused_slot < MAX_SLOTS) {
 									LOG_TRACE_GAME(L"[Map Slots]: OnMapLoad Adding {}", newSlot.english_name.Text);
-									auto slot = reinterpret_cast<s_globals_group_definition::s_ui_level_data_block::s_multiplayer_levels_block*>(mul_levels + (MULTIPLAYER_SIZE * (FIRST_UNUSED_SLOT + i)));
+									auto slot = reinterpret_cast<s_globals_group_definition::s_ui_level_data_block::s_multiplayer_levels_block*>(mul_levels + (MULTIPLAYER_SIZE * (MULTIPLAYER_FIRST_UNUSED_SLOT + current_unused_slot)));
 
 									//Write the data loaded from the maps into the unused slot
 									memcpy(slot, &newSlot, sizeof(newSlot));
@@ -136,14 +141,83 @@ namespace MapSlots
 									slot->bitmap.TagIndex = tag_loader::ResolveNewDatum(newSlot.bitmap.TagIndex);
 									//Change the map id and sort ID so that the maps are 
 									//placed in order at the end of the list
-									slot->map_id = MapIndex + i;
-									slot->sort_order = MapIndex + i;
-									i++;
+									slot->map_id = MapIndex;
+									slot->sort_order = MapIndex;
+									++current_unused_slot;
+									++MapIndex;
 								}
 								else
 								{
 									LOG_ERROR_GAME("[Map Slots]: Max Multiplayer added slots reached");
 									break;
+								}
+							}
+						}
+					}
+				}
+				if constexpr (G_MAP_SLOTS_INCLUDE_SINGLE_PLAYER)
+				{
+					LOG_TRACE_GAME("[Map Slots]: Startup - Loading Singleplayer Maps");
+					auto matg_datum = tags::find_tag(blam_tag::tag_group_type::globals, "globals\\globals");
+					BYTE* matg_data = tags::get_tag<blam_tag::tag_group_type::globals, BYTE>(matg_datum);
+					if (matg_data != nullptr)
+					{
+						//Grab the tag block for UI Level Data
+						auto* p_ui_levels = reinterpret_cast<tags::tag_data_block*>(matg_data + 0x178);
+						auto* p_runtime = reinterpret_cast<tags::tag_data_block*>(matg_data + 0x170);
+						if (p_ui_levels->block_count > 0 && p_ui_levels->block_data_offset != -1)
+						{
+							auto ui_levels = tags::get_tag_data() + p_ui_levels->block_data_offset;
+							auto runtime_data = tags::get_tag_data() + p_runtime->block_data_offset;
+							auto p_campaign_levels = reinterpret_cast<tags::tag_data_block*>(runtime_data);
+							//Grab the tag block for Multiplayer Levels
+							auto* p_sp_levels = reinterpret_cast<tags::tag_data_block*>(ui_levels + 0x8);
+							auto* p_mul_levels = reinterpret_cast<tags::tag_data_block*>(ui_levels + 0x10);
+							if (p_sp_levels->block_count > 0 && p_sp_levels->block_data_offset != -1)
+							{
+								auto sp_levels = tags::get_tag_data() + p_sp_levels->block_data_offset;
+								auto mul_levels = tags::get_tag_data() + p_mul_levels->block_data_offset;
+								for (int i = 0; i < p_sp_levels->block_count; i++)
+								{
+									auto sp_slot = reinterpret_cast<s_globals_group_definition::s_ui_level_data_block::s_campaign_levels_block*>(sp_levels + (SINGLEPLAYER_SIZE * i));
+									if (sp_slot->campaign_id != -1)
+									{
+										auto mp_slot = reinterpret_cast<s_globals_group_definition::s_ui_level_data_block::s_multiplayer_levels_block*>(mul_levels + (MULTIPLAYER_SIZE * (MULTIPLAYER_FIRST_UNUSED_SLOT + current_unused_slot)));
+										mp_slot->bitmap = sp_slot->bitmap;
+										mp_slot->chinese_description = sp_slot->chinese_description;
+										mp_slot->chinese_name = sp_slot->chinese_name;
+										mp_slot->english_description = sp_slot->english_description;
+										mp_slot->english_name = sp_slot->english_name;
+										mp_slot->french_description = sp_slot->french_description;
+										mp_slot->french_name = sp_slot->french_name;
+										mp_slot->german_description = sp_slot->german_description;
+										mp_slot->german_name = sp_slot->german_name;
+										mp_slot->italian_description = sp_slot->italian_description;
+										mp_slot->italian_name = sp_slot->italian_name;
+										mp_slot->japanese_description = sp_slot->japanese_description;
+										mp_slot->japanese_name = sp_slot->japanese_name;
+										mp_slot->korean_description = sp_slot->korean_description;
+										mp_slot->korean_name = sp_slot->korean_name;
+										mp_slot->portuguese_description = sp_slot->portuguese_description;
+										mp_slot->portuguese_name = sp_slot->portuguese_name;
+										mp_slot->spanish_description = sp_slot->spanish_description;
+										mp_slot->spanish_name = sp_slot->spanish_name;
+										mp_slot->map_id = MapIndex;
+										mp_slot->sort_order = MapIndex;
+										for (auto j = 0; j < p_campaign_levels->block_count; j++)
+										{
+											auto campagin_levels = tags::get_tag_data() + p_campaign_levels->block_data_offset;
+											auto campaign_level = reinterpret_cast<s_globals_group_definition::s_runtime_level_data_block::s_campaign_levels_block*>(campagin_levels + (0x108 * j));
+											if (campaign_level->map_id == sp_slot->map_id)
+											{
+												mp_slot->path = campaign_level->path;
+												break;
+											}
+										}
+
+										++current_unused_slot;
+										++MapIndex;
+									}
 								}
 							}
 						}
@@ -168,9 +242,9 @@ namespace MapSlots
 		int i = 0;
 		for (const auto& newSlot : MapData)
 		{
-			if (FIRST_UNUSED_SLOT + i < MAX_SLOTS) {
+			if (MULTIPLAYER_FIRST_UNUSED_SLOT + i < MAX_SLOTS) {
 				LOG_TRACE_GAME(L"[Map Slots]: store_mutliplayer_level_data Adding {}", newSlot.english_name.Text);
-				auto slotAddr = Memory::GetAddress(0, 0x419510) + (MULTIPLAYER_SIZE * (FIRST_UNUSED_SLOT + i));
+				auto slotAddr = Memory::GetAddress(0, 0x419510) + (MULTIPLAYER_SIZE * (MULTIPLAYER_FIRST_UNUSED_SLOT + i));
 				DWORD dwBack[2];
 				VirtualProtect(reinterpret_cast<LPVOID>(slotAddr), 3172, PAGE_EXECUTE_READWRITE, &dwBack[0]);
 				auto slot = reinterpret_cast<s_multiplayer_levels_block*>(slotAddr);
