@@ -32,6 +32,52 @@
 
 namespace KantTesting
 {
+	typedef void(__cdecl* game_state_call_before_load_proces_t)();
+	game_state_call_before_load_proces_t p_game_state_call_before_load_procs;
+
+	void __cdecl game_state_call_before_load_procs()
+	{
+		p_game_state_call_before_load_procs();
+	}
+
+
+	typedef int(__cdecl* sub_5AE6F1_t)(char a1);
+	sub_5AE6F1_t p_sub_5AE6F1;
+
+	int __cdecl sub_5AE6F1(char a1)
+	{
+		return p_sub_5AE6F1(a1);
+	}
+
+	typedef void(__cdecl* simulation_player_collection_clear_t)(char* a1);
+	simulation_player_collection_clear_t p_simulation_player_collection_clear;
+
+	typedef void(__thiscall* c_simulation_world_reset_world_t)(char* simulation_world);
+	c_simulation_world_reset_world_t p_c_simulation_world_reset_world;
+
+	typedef void(__thiscall* c_entity_database_reset_t)(char* entity_database);
+	c_entity_database_reset_t p_c_entity_database_reset;
+
+	typedef void(__cdecl* game_state_revert_t)(char arg0);
+	game_state_revert_t p_game_state_revert;
+
+	void __cdecl game_state_revert(char a1)
+	{
+		auto b_b = Memory::GetAddress<bool*>(0x5178D2, 0);
+		auto p1 = s_player::GetPlayer(0);
+		auto o1 = object_get_fast_unsafe<s_biped_data_definition>(p1->unit_index);
+
+		auto unk = Memory::GetAddress<char**>(0x5178E0);
+
+		auto simulation_world = Memory::GetAddress<char**>(0x5178DC);
+		auto distributed_world = (char**)(*simulation_world + 4);
+		//p_c_simulation_world_reset_world(*simulation_world);
+ 		p_c_entity_database_reset(*distributed_world + 0x20A0);
+		p_simulation_player_collection_clear(*unk + 140);
+		//*b_b = true;
+		p_game_state_revert(a1);
+		//*b_b = false;
+	}
 	void MapLoad()
 	{
 		if (h2mod->GetEngineType() == _multiplayer)
@@ -41,8 +87,20 @@ namespace KantTesting
 
 	void Initialize()
 	{
-		if (ENABLEKANTTEST) 
-		{
+		if (ENABLEKANTTEST) {
+			DETOUR_BEGIN();
+			DETOUR_ATTACH(p_game_state_call_before_load_procs, Memory::GetAddress<game_state_call_before_load_proces_t>(0x8C245, 0), game_state_call_before_load_procs);
+			DETOUR_ATTACH(p_game_state_revert, Memory::GetAddress < game_state_revert_t>(0x305DA, 0), game_state_revert);
+			DETOUR_COMMIT()
+
+				p_sub_5AE6F1 = Memory::GetAddress<sub_5AE6F1_t>(0x1AE6F1, 0);
+			p_simulation_player_collection_clear = Memory::GetAddress<simulation_player_collection_clear_t>(0x1E13FF);
+			p_c_simulation_world_reset_world = Memory::GetAddress<c_simulation_world_reset_world_t>(0x1DD0EA);
+			p_c_entity_database_reset = Memory::GetAddress<c_entity_database_reset_t>(0x1D389E);
+		//	if (!Memory::isDedicatedServer())
+			//{
+			//tags::on_map_load(MapLoad);
+		//	}
 		}
 	}
 }
