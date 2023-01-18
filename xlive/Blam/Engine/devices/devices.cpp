@@ -14,7 +14,7 @@
 bool device_set_position_animation(const datum device_datum, const string_id animation)
 {
     typedef bool (__cdecl *device_set_position_animation_t)(const datum device_datum, const string_id animation);
-	auto p_device_set_position_animation = Memory::GetAddress<device_set_position_animation_t>(0x163A2E);
+	auto p_device_set_position_animation = Memory::GetAddress<device_set_position_animation_t>(0x163A2E, 0x1594F1);
 
 	return p_device_set_position_animation(device_datum, animation);
 }
@@ -22,9 +22,9 @@ bool device_set_position_animation(const datum device_datum, const string_id ani
 void device_set_power(const datum device_datum, const float power)
 {
     typedef void(__cdecl* device_set_animation_changed_t)(const datum object_datum);
-    auto p_device_set_animation_changed = Memory::GetAddress<device_set_animation_changed_t>(0x1632E3);
+    auto p_device_set_animation_changed = Memory::GetAddress<device_set_animation_changed_t>(0x1632E3, 0x158DA6);
     typedef bool(__cdecl* device_group_set_t)(const datum device_datum, const datum device_group_datum, const float power);
-    auto p_device_group_set = Memory::GetAddress<device_group_set_t>(0x164FE6);
+    auto p_device_group_set = Memory::GetAddress<device_group_set_t>(0x164FE6, 0x15AAA9);
 
     if (device_datum != -1)
     {
@@ -39,19 +39,17 @@ void device_set_power(const datum device_datum, const float power)
 bool __cdecl device_set_position_track(datum device_datum, const string_id animation_string_id, const float interpolation_time)
 {
     typedef double(__thiscall* get_authored_time_t)(void* _this);
-    auto c_animation_channel__get_authored_time = Memory::GetAddress<get_authored_time_t>(0x11227A);
+    auto c_animation_channel__get_authored_time = Memory::GetAddress<get_authored_time_t>(0x11227A, 0x10379A);
     typedef void(__thiscall* animation_get_root_matrix_t)(void* _this, int a1, float animation_played_length, s_render_model_group_definition* render_model, real_matrix4x3* matrix);
-    auto c_animation_manager__animation_get_root_matrix = Memory::GetAddress<animation_get_root_matrix_t>(0xF4364);
+    auto c_animation_manager__animation_get_root_matrix = Memory::GetAddress<animation_get_root_matrix_t>(0xF4364, 0xF5BDE);
     typedef datum(__thiscall* find_node_t)(void* _this, string_id string);
-    auto c_animation_manager__find_node = Memory::GetAddress<find_node_t>(0xF427A);
-    typedef void (__cdecl* object_set_position_direct_t)(datum object, const real_point3d *position, const real_vector3d *forward, const real_vector3d *up, const void *location);
-    auto object_set_position_direct = Memory::GetAddress<object_set_position_direct_t>(0x136B7F);
+    auto c_animation_manager__find_node = Memory::GetAddress<find_node_t>(0xF427A, 0xF5AF4);
     typedef void(__cdecl* object_start_interpolation_t)(const datum object_datum, const float time);
-    auto object_start_interpolation = Memory::GetAddress<object_start_interpolation_t>(0x132D5C);
+    auto object_start_interpolation = Memory::GetAddress<object_start_interpolation_t>(0x132D5C, 0x121C2C);
     typedef double(__thiscall* get_authored_duration_t)(void* _this);
-    auto c_animation_channel__get_authored_duration = Memory::GetAddress<get_authored_duration_t>(0x112AB4);
-    typedef bool(__cdecl* object_can_interpolate_t)(unsigned __int16 a1);
-    auto object_can_interpolate = Memory::GetAddress<object_can_interpolate_t>(0x1318B8);
+    auto c_animation_channel__get_authored_duration = Memory::GetAddress<get_authored_duration_t>(0x112AB4, 0x103FD4);
+    typedef bool(__cdecl* object_can_interpolate_t)(const datum a1);
+    auto object_can_interpolate = Memory::GetAddress<object_can_interpolate_t>(0x1318B8, 0x120788);
     
     real_matrix4x3 temp_matrix;
     real_vector3d vector;
@@ -68,7 +66,8 @@ bool __cdecl device_set_position_track(datum device_datum, const string_id anima
     real_orientation* original_orientations;
 
     if (device_datum == DATUM_INDEX_NONE) { return false; }
-    s_device_data_group* device = object_try_and_get_and_verify_type<s_device_data_group>(device_datum, FLAG(e_object_type::light_fixture) | FLAG(e_object_type::machine) | FLAG(e_object_type::control));
+    s_device_data_group* device = object_try_and_get_and_verify_type<s_device_data_group>(device_datum, 
+        FLAG(e_object_type::light_fixture) | FLAG(e_object_type::machine) | FLAG(e_object_type::control));
     if (!device) { return false; }
 
     auto device_definition = tags::get_tag_fast<s_device_group_definition>(device->tag_definition_index);
@@ -143,7 +142,8 @@ bool __cdecl device_set_position_track(datum device_datum, const string_id anima
             || fabs(object_matrix_current_animation.vectors.up.j - up.j) >= 0.000099999997
             || fabs(object_matrix_current_animation.vectors.up.k - up.k) >= 0.000099999997)
         {   
-            object_set_position_direct(device_datum, &initial_device_matrix.position, &forward, &up, 0);
+            
+            Engine::Objects::object_set_position_direct(device_datum, &initial_device_matrix.position, &forward, &up, nullptr);
             if (object_can_interpolate(device_datum))
             {
                 real_orientation orientation[2];

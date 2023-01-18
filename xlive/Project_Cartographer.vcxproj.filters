@@ -185,6 +185,9 @@
     <ClCompile Include="Blam\Engine\hs\networked_hs_handler\networked_hs_handler_host.cpp" />
     <ClCompile Include="Blam\Engine\math\matrix_math.cpp" />
     <ClCompile Include="Blam\Engine\math\real_math.cpp" />
+    <ClCompile Include="Blam\Engine\Simulation\simulation.cpp" />
+    <ClCompile Include="Blam\Engine\Simulation\simulation_entity_database.cpp" />
+    <ClCompile Include="Blam\Engine\physics\havok.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdparty\discord\discord_register.h" />
@@ -562,6 +565,9 @@
     <ClInclude Include="Blam\Engine\hs\networked_hs_handler\networked_hs_handler_host.h" />
     <ClInclude Include="Blam\Engine\math\matrix_math.h" />
     <ClInclude Include="Blam\Engine\math\real_math.h" />
+    <ClInclude Include="Blam\Engine\Simulation\simulation.h" />
+    <ClInclude Include="Blam\Engine\Simulation\simulation_entity_database.h" />
+    <ClInclude Include="Blam\Engine\physics\havok.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc" />

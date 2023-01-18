@@ -5,8 +5,11 @@
 #include "Blam/Engine/math/matrix_math.h"
 #include "Blam/Engine/Memory/bitstream.h"
 #include "Blam/Engine/Objects/Objects.h"
+#include "Blam/Engine/physics/havok.h"
 #include "Blam/Engine/Players/Players.h"
 #include "Blam/Engine/Simulation/GameInterface/SimulationGameUnits.h"
+#include "Blam/Engine/Simulation/simulation.h"
+#include "Blam/Engine/Simulation/simulation_entity_database.h"
 #include "H2MOD/Modules/OnScreenDebug/OnscreenDebug.h"
 #include "H2MOD/Modules/PlayerRepresentation/PlayerRepresentation.h"
 #include "H2MOD/Tags/TagInterface.h"
@@ -36,7 +39,7 @@ namespace Engine::Objects
 	}
 
 	//Pass datum from new object into object to sync
-	void simulation_action_object_create(datum object_idx)
+	void simulation_action_object_create(const datum object_idx)
 	{
 		typedef void(__cdecl* simulation_action_object_create_t)(datum);
 		auto p_simulation_action_object_create = Memory::GetAddress<simulation_action_object_create_t>(0x1B8D14, 0x1B2C44);
@@ -44,20 +47,36 @@ namespace Engine::Objects
 		return p_simulation_action_object_create(object_idx);
 	}
 
-	void object_destroy(datum object_idx)
+	void object_delete(const datum object_idx)
 	{
-		typedef void(__cdecl object_destroy_t)(datum);
-		auto p_object_destroy = Memory::GetAddress<object_destroy_t*>(0x136005);
+		typedef void(__cdecl* object_delete_t)(datum);
+		auto p_object_delete = Memory::GetAddress<object_delete_t>(0x136005, 0x124ED5);
 
-		p_object_destroy(object_idx);
+		p_object_delete(object_idx);
 	}
 
-	void object_wake(const unsigned __int16 object_datum)
+	void object_wake(const datum object_datum)
 	{
-		typedef void(__cdecl* object_wake_t)(const unsigned __int16 object_datum);
-		auto object_wake = Memory::GetAddress<object_wake_t>(0x12FA1E);
+		typedef void(__cdecl* object_wake_t)(const datum object_datum);
+		auto object_wake = Memory::GetAddress<object_wake_t>(0x12FA1E, 0x11E8E1);
 
 		object_wake(object_datum);
+	}
+
+	void __cdecl object_disconnect_from_map(const datum object_index)
+	{
+		typedef void(__cdecl* object_disconnect_from_map_t)(const datum object_index);
+		auto object_disconnect_from_map = Memory::GetAddress<object_disconnect_from_map_t>(0x136226, 0x125136);
+
+		object_disconnect_from_map(object_index);
+	}
+
+	void __cdecl object_reconnect_to_map(const void* location_struct, const datum object_index)
+	{
+		typedef void(__cdecl* object_reconnect_to_map_t)(const void* location_struct, const datum object_index);
+		auto object_reconnect_to_map = Memory::GetAddress<object_reconnect_to_map_t>(0x1360CE, 0x124F9E);
+
+		object_reconnect_to_map(location_struct, object_index);
 	}
 
 	void object_compute_node_matrices_with_children(const datum object_datum)
@@ -88,6 +107,105 @@ namespace Engine::Objects
 	{
 		const s_object_data_definition* object = object_get_fast_unsafe(object_datum);
 		return(real_matrix4x3*)((char*)object + 52 * node_index + object->nodes_offset);
+	}
+
+	void __cdecl object_type_fix_transform(const datum object, const real_point3d* position, const real_vector3d* up, const real_vector3d* forward)
+	{
+		typedef void(__cdecl* object_type_fix_transform_t)(const datum object, const real_point3d* position, const real_vector3d* up, const real_vector3d* forward);
+		auto object_type_fix_transform = Memory::GetAddress<object_type_fix_transform_t>(0x186355, 0x1703F1);
+		
+		object_type_fix_transform(object, position, up, forward);
+	}
+
+	void object_set_position(const real_vector3d* up,
+		const real_vector3d* forward,
+		const datum object_datum,
+		const real_point3d* position,
+		const void* location_struct,
+		const bool some_bool)
+	{
+		real_vector3d forward_1; // rax
+		real_point3d position_copy; // [esp+10h] [ebp-24h] BYREF
+		real_vector3d up_copy; // [esp+1Ch] [ebp-18h] BYREF
+		real_vector3d forward_copy; // [esp+28h] [ebp-Ch] BYREF
+
+		if (position)
+		{
+			position_copy.x = position->x;
+			position_copy.y = position->y;
+			position_copy.z = position->z;
+		}
+		if (forward)
+		{
+			forward_copy.i = forward->i;
+			forward_copy.j = forward->j;
+			forward_copy.k = forward->k;
+		}
+		if (up)
+		{
+			up_copy.i = up->i;
+			up_copy.j = up->j;
+			up_copy.k = up->k;
+		}
+		object_type_fix_transform(object_datum, &position_copy, &forward_copy, &up_copy);
+		if (!object_set_position_internal(object_datum, &position_copy, &forward_copy, &up_copy, location_struct, true, true, some_bool, false)
+			&& !simulation_query_object_is_predicted(object_datum))
+		{
+			object_delete(object_datum);
+		}
+		object_wake(object_datum);
+	}
+
+	void object_set_position_direct(const datum object_datum, const real_point3d* position, const real_vector3d* forward, const real_vector3d* up, const void* location)
+	{
+		object_set_position(up, forward, object_datum, position, location, false);
+	}
+
+	bool __cdecl object_set_position_internal(datum object_datum,
+		const real_point3d* object_placement,
+		const real_vector3d* forward,
+		const real_vector3d* up,
+		const void* location_struct,
+		const bool b_compute_node_matricies,
+		const bool b_set_havok_position,
+		const bool bool2,
+		const bool b_shouldnt_reconnect_to_map)
+	{
+
+		s_object_data_definition* object = object_get_fast_unsafe(object_datum);
+		bool some_flag_is_true = object->object_flags & 1;
+		bool isnt_out_of_bounds = true;
+		if (some_flag_is_true && !b_shouldnt_reconnect_to_map) { object_disconnect_from_map(object_datum); }
+
+		if (object_placement)
+		{
+			if (object->parent_datum == DATUM_INDEX_NONE
+				&& (object_placement->x < SHRT_MIN || object_placement->x > SHRT_MAX
+					|| object_placement->y < SHRT_MIN || object_placement->y > SHRT_MAX
+					|| object_placement->z < SHRT_MIN || object_placement->z > SHRT_MAX))
+			{
+				isnt_out_of_bounds = false;
+			}
+			else
+			{
+				object->position = *object_placement;
+				simulation_action_object_update(object_datum, 2);
+			}
+		}
+		if (up)
+		{
+			object->orientation = *forward;
+			object->up = *up;
+			simulation_action_object_update(object_datum, 4);
+		}
+
+		if (b_set_havok_position) { havok_object_set_position(object_datum, object_placement == 0, bool2); }
+
+		if (b_compute_node_matricies) { object_compute_node_matrices_with_children(object_datum); }
+
+		if (some_flag_is_true && !b_shouldnt_reconnect_to_map) { object_reconnect_to_map(location_struct, object_datum); }
+
+		return isnt_out_of_bounds;
 	}
 
 #pragma region Biped variant patches

@@ -135,7 +135,7 @@ struct s_object_data_definition
 	__int16 field_D0;
 	BYTE model_variant_id;//hlmt variant tag_block index
 	char gap_D3;
-	unsigned int simulation_entity_index;
+	datum simulation_entity_index;
 	char field_D8;
 	char gap_D9[7];
 	WORD destroyed_constraints_flag;
@@ -318,11 +318,23 @@ namespace Engine::Objects
 	datum object_new(s_object_placement_data* object_placement_data);
 	void apply_biped_object_definition_patches();
 	void simulation_action_object_create(datum object_idx);
-	void object_destroy(datum object_idx);
-	void object_wake(const unsigned __int16 object_datum);
+	void object_delete(const datum object_idx);
+	void object_wake(const datum object_datum);
 	bool object_has_animation_manager(const datum object_index);
 	void object_compute_node_matrices_with_children(const datum object_datum);
 	real_matrix4x3* object_get_node_matrix(const datum object_datum, const __int16 node_index);
+	void __cdecl object_type_fix_transform(const datum object, const real_point3d* position, const real_vector3d* up, const real_vector3d* forward);
+	void object_set_position(const real_vector3d* forward_ptr, const real_vector3d* up, const datum object_datum, const real_point3d* position, const void* location_struct, const bool some_bool);
+	void object_set_position_direct(const datum object_datum, const real_point3d* position, const real_vector3d* forward, const real_vector3d* up, const void* location);
+	bool __cdecl object_set_position_internal(datum object_datum,
+		const real_point3d* object_placement,
+		const real_vector3d* forward,
+		const real_vector3d* up,
+		const void* location_struct,
+		const bool b_compute_node_matricies,
+		const bool b_set_havok_position,
+		const bool bool2,
+		const bool b_shouldnt_reconnect_to_map);
 
 	int object_get_count();
 	int object_count_from_iter();
