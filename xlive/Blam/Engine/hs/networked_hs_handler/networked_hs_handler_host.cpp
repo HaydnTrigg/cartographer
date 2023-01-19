@@ -10,7 +10,7 @@ void initialize_modify_hs_arguments_table()
 {
 	for (unsigned short i = 0; i < e_hs_function::_e_hs_function_size; i++)
 	{
-		modify_hs_arguments_table[i] = get_modify_lamda_function((e_hs_function)i);
+		modify_hs_arguments_table[i] = get_modify_lambda_function((e_hs_function)i);
 	}
 }
 
@@ -18,14 +18,16 @@ void send_hs_function_to_clients(s_networked_hs_function* function)
 {
 	bool found = false;
 
-	//If host send out the packets
-	if (!s_game_globals::game_is_campaign() || !NetworkSession::LocalPeerIsSessionHost()) { return; }
+	// If the game is host, send out the packets
+	// if the function type is 0 (begin) make sure not to send a packet for it
+	if (!s_game_globals::game_is_campaign() || !NetworkSession::LocalPeerIsSessionHost() || function->function_type == 0) { return; }
 
 	for (unsigned short i = 0; i < HS_SYNC_TABLE_SIZE; i++)
 	{
 		if (hs_sync_table[i] == function->function_type)
 		{
 			found = true;
+			break;
 		}
 	}
 
@@ -33,6 +35,7 @@ void send_hs_function_to_clients(s_networked_hs_function* function)
 
 	modify_hs_arguments_table[function->function_type](function);
 
+	// Send packet to every player
 	for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
 	{
 		if (NetworkSession::PlayerIsActive(i))
@@ -42,6 +45,7 @@ void send_hs_function_to_clients(s_networked_hs_function* function)
 	}
 	g_next_hs_function_id++;
 
+	// Clear memory of networked hs function info (we might not need to do this anyways?)
 	memset(function, 0, sizeof(s_networked_hs_function));
 }
 
@@ -50,21 +54,19 @@ void send_hs_function_packet(int peerIdx, s_networked_hs_function* data)
 	s_network_session* session = NetworkSession::GetCurrentNetworkSession();
 
 	s_network_observer* observer = session->p_network_observer;
-	s_peer_observer_channel* observer_channel = NetworkSession::GetPeerObserverChannel(peerIdx);
+	const s_peer_observer_channel* observer_channel = NetworkSession::GetPeerObserverChannel(peerIdx);
 
-	if (!NetworkSession::LocalPeerIsSessionHost()) { return; }
+	if (!NetworkSession::LocalPeerIsSessionHost() || peerIdx == -1 || NetworkSession::PeerIndexLocal(peerIdx)) { return; }
 
-	if (peerIdx != -1 && !NetworkSession::PeerIndexLocal(peerIdx))
+	if (observer_channel->field_1)
 	{
-		if (observer_channel->field_1)
-		{
-			observer->sendNetworkMessage(session->session_index, observer_channel->observer_index, s_network_observer::e_network_message_send_protocol::in_band,
-				_hs_function, sizeof(s_networked_hs_function), data);
-		}
+		observer->sendNetworkMessage(session->session_index, observer_channel->observer_index, s_network_observer::e_network_message_send_protocol::in_band,
+		_hs_function, sizeof(s_networked_hs_function), data);
 	}
+	
 }
 
-modify_hs_arguments_table_t get_modify_lamda_function(const e_hs_function function_type)
+modify_hs_arguments_table_t get_modify_lambda_function(const e_hs_function function_type)
 {
 	switch (function_type)
 	{
@@ -245,6 +247,7 @@ modify_hs_arguments_table_t get_modify_lamda_function(const e_hs_function functi
 	{
 		return [](const s_networked_hs_function* data)
 		{
+			// Who would've guessed... the default modify lambda dosen't actually modify anything
 		};
 	}
 	}

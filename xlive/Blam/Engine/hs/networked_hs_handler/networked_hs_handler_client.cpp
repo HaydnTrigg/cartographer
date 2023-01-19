@@ -17,7 +17,7 @@ void initialize_networked_hs_function_table()
 {
 	for (unsigned short i = 0; i < e_hs_function::_e_hs_function_size; i++)
 	{
-		networked_hs_function_table[i] = get_networked_hs_lamda_function((e_hs_function)i);
+		networked_hs_function_table[i] = get_networked_hs_lambda_function((e_hs_function)i);
 	}
 }
 
@@ -48,7 +48,7 @@ void client_execute_stored_hs_commands()
 	}
 }
 
-networked_hs_functions_table_t get_networked_hs_lamda_function(const e_hs_function function_type)
+networked_hs_functions_table_t get_networked_hs_lambda_function(const e_hs_function function_type)
 {
 	switch (function_type)
 	{
@@ -207,7 +207,7 @@ networked_hs_functions_table_t get_networked_hs_lamda_function(const e_hs_functi
 
 			if (!custom_animation_loop(args->object, args->animation_path, args->animation, args->interpolates_into_animation))
 			{
-				print_to_console("custom_animation_loop returned false on clients, this is very bad!!!!");
+				LOG_ERROR_GAME("custom_animation_loop returned false on clients, this is very bad!!!!");
 			}
 		};
 	}

@@ -3,7 +3,7 @@
 #include <list>
 
 #define HS_SENT_BUFFER_SIZE 128
-#define HS_SYNC_TABLE_SIZE 34
+#define HS_SYNC_TABLE_SIZE 33
 
 extern long g_next_hs_function_id;
 

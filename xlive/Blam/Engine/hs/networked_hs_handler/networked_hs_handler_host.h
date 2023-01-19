@@ -14,4 +14,4 @@ void send_hs_function_to_clients(s_networked_hs_function* function);
 void send_hs_function_packet(int peerIdx, s_networked_hs_function* data);
 
 // Modifies the arguments sent to the client depending on the script operation being executed
-modify_hs_arguments_table_t get_modify_lamda_function(const e_hs_function function_type);
+modify_hs_arguments_table_t get_modify_lambda_function(const e_hs_function function_type);
