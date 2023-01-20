@@ -1,13 +1,15 @@
 #include "stdafx.h"
 #include "Coop.h"
 
+#include "H2MOD.h"
 #include "H2MOD/Tags/TagInterface.h"
 #include "Util/Hooks/Hook.h"
 namespace coop
 {
 	void PreOnMapLoadPatches(s_game_options* game_options)
 	{
-		if (game_options->m_engine_type == _multiplayer && tags::get_cache_header()->type == s_cache_header::e_scnr_type::SinglePlayerScenario)
+		//See map_slots.cpp the range of valid singleplayer maps is hard defined.
+		if (game_options->m_engine_type == _multiplayer && game_options->map_id >= INT32_MAX - 1000 && game_options->map_id <= INT32_MAX)
 		{
 			game_options->m_engine_type = _single_player;
 			game_options->coop = 1;
@@ -17,7 +19,7 @@ namespace coop
 
 	void PostMapLoadPatches()
 	{
-		if (!Memory::IsDedicatedServer())
+		if (!Memory::IsDedicatedServer() && h2mod->GetEngineType() == _single_player)
 		{
 			WriteValue<BYTE>(Memory::GetAddress(0x23EC55 + 1), 0);	// Prevent the game from pausing during the game
 		}
