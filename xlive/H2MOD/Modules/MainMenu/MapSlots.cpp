@@ -14,8 +14,10 @@ namespace MapSlots
 	const int MULTIPLAYER_SIZE = 3172;
 	const int SINGLEPLAYER_SIZE = 2896;
 
-	int MapIndex = 3000;
+	int multiplayer_map_index = 3000;
+	int singleplayer_map_index = INT32_MAX - 1000;
 	int current_unused_slot = 0;
+
 	std::vector<std::string> AddedMaps;
 	std::vector<s_globals_group_definition::s_ui_level_data_block::s_multiplayer_levels_block> MapData;
 	std::map<datum, std::string> BitmapsToLoad;
@@ -100,7 +102,8 @@ namespace MapSlots
 		if (h2mod->GetEngineType() == _main_menu)
 		{
 			//Reset variables.
-			MapIndex = 3000;
+			multiplayer_map_index = 3000;
+			singleplayer_map_index = INT32_MAX - 1000;
 			current_unused_slot = 0;
 
 			if (!AddedMaps.empty())
@@ -141,10 +144,10 @@ namespace MapSlots
 									slot->bitmap.TagIndex = tag_loader::ResolveNewDatum(newSlot.bitmap.TagIndex);
 									//Change the map id and sort ID so that the maps are 
 									//placed in order at the end of the list
-									slot->map_id = MapIndex;
-									slot->sort_order = MapIndex;
+									slot->map_id = multiplayer_map_index;
+									slot->sort_order = multiplayer_map_index;
 									++current_unused_slot;
-									++MapIndex;
+									++multiplayer_map_index;
 								}
 								else
 								{
@@ -202,8 +205,8 @@ namespace MapSlots
 										mp_slot->portuguese_name = sp_slot->portuguese_name;
 										mp_slot->spanish_description = sp_slot->spanish_description;
 										mp_slot->spanish_name = sp_slot->spanish_name;
-										mp_slot->map_id = MapIndex;
-										mp_slot->sort_order = MapIndex;
+										mp_slot->map_id = singleplayer_map_index;
+										mp_slot->sort_order = singleplayer_map_index;
 										for (auto j = 0; j < p_campaign_levels->block_count; j++)
 										{
 											auto campagin_levels = tags::get_tag_data() + p_campaign_levels->block_data_offset;
@@ -216,7 +219,7 @@ namespace MapSlots
 										}
 
 										++current_unused_slot;
-										++MapIndex;
+										++singleplayer_map_index;
 									}
 								}
 							}
@@ -254,8 +257,8 @@ namespace MapSlots
 
 				//Change the map id and sort ID so that the maps are 
 				//placed in order at the end of the list
-				slot->map_id = MapIndex + i;
-				slot->sort_order = MapIndex + i;
+				slot->map_id = multiplayer_map_index + i;
+				slot->sort_order = multiplayer_map_index + i;
 				VirtualProtect(reinterpret_cast<LPVOID>(slotAddr), 3172, dwBack[0], &dwBack[1]);
 				i++;
 
