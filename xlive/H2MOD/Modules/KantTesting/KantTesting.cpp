@@ -64,6 +64,28 @@ namespace KantTesting
 		}
 		LOG_INFO_GAME("[Entity Dump] Dumped");
 	}
+	typedef void(__cdecl* simulation_action_object_create_t)(int object_index);
+	simulation_action_object_create_t p_simulation_action_object_create;
+	
+	void regenerate_entity_table()
+	{
+		auto scen = tags::get_tag_fast<s_scenario_group_definition>(tags::get_tags_header()->scenario_datum);
+		std::vector<datum> simulation_tag_datums;
+		for (auto simulation_definition_entry : scen->simulation_definition_table)
+			simulation_tag_datums.emplace_back(simulation_definition_entry.tag);
+
+		auto objects_table = s_data_iterator<s_object_header>(get_objects_header());
+		while(objects_table.get_next_datum())
+		{
+			auto object = (s_object_data_definition*)objects_table.get_current_datum()->object;
+			if(std::find(simulation_tag_datums.begin(), simulation_tag_datums.end(), object->tag_definition_index) != simulation_tag_datums.end())
+			{
+				objects_table.get_current_datum()->flags = (e_object_header_flag)(((byte)objects_table.get_current_datum()->flags) | object_header_flags_10);
+				p_simulation_action_object_create(objects_table.get_current_absolute_index());
+			}
+		}
+	}
+
 	typedef void(__cdecl* simulation_player_collection_clear_t)(char* a1);
 	simulation_player_collection_clear_t p_simulation_player_collection_clear;
 
@@ -86,8 +108,8 @@ namespace KantTesting
 		dump_entity_table();
 		auto simulation_world = Memory::GetAddress<char**>(0x5178DC);
 		auto distributed_world = (char**)(*simulation_world + 4);
-		//p_c_simulation_world_reset_world(*simulation_world);
- 		//p_c_entity_database_reset(*distributed_world + 0x20A0);
+		p_c_simulation_world_reset_world(*simulation_world);
+ 		p_c_entity_database_reset(*distributed_world + 0x20A0);
 		//p_simulation_player_collection_clear(*unk + 140);
 		//*b_b = true;
 		p_game_state_revert(a1);
@@ -126,18 +148,19 @@ namespace KantTesting
 	auto key2 = VK_OEM_PLUS;
 	void Initialize()
 	{
-		KeyboardInput::RegisterHotkey(&key, force_client_bluescreen);
-		KeyboardInput::RegisterHotkey(&key2, force_client_bluescreen2);
+		KeyboardInput::RegisterHotkey(&key, regenerate_entity_table);
+		KeyboardInput::RegisterHotkey(&key2, dump_entity_table);
 		if (ENABLEKANTTEST) {
 			DETOUR_BEGIN();
-//			DETOUR_ATTACH(p_game_state_call_before_load_procs, Memory::GetAddress<game_state_call_before_load_proces_t>(0x8C245, 0), game_state_call_before_load_procs);
-//			DETOUR_ATTACH(p_game_state_revert, Memory::GetAddress < game_state_revert_t>(0x305DA, 0), game_state_revert);
+			DETOUR_ATTACH(p_game_state_call_before_load_procs, Memory::GetAddress<game_state_call_before_load_proces_t>(0x8C245, 0), game_state_call_before_load_procs);
+			DETOUR_ATTACH(p_game_state_revert, Memory::GetAddress < game_state_revert_t>(0x305DA, 0), game_state_revert);
 			DETOUR_COMMIT()
 
 			p_sub_5AE6F1 = Memory::GetAddress<sub_5AE6F1_t>(0x1AE6F1, 0);
 			p_simulation_player_collection_clear = Memory::GetAddress<simulation_player_collection_clear_t>(0x1E13FF);
 			p_c_simulation_world_reset_world = Memory::GetAddress<c_simulation_world_reset_world_t>(0x1DD0EA);
 			p_c_entity_database_reset = Memory::GetAddress<c_entity_database_reset_t>(0x1D389E);
+			p_simulation_action_object_create = Memory::GetAddress<simulation_action_object_create_t>(0x1B8D14);
 		//	if (!Memory::isDedicatedServer())
 			//{
 			//tags::on_map_load(MapLoad);
