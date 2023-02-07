@@ -2007,10 +2007,10 @@ static const char* hs_function_strings[] =
 	"scenario_force_signature_failure_disable",
 	"scenario_force_name_failure_disable",
 	"scenario_ignore_failures_disable",
-	"hs_unk_1",
-	"hs_unk_2",
-	"hs_unk_3",
-	"hs_unk_4",
+	"hopper_verify_force_failures_enable",		// Stubbed out
+	"hopper_verify_ignore_failures_enable",		// Stubbed out
+	"hopper_verify_force_failures_disable",		// Stubbed out
+	"hopper_verify_ignore_failures_disable",	// Stubbed out 
 	"loading_screen_fade_to_white",
 	"rasterizer_debug_frame_usage",
 	"rasterizer_debug_crap_pixel_shader",

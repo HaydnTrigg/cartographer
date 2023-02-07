@@ -111,17 +111,17 @@ struct s_object_data_definition
 	float dynamic_light_sphere_radius;
 	float unk5C;
 	real_point3d position;
-	real_vector3d orientation;
+	real_vector3d forward;
 	real_vector3d up;
 	real_point3d translational_velocity;
 	real_vector3d angular_velocity;
 	float scale;
 	datum unique_id;
 	__int16 origin_bsp_index;
-	e_object_type object_type;//TODO: confirm if its object_type or object_type_flags
-	char gap_AB[1];
+	e_object_type object_type;
+	char gap_AB;
 	__int16 name_list_index;
-	char gap_5[1];
+	char current_bsp_index;
 	char netgame_equipment_index;
 	char placement_policy;
 	char gap_6[3];
@@ -227,24 +227,25 @@ struct s_weapon_data_definition : s_object_data_definition
 };
 CHECK_STRUCT_SIZE(s_weapon_data_definition, 0x25C);
 
-enum e_object_header_flag :BYTE
+enum e_object_header_flag : BYTE
 {
 	_object_header_active_bit = 0x1,
 	_object_header_requires_motion_bit = 0x2,
 	object_header_flags_4 = 0x4,
 	_object_header_being_deleted_bit = 0x8,
-	object_header_flags_10 = 0x10,
+	_object_header_create_entity = 0x10,
 	_object_header_connected_to_map_bit = 0x20,
 	_object_header_child_bit = 0x40,
 };
 
+
 struct s_object_header {
-	__int16 datum_salt; //0x00
-	e_object_header_flag flags; // 0x02
-	e_object_type type; // 0x03
-	__int16 unk__;  // 0x04
-	__int16 object_data_size;  //0x06
-	char* object; //0x08 -
+	__int16 datum_salt;
+	e_object_header_flag flags;
+	e_object_type object_type;
+	__int16 unk__;
+	__int16 object_data_size;
+	char* object;
 };
 CHECK_STRUCT_SIZE(s_object_header, 0xC);
 

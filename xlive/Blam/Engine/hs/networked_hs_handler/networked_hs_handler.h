@@ -3,7 +3,7 @@
 #include <list>
 
 #define HS_SENT_BUFFER_SIZE 128
-#define HS_SYNC_TABLE_SIZE 33
+#define HS_SYNC_TABLE_SIZE 35
 
 extern long g_next_hs_function_id;
 
@@ -49,8 +49,8 @@ const e_hs_function hs_sync_table[HS_SYNC_TABLE_SIZE]
 	e_hs_function_object_dynamic_simulation_disable,
 	e_hs_function_game_save,
 	e_hs_function_game_revert,
-	//e_hs_function_cinematic_skip_start_internal, (clients have control over the cutscene skip, dosent apply for host)
-	//e_hs_function_cinematic_skip_stop_internal, (clients have control over the cutscene skip, dosent apply for host)
+	//e_hs_function_cinematic_skip_start_internal, //(clients have control over the cutscene skip, dosent apply for host)
+	//e_hs_function_cinematic_skip_stop_internal, //(clients have control over the cutscene skip, dosent apply for host)
 	e_hs_function_device_set_power
 	//e_hs_function_device_set_position (this is already synced by the host)
 };

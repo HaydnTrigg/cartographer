@@ -185,9 +185,9 @@ namespace Engine::Objects
 		if (object_placement)
 		{
 			if (object->parent_datum == DATUM_INDEX_NONE
-				&& (object_placement->x < SHRT_MIN || object_placement->x > SHRT_MAX
-					|| object_placement->y < SHRT_MIN || object_placement->y > SHRT_MAX
-					|| object_placement->z < SHRT_MIN || object_placement->z > SHRT_MAX))
+				&& (object_placement->x < -32768.0f || object_placement->x > 32768.0f
+					|| object_placement->y < -32768.0f || object_placement->y > 32768.0f
+					|| object_placement->z < -32768.0f || object_placement->z > 32768.0f))
 			{
 				isnt_out_of_bounds = false;
 			}
@@ -200,9 +200,9 @@ namespace Engine::Objects
 				}
 			}
 		}
-		if (up)
+		if (forward)
 		{
-			object->orientation = *forward;
+			object->forward = *forward;
 			object->up = *up;
 			if (!b_dont_update_simulation)
 			{
@@ -210,7 +210,7 @@ namespace Engine::Objects
 			}
 		}
 
-		if (b_set_havok_position) { havok_object_set_position(object_datum, object_placement == 0, bool2); }
+		if (b_set_havok_position) { havok_object_set_position(object_datum, object_placement == nullptr, bool2); }
 
 		if (b_compute_node_matricies) { object_compute_node_matrices_with_children(object_datum); }
 

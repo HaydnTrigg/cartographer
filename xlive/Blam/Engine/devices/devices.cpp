@@ -80,7 +80,7 @@ bool __cdecl device_set_position_track(datum device_datum, const string_id anima
     if (!Engine::Objects::object_has_animation_manager(device_datum)) { return false; }
 
     void* animation_manager = (char*)device + device->animation_manager_index;
-    matrix4x3_from_point_and_vectors(&object_matrix_current_animation, &device->position, &device->orientation, &device->up);
+    matrix4x3_from_point_and_vectors(&object_matrix_current_animation, &device->position, &device->forward, &device->up);
     real_matrix4x3 initial_device_matrix = object_matrix_current_animation;
 
     bool some_flag_is_true = (device->flags & 8) != 0;
@@ -142,7 +142,6 @@ bool __cdecl device_set_position_track(datum device_datum, const string_id anima
             || fabs(object_matrix_current_animation.vectors.up.j - up.j) >= 0.000099999997
             || fabs(object_matrix_current_animation.vectors.up.k - up.k) >= 0.000099999997)
         {   
-            
             Engine::Objects::object_set_position_direct(device_datum, &initial_device_matrix.position, &forward, &up, nullptr, true);
             if (object_can_interpolate(device_datum))
             {
@@ -153,7 +152,7 @@ bool __cdecl device_set_position_track(datum device_datum, const string_id anima
                 matrix4x3_to_orientation(&object_matrix_current_animation, orientation);
                 orientations_multiply(orientation, node_orientations, node_orientations);
                 orientations_multiply(orientation, original_orientations, original_orientations);
-                matrix4x3_from_point_and_vectors(&animation_matrix_from_initial_and_current, &device->position, &device->orientation, &device->up);
+                matrix4x3_from_point_and_vectors(&animation_matrix_from_initial_and_current, &device->position, &device->forward, &device->up);
                 matrix4x3_inverse(&animation_matrix_from_initial_and_current, &matrix_initial_inversed);
                 matrix4x3_to_orientation(&matrix_initial_inversed, orientation);
                 orientations_multiply(orientation, node_orientations, node_orientations);

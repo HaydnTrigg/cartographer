@@ -321,7 +321,6 @@ void game_save()
 
 void* __cdecl game_save_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool)
 {
-	game_save();
 	for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
 	{
 		if (NetworkSession::PlayerIsActive(i))
@@ -329,6 +328,7 @@ void* __cdecl game_save_evaluate(const __int16 op_code, const int thread_id, con
 			g_hs_function_to_send = populate_networked_hs_function(nullptr, (const e_hs_function)op_code);
 		}
 	}
+	game_save();
 
 	return hs_return(thread_id, 0);
 }
@@ -341,7 +341,6 @@ void game_revert()
 
 void* __cdecl game_revert_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool)
 {
-	game_revert();
 	for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
 	{
 		if (NetworkSession::PlayerIsActive(i))
@@ -349,13 +348,14 @@ void* __cdecl game_revert_evaluate(const __int16 op_code, const int thread_id, c
 			g_hs_function_to_send = populate_networked_hs_function(nullptr, (const e_hs_function)op_code);
 		}
 	}
+
+	game_revert();
 
 	return hs_return(thread_id, 0);
 }
 
 void* __cdecl cinematic_skip_start_internal_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool)
 {
-	s_cinematic_globals::cinematic_skip_start_internal();
 	for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
 	{
 		if (NetworkSession::PlayerIsActive(i))
@@ -364,12 +364,12 @@ void* __cdecl cinematic_skip_start_internal_evaluate(const __int16 op_code, cons
 		}
 	}
 
+	s_cinematic_globals::cinematic_skip_start_internal();
 	return hs_return(thread_id, 0);
 }
 
 void* __cdecl cinematic_skip_stop_internal_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool)
 {
-	s_cinematic_globals::cinematic_skip_stop_internal();
 	for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
 	{
 		if (NetworkSession::PlayerIsActive(i))
@@ -378,6 +378,7 @@ void* __cdecl cinematic_skip_stop_internal_evaluate(const __int16 op_code, const
 		}
 	}
 
+	s_cinematic_globals::cinematic_skip_stop_internal();
 	return hs_return(thread_id, 0);
 }
 

@@ -80,7 +80,7 @@ namespace KantTesting
 			auto object = (s_object_data_definition*)objects_table.get_current_datum()->object;
 			if(std::find(simulation_tag_datums.begin(), simulation_tag_datums.end(), object->tag_definition_index) != simulation_tag_datums.end())
 			{
-				objects_table.get_current_datum()->flags = (e_object_header_flag)(((byte)objects_table.get_current_datum()->flags) | object_header_flags_10);
+				objects_table.get_current_datum()->flags = (e_object_header_flag)((objects_table.get_current_datum()->flags) | _object_header_create_entity);
 				p_simulation_action_object_create(objects_table.get_current_absolute_index());
 			}
 		}
