@@ -51,12 +51,12 @@ void send_hs_function_to_clients(s_networked_hs_function* function)
 
 void send_hs_function_packet(int peerIdx, s_networked_hs_function* data)
 {
-	s_network_session* session = NetworkSession::GetCurrentNetworkSession();
+	s_network_session* session = NetworkSession::GetActiveNetworkSession();
 
 	s_network_observer* observer = session->p_network_observer;
-	const s_peer_observer_channel* observer_channel = NetworkSession::GetPeerObserverChannel(peerIdx);
+	s_session_observer_channel* observer_channel = NetworkSession::GetPeerObserverChannel(peerIdx);
 
-	if (!NetworkSession::LocalPeerIsSessionHost() || peerIdx == -1 || NetworkSession::PeerIndexLocal(peerIdx)) { return; }
+	if (!NetworkSession::LocalPeerIsSessionHost() || peerIdx == -1 || NetworkSession::IsPeerIndexLocal(peerIdx)) { return; }
 
 	if (observer_channel->field_1)
 	{

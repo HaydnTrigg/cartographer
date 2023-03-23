@@ -91,7 +91,7 @@ bool __cdecl device_set_position_track(datum device_datum, const string_id anima
         c_animation_manager__animation_get_root_matrix(animation_manager, animation_tagblock_index, 0.0f, render_model_definition, &animation_matrix_initial);
         c_animation_manager__animation_get_root_matrix(animation_manager, animation_tagblock_index, authored_time, render_model_definition, &matrix_current_animation_time);
         
-        if (datum node = c_animation_manager__find_node(animation_manager, HaloString::HS_ORIGIN_MARKER);
+        if (datum node = c_animation_manager__find_node(animation_manager, e_global_string_ids::HS_ORIGIN_MARKER);
             node == DATUM_INDEX_NONE)
         {
             matrix4x3_inverse(&animation_matrix_initial, &matrix_initial_inversed);

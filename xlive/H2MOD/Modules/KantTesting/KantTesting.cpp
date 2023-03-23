@@ -125,10 +125,10 @@ namespace KantTesting
 	void force_client_bluescreen()
 	{
 		auto p = NetworkSession::GetPeerIndex(1);
-		for(int i = 0; i < 16; i++)
+		for(int i = 0; i < ENGINE_MAX_PLAYERS; i++)
 		{
-			NetworkSession::GetCurrentNetworkSession()->peer_observer_channels[i].field_1 = false;
-			for (int i = 0; i < 16; i++)
+			NetworkSession::GetActiveNetworkSession()->observer_channels[i].field_1 = false;
+			for (int i = 0; i < ENGINE_MAX_PLAYERS; i++)
 			{
 				s_network_channel* network_channels = *Memory::GetAddress<s_network_channel**>(0x4FADBC, 0x525274);
 				network_channels[i].field_1D = 0;
@@ -138,7 +138,7 @@ namespace KantTesting
 	void force_client_bluescreen2()
 	{
 		auto p = NetworkSession::GetPeerIndex(1);
-		for (int i = 0; i < 16; i++)
+		for (int i = 0; i < ENGINE_MAX_PLAYERS; i++)
 		{
 			s_network_channel* network_channels = *Memory::GetAddress<s_network_channel**>(0x4FADBC, 0x525274);
 			network_channels[i].field_1D = 0;

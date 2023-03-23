@@ -9,11 +9,11 @@ namespace coop
 	void PreOnMapLoadPatches(s_game_options* game_options)
 	{
 		//See map_slots.cpp the range of valid singleplayer maps is hard defined.
-		if (game_options->m_engine_type == _multiplayer && game_options->map_id >= INT32_MAX - 1000 && game_options->map_id <= INT32_MAX)
+		if (game_options->engine_type == _multiplayer && game_options->map_id >= INT32_MAX - 1000 && game_options->map_id <= INT32_MAX)
 		{
-			game_options->m_engine_type = _single_player;
+			game_options->engine_type = _single_player;
 			game_options->coop = 1;
-			game_options->m_game_variant.variant_game_engine_index = _game_engine_campaign;
+			game_options->game_variant.variant_game_engine_index = _game_engine_campaign;
 		}
 	}
 

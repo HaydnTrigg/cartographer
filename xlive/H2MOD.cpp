@@ -522,7 +522,7 @@ bool __cdecl OnMapLoad(s_game_options* options)
 		WriteValue(Memory::GetAddress(0x41F6B1), 0);
 	}
 
-	coop::PreOnMapLoadPatches(game_options);
+	coop::PreOnMapLoadPatches(options);
 
 	EventHandler::MapLoadEventExecute(EventExecutionType::execute_before, options->engine_type);
 	CustomVariantHandler::OnMapLoad(ExecTime::_preEventExec, options);
