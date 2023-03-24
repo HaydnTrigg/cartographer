@@ -169,7 +169,6 @@
     <ClCompile Include="Blam\Engine\structures\cluster_partitions.cpp" />
     <ClCompile Include="Blam\Engine\objects\object_types.cpp" />
     <ClCompile Include="Blam\Engine\math\convex_hulls.cpp" />
-    <ClCompile Include="Blam\Engine\Simulation\simulation.cpp" />
     <ClCompile Include="Blam\Engine\objects\object_early_movers.cpp" />
     <ClCompile Include="Blam\Engine\objects\object_globals.cpp" />
     <ClCompile Include="Blam\Engine\objects\object_types.cpp" />
@@ -547,7 +546,6 @@
     <ClInclude Include="Blam\Engine\objects\object_globals.h" />
     <ClInclude Include="Blam\Engine\objects\object_types.h" />
     <ClInclude Include="Blam\Engine\math\convex_hulls.h" />
-    <ClInclude Include="Blam\Engine\Simulation\simulation.h" />
     <ClInclude Include="Blam\Engine\objects\damage.h" />
     <ClInclude Include="Blam\Engine\objects\object_early_movers.h" />
     <ClInclude Include="Blam\Engine\objects\object_globals.h" />
