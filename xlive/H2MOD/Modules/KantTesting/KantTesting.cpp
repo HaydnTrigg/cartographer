@@ -146,8 +146,30 @@ namespace KantTesting
 	}
 	auto key = VK_OEM_MINUS;
 	auto key2 = VK_OEM_PLUS;
+
+	typedef bool(__cdecl* machine_update_t)(datum machine_datum_index);
+	machine_update_t p_machine_update;
+	bool machine_update_hook(datum machine_datum_index)
+	{
+		bool result = p_machine_update(machine_datum_index);
+		s_object_data_definition* object = object_get_fast_unsafe(machine_datum_index);
+
+		if (s_game_globals::game_is_campaign() && NetworkSession::LocalPeerIsSessionHost())
+		{
+			typedef void(__cdecl* simulation_action_object_update_t)(datum object_datum_index, int flags);
+			auto simulation_action_object_update = Memory::GetAddress<simulation_action_object_update_t>(0x1B6685);
+			simulation_action_object_update(machine_datum_index, 4);
+		}
+
+		return result;
+	}
+
 	void Initialize()
 	{
+		DETOUR_BEGIN();
+		DETOUR_ATTACH(p_machine_update, Memory::GetAddress<machine_update_t>(0x18D8C7, 0x0), machine_update_hook);
+		DETOUR_COMMIT()
+
 		KeyboardInput::RegisterHotkey(&key, regenerate_entity_table);
 		KeyboardInput::RegisterHotkey(&key2, dump_entity_table);
 		if (ENABLEKANTTEST) {

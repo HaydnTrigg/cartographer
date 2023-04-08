@@ -34,7 +34,7 @@ void cinematic_start();
 void* __cdecl cinematic_start_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool);
 void cinematic_stop();
 void* __cdecl cinematic_stop_evaluate(__int16 op_code, int thread_id, char unk_bool);
-bool custom_animation_relative(const datum object_datum, const datum animation_path, const string_id animation, const bool interpolates_into_animation, const datum relative_object);
+bool custom_animation_relative(const datum object_datum, const datum animation_path, const datum animation, const bool interpolates_into_animation, const datum relative_object);
 void object_cinematic_lod(const WORD object_name_index, bool enable);
 void switch_bsp(const __int16 bsp_index);
 bool custom_animation_loop(const datum object_datum, const datum animation_path, const string_id animation, const bool interpolates_into_animation);

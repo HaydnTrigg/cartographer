@@ -2050,7 +2050,7 @@ struct s_hs_custom_animation_relative_args
 {
 	datum object;
 	datum animation_path;
-	string_id animation;
+	datum animation;
 	bool interpolates_into_animation;
 	datum relative_object;
 };

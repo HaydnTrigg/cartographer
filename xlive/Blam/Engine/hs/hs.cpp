@@ -170,9 +170,13 @@ void* __cdecl cinematic_stop_evaluate(__int16 op_code, int thread_id, char unk_b
 	return hs_return(thread_id, 0);
 }
 
-typedef bool(__cdecl* custom_animation_relative_t)(const datum object_datum, const datum animation_path, const string_id animation, const bool interpolates_into_animation, const datum relative_object);
+typedef bool(__cdecl* custom_animation_relative_t)(const datum object_datum, 
+	const datum animation_path, 
+	const datum animation, 
+	const bool interpolates_into_animation, 
+	const datum relative_object);
 custom_animation_relative_t p_custom_animation_relative;
-bool custom_animation_relative(const datum object_datum, const datum animation_path, const string_id animation, const bool interpolates_into_animation, const datum relative_object)
+bool custom_animation_relative(const datum object_datum, const datum animation_path, const datum animation, const bool interpolates_into_animation, const datum relative_object)
 {
 	return p_custom_animation_relative(object_datum, animation_path, animation, interpolates_into_animation, relative_object);
 }
