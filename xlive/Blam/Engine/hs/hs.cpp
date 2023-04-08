@@ -9,6 +9,7 @@
 #include "Blam/Engine/Networking/NetworkMessageTypeCollection.h"
 #include "Blam/Engine/Objects/Objects.h"
 #include "Blam/Engine/Players/Players.h"
+#include "Blam/Engine/Game/GameTimeGlobals.h"
 #include "H2MOD/Modules/OnScreenDebug/OnscreenDebug.h"
 #include "H2MOD/Modules/EventHandler/EventHandler.hpp"
 #include "Util/Hooks/Hook.h"
@@ -116,7 +117,7 @@ void __cdecl sound_impulse_start(char* sound, int object_datum, float scale)
 	p_sound_impulse_start(sound, object_datum, scale);
 }
 
-typedef float (__cdecl* ai_play_line_on_object_t)(int object_datum, string_id sound);
+typedef float(__cdecl* ai_play_line_on_object_t)(int object_datum, string_id sound);
 ai_play_line_on_object_t p_ai_play_line_on_object;
 float __cdecl ai_play_line_on_object(int object_datum, string_id sound)
 {
@@ -170,10 +171,10 @@ void* __cdecl cinematic_stop_evaluate(__int16 op_code, int thread_id, char unk_b
 	return hs_return(thread_id, 0);
 }
 
-typedef bool(__cdecl* custom_animation_relative_t)(const datum object_datum, 
-	const datum animation_path, 
-	const datum animation, 
-	const bool interpolates_into_animation, 
+typedef bool(__cdecl* custom_animation_relative_t)(const datum object_datum,
+	const datum animation_path,
+	const datum animation,
+	const bool interpolates_into_animation,
 	const datum relative_object);
 custom_animation_relative_t p_custom_animation_relative;
 bool custom_animation_relative(const datum object_datum, const datum animation_path, const datum animation, const bool interpolates_into_animation, const datum relative_object)
@@ -284,10 +285,10 @@ void pvs_set_object(const datum object)
 	}
 }
 
-	void pvs_clear()
-	{
-		s_game_globals::get()->pvs_object_is_set = 0;
-	}
+void pvs_clear()
+{
+	s_game_globals::get()->pvs_object_is_set = 0;
+}
 
 void* __cdecl pvs_clear_evaluate(const __int16 op_code, const int thread_id, const bool unk_bool)
 {
@@ -400,7 +401,7 @@ void* __cdecl hs_arguments_evaluate(unsigned __int16 op_code, unsigned __int16 t
 	s_networked_hs_function function_details;
 
 	void* args = p_hs_evaluate(thread_id, hs_function_table[op_code]->arg_count, (int)hs_function_table[op_code]->arg_array, unk_bool);
-	
+
 	// Added for script syncing in coop
 	if (NetworkSession::GetLocalSessionState() != _network_session_state_none)
 	{
@@ -432,13 +433,53 @@ void __cdecl hs_update()
 	// If we are the client, run stored script args
 	if (!NetworkSession::LocalPeerIsSessionHost() && NetworkSession::GetLocalSessionState() != _network_session_state_none)
 	{
-		client_execute_stored_hs_commands();
+		// Prevent race condition of custom_relative_animation executing before objects are created
+		if (time_globals::get_game_time() % 5 == 0)
+			client_execute_stored_hs_commands();
 	}
 }
 
 void on_map_load()
 {
 	g_next_hs_function_id = 0;
+}
+
+typedef void(__cdecl* object_create_anew_t)(const WORD object_name_index);
+object_create_anew_t p_object_create_anew;
+void __cdecl object_create_anew(const WORD object_name_index)
+{
+	typedef void(__cdecl* object_delete_t)(const datum object_index);
+	object_delete_t p_object_delete = Memory::GetAddress<object_delete_t>(0x136005, 0x124ED5);
+	typedef datum(__cdecl* object_create_t)(const datum object_name_index, bool some_bool);
+	object_create_t p_object_create = Memory::GetAddress<object_create_t>(0x138369, 0x127239);
+	typedef bool(__cdecl* is_object_player_or_horse_t)(const datum object_index);
+	is_object_player_or_horse_t p_is_object_player_or_horse = Memory::GetAddress<is_object_player_or_horse_t>(0x1347FB, 0x1236CB);
+	typedef datum(__cdecl* object_index_from_name_index_t)(const WORD object_name_index);
+	object_index_from_name_index_t p_object_index_from_name_index = Memory::GetAddress<object_index_from_name_index_t>(0x1335FB, 0x1224CB);
+
+	datum object_index;
+
+	if (object_name_index != 0xFFFF)
+	{
+		LOG_WARNING_FUNC(" invoked with index {0}", object_name_index);
+		object_index = p_object_index_from_name_index(object_name_index);
+		if (object_index != 0xFFFFFFFF && !p_is_object_player_or_horse(object_index))
+			p_object_delete(object_index);
+
+		//if(object_name_index == 45) //spectre_intra1
+		//__debugbreak();
+		object_index = p_object_create(object_name_index, false);
+
+		if (!DATUM_IS_NONE(object_index))
+		{
+			LOG_WARNING_GAME("Host : successfully created new object with id {0:X}", object_index);
+			s_object_data_definition* obj = object_get_fast_unsafe(object_index);
+
+			LOG_WARNING_GAME("Tag Idx : {0:X}  Postion : {1} {2} {3}", obj->tag_definition_index, obj->position.x, obj->position.y, obj->position.z);
+
+		}
+
+	}
 }
 
 void ApplyHooks()
@@ -457,8 +498,9 @@ void ApplyHooks()
 	DETOUR_BEGIN();
 	DETOUR_ATTACH(p_hs_arguments_evaluate, Memory::GetAddress<hs_arguments_evaluate_t>(0x9581D, 0xAAA1D), hs_arguments_evaluate);
 	DETOUR_ATTACH(p_hs_return, Memory::GetAddress<hs_return_t>(0x9505D, 0xAA25D), hs_return);
+	DETOUR_ATTACH(p_object_create_anew, Memory::GetAddress<object_create_anew_t>(0xFE444, 0xE5280), object_create_anew);
 	DETOUR_COMMIT();
-		
+
 	// Write pointers for script functions that have no arguments
 	WritePointer(Memory::GetAddress(0x3C0CD4, 0x37D5EC), cinematic_start_evaluate);
 	WritePointer(Memory::GetAddress(0x3C0CE4, 0x37D5FC), cinematic_stop_evaluate);
@@ -468,7 +510,7 @@ void ApplyHooks()
 	WritePointer(Memory::GetAddress(0x3C0DD4, 0x37D6EC), game_revert_evaluate);
 	WritePointer(Memory::GetAddress(0x3C0CF4, 0x37D60C), cinematic_skip_start_internal_evaluate);
 	WritePointer(Memory::GetAddress(0x3C0D04, 0x37D61C), cinematic_skip_stop_internal_evaluate);
-	
+
 	// hook the print command to redirect the output to our console
 	if (!Memory::IsDedicatedServer())
 	{
@@ -493,7 +535,7 @@ void hs_initialize()
 	p_object_destroy = Memory::GetAddress<object_destroy_t*>(0xFDCFD, 0x124ED5);
 	p_fade_out = Memory::GetAddress<fade_out_t>(0xA3CCA, 0x95F2A);
 	p_fade_in = Memory::GetAddress<fade_in_t>(0xA402C, 0x9628C);
-	
+
 	if (!Memory::IsDedicatedServer())
 	{
 		p_player_enable_input = Memory::GetAddress<player_enable_input_t>(0x51464);

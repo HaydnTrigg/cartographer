@@ -90,6 +90,14 @@ namespace Engine::Objects
 		return(real_matrix4x3*)((char*)object + 52 * node_index + object->nodes_offset);
 	}
 
+	unsigned int object_index_from_name_index(datum obj_index)
+	{
+		typedef unsigned int(__cdecl* object_index_from_name_index_t)(datum);
+		auto p_object_index_from_name_index = Memory::GetAddress<object_index_from_name_index_t>(0x1335FB);
+		return p_object_index_from_name_index(obj_index);
+	}
+
+
 #pragma region Biped variant patches
 	void update_biped_object_variant_data(datum object_idx, int variant_index)
 	{
@@ -157,7 +165,7 @@ namespace Engine::Objects
 	{
 		// set the object placement data
 		object_placement_data->variant_name = creation_data->variant_name;
-		if(*(byte*)((char*)creation_data + 0x10) != -1)
+		if (*(byte*)((char*)creation_data + 0x10) != -1)
 		{
 			auto profile = reinterpret_cast<s_player::s_player_properties::s_player_profile*>((char*)creation_data + 0x10);
 			datum player_representation_datum = PlayerRepresentation::get_object_datum_from_representation(profile->player_character_type);
@@ -165,7 +173,21 @@ namespace Engine::Objects
 				object_placement_data->tag_index = player_representation_datum;
 		}
 		//addDebugText("creating object with variant index: %d", object_placement_data->variant_name);
-		return Memory::GetAddress<int(__thiscall*)(int, void*, int, int, s_object_placement_data*)>(0x1F32DB, 0x1DE374)(thisx, creation_data, a2, a3, object_placement_data);
+		//return Memory::GetAddress<int(__thiscall*)(int, void*, int, int, s_object_placement_data*)>(0x1F32DB, 0x1DE374)(thisx, creation_data, a2, a3, object_placement_data);
+
+		//datum obj_id = Engine::Objects::object_new(object_placement_data);
+		datum obj_id = Memory::GetAddress<int(__thiscall*)(int, void*, int, int, s_object_placement_data*)>(0x1F32DB, 0x1DE374)(thisx, creation_data, a2, a3, object_placement_data);
+		if (!DATUM_IS_NONE(obj_id))
+		{
+			LOG_WARNING_GAME("Client :  successfully created new object with id {0:X}", obj_id);
+			s_object_data_definition* obj = object_get_fast_unsafe(obj_id);
+			//obj->netgame_equipment_index = creation_data->object.multiplayer_spawn_monitor_index;
+			LOG_WARNING_GAME("Tag Idx : {0:X}  Postion : {1} {2} {3}", obj->tag_definition_index, obj->position.x, obj->position.y, obj->position.z);
+			/*if (obj->tag_definition_index == 0xF26B10F5)
+				__debugbreak();*/
+		}
+
+		return obj_id;
 	}
 
 	__declspec(naked) void c_simulation_object_entity_definition_object_create_object_to_stdcall()
@@ -188,7 +210,7 @@ namespace Engine::Objects
 		int object_permutation_idx = object_creation_data->variant_name.get_packed();
 
 		//if (object_permutation_index == 0)
-		if(*(byte*)((char*)a1) != -1)
+		if (*(byte*)((char*)a1) != -1)
 			return p_set_unit_color_data(a1, a2, a3);
 
 		return 0;

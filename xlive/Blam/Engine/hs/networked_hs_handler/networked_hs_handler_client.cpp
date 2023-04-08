@@ -6,12 +6,14 @@
 #include "Blam/Engine/cutscene/cinematics.h"
 #include "Blam/Engine/devices/devices.h"
 #include "Blam/Engine/Simulation/simulation_world.h"
+#include "H2MOD/Modules/OnScreenDebug/OnscreenDebug.h"
 
 // Stores all the functions recieved from the host
 static std::list<s_networked_hs_function> g_hs_client_function_backlog;
 
 // Table of functions to execute depending on hs function type
 static networked_hs_functions_table_t networked_hs_function_table[e_hs_function::_e_hs_function_size];
+static int itr = 1;
 
 void initialize_networked_hs_function_table()
 {
@@ -147,13 +149,18 @@ networked_hs_functions_table_t get_networked_hs_lamda_function(const e_hs_functi
 		return [](const s_networked_hs_function* data)
 		{
 			s_hs_custom_animation_relative_args* args = (s_hs_custom_animation_relative_args*)data->arg_buffer;
-			args->object = simulation_gamestate_entity_get_object_index(args->object);
-			args->relative_object = simulation_gamestate_entity_get_object_index(args->relative_object);
-
+			addDebugText("[HSC Print] Client custom_animation_relative( %d, %08X ,  %08X , %d ,  %d)", args->object, args->animation_path, args->animation, args->interpolates_into_animation, args->relative_object);
+			addDebugText("[HSC Print] Client custom_animation_relative (name index : %d , %08X),", args->object, Engine::Objects::object_index_from_name_index(args->object));
+			args->object = Engine::Objects::object_index_from_name_index(args->object);
+			args->relative_object = Engine::Objects::object_index_from_name_index(args->relative_object);
+			/*if(itr==2)
+			__debugbreak();
+			*/
 			if (!custom_animation_relative(args->object, args->animation_path, args->animation, args->interpolates_into_animation, args->relative_object))
 			{
 				print_to_console("custom_animation_relative returned false on clients, this is very bad!!!!");
 			}
+			itr++;
 		};
 	}
 	case e_hs_function_object_cinematic_lod:
