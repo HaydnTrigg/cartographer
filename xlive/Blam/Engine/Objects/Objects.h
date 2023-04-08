@@ -169,7 +169,7 @@ struct s_unit_data_definition : s_object_data_definition
 	DWORD field_130;
 	datum simulation_actor_index;
 	DWORD unit_flags;		  //(unit_data->unit_flags & 8) != 0   -->active_camo_active
-							  //unit_data->unit_flags |= 2         -->unit_is_alive
+	//unit_data->unit_flags |= 2         -->unit_is_alive
 	e_object_team unit_team;
 	char pad[3];
 	datum controlling_player_index;
@@ -323,6 +323,7 @@ namespace Engine::Objects
 	bool object_has_animation_manager(const datum object_index);
 	void object_compute_node_matrices_with_children(const datum object_datum);
 	real_matrix4x3* object_get_node_matrix(const datum object_datum, const __int16 node_index);
+	unsigned int object_index_from_name_index(datum obj_index);
 
 	int object_get_count();
 	int object_count_from_iter();

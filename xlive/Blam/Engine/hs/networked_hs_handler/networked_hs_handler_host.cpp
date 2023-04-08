@@ -3,6 +3,7 @@
 
 #include "Blam/Engine/Game/GameGlobals.h"
 #include "Blam/Engine/Networking/NetworkMessageTypeCollection.h"
+#include "H2MOD/Modules/OnScreenDebug/OnscreenDebug.h"
 
 static modify_hs_arguments_table_t modify_hs_arguments_table[e_hs_function::_e_hs_function_size];
 
@@ -113,10 +114,13 @@ modify_hs_arguments_table_t get_modify_lamda_function(const e_hs_function functi
 			const s_object_data_definition* relative_object = object_get_fast_unsafe(args->relative_object);
 
 			if (args->object == DATUM_INDEX_NONE) { return; }
-			args->object = object->simulation_entity_index;
+			args->object = object->name_list_index;
 
 			if (args->relative_object == DATUM_INDEX_NONE) { return; }
-			args->relative_object = relative_object->simulation_entity_index;
+			args->relative_object = relative_object->name_list_index;
+
+			addDebugText("[HSC Print] Host custom_animation_relative( %d, %08X ,  %08X , %d ,  %d)", args->object, args->animation_path, args->animation, args->interpolates_into_animation, args->relative_object);
+			addDebugText("[HSC Print] Host custom_animation_relative (name index : %d , %08X ),", object->name_list_index, Engine::Objects::object_index_from_name_index(object->name_list_index));
 		};
 	}
 	case e_hs_function_ai_play_line_on_object:
