@@ -11,6 +11,7 @@ s_networked_hs_function populate_networked_hs_function(const void* args_src, con
 	args_dest.function_type = function_type;
 	memset(args_dest.arg_buffer, 0, HS_SENT_BUFFER_SIZE);
 
+	// Sending text over a packet requires us to copy the memory differently compared to how we normally copy the arg buffer
 	if (args_src != nullptr)
 	{
 		if (function_type == e_hs_function::e_hs_function_print)

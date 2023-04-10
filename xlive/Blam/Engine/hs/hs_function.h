@@ -2027,14 +2027,20 @@ struct s_hs_fade_args
 
 struct s_hs_sound_impulse_start_args
 {
-	char* sound;
+	string_id sound;
 	datum object;
 	float scale;
 };
 
+struct s_hs_ai_play_line
+{
+	datum ai_datum_index;
+	string_id sound;
+};
+
 struct s_hs_ai_play_line_on_object_args
 {
-	datum object;
+	datum object;	// Used as the object_datum as well as the object_name_index
 	string_id sound;
 };
 
@@ -2057,7 +2063,7 @@ struct s_hs_custom_animation_relative_args
 
 struct s_hs_object_cinematic_lod_args
 {
-	datum object;
+	datum object;	// Used as the object_datum as well as the object_name_index
 	bool enable;
 };
 
@@ -2139,8 +2145,8 @@ struct s_hs_device_animate_overlay_args
 	datum device;
 	float position;
 	float time;
-	float unk1;
-	float unk2;
+	float acceleration_time;
+	float deceleration_time;
 };
 
 struct s_hs_object_dynamic_simulation_disable_args

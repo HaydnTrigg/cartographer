@@ -18,4 +18,4 @@ void call_networked_hs_function(const s_networked_hs_function* data);
 void client_execute_stored_hs_commands();
 
 // Depending on the function type passed return a lambda function that's used to handle that hs function on the client
-networked_hs_functions_table_t get_networked_hs_lamda_function(const e_hs_function function_type);
+networked_hs_functions_table_t get_networked_hs_lambda_function(const e_hs_function function_type);

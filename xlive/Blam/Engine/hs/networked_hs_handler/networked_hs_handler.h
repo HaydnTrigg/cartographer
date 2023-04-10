@@ -23,12 +23,13 @@ const e_hs_function hs_sync_table[HS_SYNC_TABLE_SIZE]
 	e_hs_function_camera_control,
 	e_hs_function_ai_allegiance,
 	e_hs_function_sound_impulse_start,
+	//e_hs_function_ai_play_line,	(Dosent work because ai datums arent synced to client)
 	e_hs_function_ai_play_line_on_object,
 	e_hs_function_camera_set_animation_relative,
 	e_hs_function_cinematic_start,
 	e_hs_function_cinematic_stop,
 	e_hs_function_custom_animation_relative,
-	//e_hs_function_object_cinematic_lod, (crashes, something something objects still need to be fixed)
+	//e_hs_function_object_cinematic_lod, (Not synced due to crashing issues on certain maps, entity creation being delayed on clients is the issue)
 	//e_hs_function_device_animate_position,
 	//e_hs_function_device_set_position_track,
 	//e_hs_function_device_set_overlay_track,

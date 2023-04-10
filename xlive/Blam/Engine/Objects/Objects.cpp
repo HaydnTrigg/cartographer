@@ -90,7 +90,7 @@ namespace Engine::Objects
 		return(real_matrix4x3*)((char*)object + 52 * node_index + object->nodes_offset);
 	}
 
-	unsigned int object_index_from_name_index(datum obj_index)
+	datum object_index_from_name_index(WORD obj_index)
 	{
 		typedef unsigned int(__cdecl* object_index_from_name_index_t)(datum);
 		auto p_object_index_from_name_index = Memory::GetAddress<object_index_from_name_index_t>(0x1335FB);

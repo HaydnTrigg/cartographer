@@ -110,18 +110,25 @@ void __cdecl ai_allegiance(__int16 team1, __int16 team2)
 	p_ai_allegiance(team1, team2);
 }
 
-typedef void(__cdecl* sound_impulse_start_t)(char* sound, int object_datum, float scale);
+typedef void(__cdecl* sound_impulse_start_t)(string_id sound, int object_datum, float scale);
 sound_impulse_start_t p_sound_impulse_start;
-void __cdecl sound_impulse_start(char* sound, int object_datum, float scale)
+void __cdecl sound_impulse_start(string_id sound, int object_datum, float scale)
 {
 	p_sound_impulse_start(sound, object_datum, scale);
 }
 
-typedef float(__cdecl* ai_play_line_on_object_t)(int object_datum, string_id sound);
-ai_play_line_on_object_t p_ai_play_line_on_object;
-float __cdecl ai_play_line_on_object(int object_datum, string_id sound)
+typedef float(__cdecl* ai_play_line_t)(datum ai_datum_index, string_id sound);
+ai_play_line_t p_ai_play_line;
+float __cdecl ai_play_line(datum ai_datum_index, string_id sound)
 {
-	return p_ai_play_line_on_object(object_datum, sound);
+	return p_ai_play_line(ai_datum_index, sound);
+}
+
+typedef float(__cdecl* ai_play_line_on_object_t)(datum ai_datum_index, string_id sound);
+ai_play_line_on_object_t p_ai_play_line_on_object;
+float __cdecl ai_play_line_on_object(datum ai_datum_index, string_id sound)
+{
+	return p_ai_play_line_on_object(ai_datum_index, sound);
 }
 
 typedef void(__cdecl* camera_set_animation_relative_t)(const char* animation_path, const char* animation, int unit, const WORD cutscene_flag_index);
@@ -184,9 +191,9 @@ bool custom_animation_relative(const datum object_datum, const datum animation_p
 
 typedef void(__cdecl* object_cinematic_lod_t)(const WORD object_name_index, bool enable);
 object_cinematic_lod_t p_object_cinematic_lod;
-void object_cinematic_lod(const WORD object_name_index, bool enable)
+void object_cinematic_lod(const datum object_datum_index, bool enable)
 {
-	p_object_cinematic_lod(object_name_index, enable);
+	p_object_cinematic_lod(object_datum_index, enable);
 }
 
 typedef void(__cdecl* switch_bsp_t)(const __int16 bsp_index);
@@ -435,7 +442,9 @@ void __cdecl hs_update()
 	{
 		// Prevent race condition of custom_relative_animation executing before objects are created
 		if (time_globals::get_game_time() % 5 == 0)
+		{
 			client_execute_stored_hs_commands();
+		}
 	}
 }
 
@@ -542,6 +551,7 @@ void hs_initialize()
 		p_camera_control = Memory::GetAddress<camera_control_t>(0x5A181);
 		p_ai_allegiance = Memory::GetAddress<ai_allegiance_t>(0x30F39A);
 		p_sound_impulse_start = Memory::GetAddress<sound_impulse_start_t>(0x8A825);
+		p_ai_play_line = Memory::GetAddress<ai_play_line_t>(0x312142);
 		p_ai_play_line_on_object = Memory::GetAddress<ai_play_line_on_object_t>(0x30F886);
 		p_camera_set_animation_relative = Memory::GetAddress<camera_set_animation_relative_t>(0x978BC);
 		p_cinematic_start = Memory::GetAddress<no_arg_hs_function_t>(0x3A6D0);

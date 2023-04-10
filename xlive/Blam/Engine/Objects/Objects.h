@@ -323,7 +323,7 @@ namespace Engine::Objects
 	bool object_has_animation_manager(const datum object_index);
 	void object_compute_node_matrices_with_children(const datum object_datum);
 	real_matrix4x3* object_get_node_matrix(const datum object_datum, const __int16 node_index);
-	unsigned int object_index_from_name_index(datum obj_index);
+	datum object_index_from_name_index(WORD obj_index);
 
 	int object_get_count();
 	int object_count_from_iter();

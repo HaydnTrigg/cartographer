@@ -19,7 +19,7 @@ void initialize_networked_hs_function_table()
 {
 	for (unsigned short i = 0; i < e_hs_function::_e_hs_function_size; i++)
 	{
-		networked_hs_function_table[i] = get_networked_hs_lamda_function((e_hs_function)i);
+		networked_hs_function_table[i] = get_networked_hs_lambda_function((e_hs_function)i);
 	}
 }
 
@@ -50,7 +50,7 @@ void client_execute_stored_hs_commands()
 	}
 }
 
-networked_hs_functions_table_t get_networked_hs_lamda_function(const e_hs_function function_type)
+networked_hs_functions_table_t get_networked_hs_lambda_function(const e_hs_function function_type)
 {
 	switch (function_type)
 	{
@@ -107,7 +107,7 @@ networked_hs_functions_table_t get_networked_hs_lamda_function(const e_hs_functi
 		return [](const s_networked_hs_function* data)
 		{
 			s_hs_sound_impulse_start_args* args = (s_hs_sound_impulse_start_args*)data->arg_buffer;
-			args->object = simulation_gamestate_entity_get_object_index(args->object);
+			args->object = Engine::Objects::object_index_from_name_index(args->object);
 
 			sound_impulse_start(args->sound, args->object, args->scale);
 		};
@@ -117,7 +117,7 @@ networked_hs_functions_table_t get_networked_hs_lamda_function(const e_hs_functi
 		return [](const s_networked_hs_function* data)
 		{
 			s_hs_ai_play_line_on_object_args* args = (s_hs_ai_play_line_on_object_args*)data->arg_buffer;
-			args->object = (args->object == NULL ? NULL : simulation_gamestate_entity_get_object_index(args->object));
+			args->object = Engine::Objects::object_index_from_name_index(args->object);
 
 			ai_play_line_on_object(args->object, args->sound);
 		};
@@ -168,9 +168,8 @@ networked_hs_functions_table_t get_networked_hs_lamda_function(const e_hs_functi
 		return [](const s_networked_hs_function* data)
 		{
 			s_hs_object_cinematic_lod_args* args = (s_hs_object_cinematic_lod_args*)data->arg_buffer;
-			args->object = simulation_gamestate_entity_get_object_index(args->object);
 
-			object_cinematic_lod((unsigned __int16)args->object, args->enable);
+			object_cinematic_lod(Engine::Objects::object_index_from_name_index(args->object), args->enable);
 		};
 	}
 	case e_hs_function_device_animate_position:
@@ -322,7 +321,7 @@ networked_hs_functions_table_t get_networked_hs_lamda_function(const e_hs_functi
 			s_hs_device_animate_overlay_args* args = (s_hs_device_animate_overlay_args*)data->arg_buffer;
 			args->device = simulation_gamestate_entity_get_object_index(args->device);
 
-			device_animate_overlay(args->device, args->position, args->time, args->unk1, args->unk2);
+			device_animate_overlay(args->device, args->position, args->time, args->acceleration_time, args->deceleration_time);
 		};
 	}
 	case e_hs_function_object_dynamic_simulation_disable:

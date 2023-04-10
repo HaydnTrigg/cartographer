@@ -11,7 +11,7 @@ void initialize_modify_hs_arguments_table()
 {
 	for (unsigned short i = 0; i < e_hs_function::_e_hs_function_size; i++)
 	{
-		modify_hs_arguments_table[i] = get_modify_lamda_function((e_hs_function)i);
+		modify_hs_arguments_table[i] = get_modify_lambda_function((e_hs_function)i);
 	}
 }
 
@@ -19,14 +19,16 @@ void send_hs_function_to_clients(s_networked_hs_function* function)
 {
 	bool found = false;
 
-	//If host send out the packets
-	if (!s_game_globals::game_is_campaign() || !NetworkSession::LocalPeerIsSessionHost()) { return; }
+	// If the game is host, send out the packets
+	// if the function type is 0 (begin) make sure not to send a packet for it
+	if (!s_game_globals::game_is_campaign() || !NetworkSession::LocalPeerIsSessionHost() || function->function_type == 0) { return; }
 
 	for (unsigned short i = 0; i < HS_SYNC_TABLE_SIZE; i++)
 	{
 		if (hs_sync_table[i] == function->function_type)
 		{
 			found = true;
+			break;
 		}
 	}
 
@@ -34,6 +36,7 @@ void send_hs_function_to_clients(s_networked_hs_function* function)
 
 	modify_hs_arguments_table[function->function_type](function);
 
+	// Send packet to every player
 	for (byte i = 0; i < ENGINE_MAX_PLAYERS; i++)
 	{
 		if (NetworkSession::PlayerIsActive(i))
@@ -43,6 +46,7 @@ void send_hs_function_to_clients(s_networked_hs_function* function)
 	}
 	g_next_hs_function_id++;
 
+	// Clear memory of networked hs function info (we might not need to do this anyways?)
 	memset(function, 0, sizeof(s_networked_hs_function));
 }
 
@@ -65,7 +69,7 @@ void send_hs_function_packet(int peerIdx, s_networked_hs_function* data)
 	}
 }
 
-modify_hs_arguments_table_t get_modify_lamda_function(const e_hs_function function_type)
+modify_hs_arguments_table_t get_modify_lambda_function(const e_hs_function function_type)
 {
 	switch (function_type)
 	{
@@ -98,11 +102,9 @@ modify_hs_arguments_table_t get_modify_lamda_function(const e_hs_function functi
 		return [](const s_networked_hs_function* function)
 		{
 			s_hs_object_cinematic_lod_args* args = (s_hs_object_cinematic_lod_args*)function->arg_buffer;
-			const s_object_data_definition* object = object_get_fast_unsafe(args->object);
-
 			if (args->object == DATUM_INDEX_NONE) { return; }
 
-			args->object = object->simulation_entity_index;
+			args->object = object_get_fast_unsafe(args->object)->name_list_index;
 		};
 	}
 	case e_hs_function_custom_animation_relative:
@@ -123,16 +125,26 @@ modify_hs_arguments_table_t get_modify_lamda_function(const e_hs_function functi
 			addDebugText("[HSC Print] Host custom_animation_relative (name index : %d , %08X ),", object->name_list_index, Engine::Objects::object_index_from_name_index(object->name_list_index));
 		};
 	}
+	case e_hs_function_sound_impulse_start:
+	{
+		return [](const s_networked_hs_function* function)
+		{
+			s_hs_sound_impulse_start_args* args = (s_hs_sound_impulse_start_args*)function->arg_buffer;
+			if (args->object == DATUM_INDEX_NONE) { return; }
+			const s_object_data_definition* object = object_get_fast_unsafe(args->object);
+
+			args->object = object->name_list_index;
+		};
+	}
 	case e_hs_function_ai_play_line_on_object:
 	{
 		return [](const s_networked_hs_function* function)
 		{
 			s_hs_ai_play_line_on_object_args* args = (s_hs_ai_play_line_on_object_args*)function->arg_buffer;
-			const s_object_data_definition* object = object_get_fast_unsafe(args->object);
-
 			if (args->object == DATUM_INDEX_NONE) { return; }
 
-			args->object = object->simulation_entity_index;
+			const s_object_data_definition* object = object_get_fast_unsafe(args->object);
+			args->object = object->name_list_index;
 		};
 	}
 	case e_hs_function_custom_animation_loop:
@@ -249,6 +261,7 @@ modify_hs_arguments_table_t get_modify_lamda_function(const e_hs_function functi
 	{
 		return [](const s_networked_hs_function* data)
 		{
+			// Who would've guessed... the default modify lambda dosen't actually modify anything
 		};
 	}
 	}
