@@ -24,18 +24,18 @@ struct s_display_option
 
 struct s_video_settings
 {
-	DWORD DisplayMode;
-	DWORD AspectRatio;
-	DWORD ScreenResX;
-	DWORD ScreenResY;
-	DWORD RefreshRate;
-	DWORD ResArrayIndex; // this is the index of the current used hardcoded video resolution 
-	DWORD Brightness;
-	DWORD Gamma;
-	DWORD AntiAliasing;
-	DWORD HUDSize;
-	DWORD SafeArea;
-	DWORD LevelOfDetail;
+	DWORD display_mode;
+	DWORD aspect_ratio;
+	DWORD screen_width;
+	DWORD screen_height;
+	DWORD refresh_rate;
+	DWORD display_option_index;
+	DWORD brightness;
+	DWORD gamma;
+	DWORD anti_aliasing;
+	DWORD hud_size;
+	DWORD safe_area;
+	DWORD level_of_detail;
 };
 static_assert(sizeof(s_video_settings) == 48, "s_video_settings total bytes wrong");
 
