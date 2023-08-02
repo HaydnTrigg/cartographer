@@ -362,7 +362,6 @@
     <ClCompile Include="H2MOD\Modules\MainLoopPatches\Interpolation\Interpolation.cpp" />
     <ClCompile Include="H2MOD\Modules\MainLoopPatches\Interpolation\ObjectInterpolate.cpp" />
     <ClCompile Include="H2MOD\Modules\MapManager\CustomMapDataCache\CustomMapDataCache.cpp" />
-    <ClCompile Include="H2MOD\Modules\CustomResolutions\CustomResolutions.cpp" />
     <ClCompile Include="H2MOD\Modules\CustomVariantSettings\CustomVariantSettings.cpp" />
     <ClCompile Include="H2MOD\Modules\DirectorHooks\DirectorHooks.cpp" />
     <ClCompile Include="H2MOD\Modules\EventHandler\EventHandler.cpp" />
@@ -697,7 +696,6 @@
     <ClInclude Include="H2MOD\Modules\MainLoopPatches\Interpolation\Interpolation.h" />
     <ClInclude Include="H2MOD\Modules\MainLoopPatches\Interpolation\ObjectInterpolate.h" />
     <ClInclude Include="H2MOD\Modules\MapManager\CustomMapDataCache\CustomMapDataCache.h" />
-    <ClInclude Include="H2MOD\Modules\CustomResolutions\CustomResolutions.h" />
     <ClInclude Include="H2MOD\Modules\CustomVariantSettings\CustomVariantSettings.h" />
     <ClInclude Include="H2MOD\Modules\DirectorHooks\DirectorHooks.h" />
     <ClInclude Include="H2MOD\Modules\EventHandler\EventHandler.hpp" />
