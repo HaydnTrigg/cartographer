@@ -27,6 +27,7 @@
 #include <mmsystem.h>
 #include <windef.h>
 #include <codecvt>
+#include <sys/timeb.h>
 
 // game input
 #include <xinput.h>

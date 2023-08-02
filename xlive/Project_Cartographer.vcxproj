@@ -235,6 +235,7 @@
     <ClCompile Include="Blam\Engine\cseries\cseries_strings.cpp" />
     <ClCompile Include="Blam\Engine\cutscene\cinematics.cpp" />
     <ClCompile Include="Blam\Engine\game\game_statborg.cpp" />
+    <ClCompile Include="Blam\Engine\main\main.cpp" />
     <ClCompile Include="Blam\Engine\main\main_screenshot.cpp" />
     <ClCompile Include="Blam\Engine\cseries\cseries_windows_debug_pc.cpp" />
     <ClCompile Include="Blam\Engine\decorators\decorator_definitions.cpp" />
@@ -320,6 +321,7 @@
     <ClInclude Include="Blam\Engine\interface\user_interface_text.h" />
     <ClInclude Include="Blam\Engine\interface\new_hud_definitions.h" />
     <ClInclude Include="Blam\Engine\interface\user_interface_screen_widget_definition.h" />
+    <ClInclude Include="Blam\Engine\main\main.h" />
     <ClInclude Include="Blam\Engine\main\main_screenshot.h" />
     <ClInclude Include="Blam\Engine\math\color_math.h" />
     <ClInclude Include="Blam\Engine\math\function_definitions.h" />

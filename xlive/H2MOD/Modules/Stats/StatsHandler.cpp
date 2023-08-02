@@ -1,5 +1,4 @@
 #include "stdafx.h"
-
 #include "StatsHandler.h"
 
 #include "Blam/Engine/Networking/NetworkMessageTypeCollection.h"

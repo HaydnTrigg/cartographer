@@ -2,6 +2,7 @@
 #include "rasterizer_settings.h"
 
 #include "Blam/Engine/interface/user_interface_text.h"
+#include "Blam/Engine/main/main.h"
 #include "Util/Hooks/Hook.h"
 
 s_display_option g_display_options[k_max_display_option_count] = { 0 };
@@ -122,7 +123,7 @@ void create_new_display_setting_array()
 	if (count == 0)
 	{
 		LOG_CRITICAL_FUNCW("Display Option count is 0, something is definitely wrong here");
-		exit(EXIT_FAILURE);
+		main_exit_game();
 	}
 
 	WritePointer(Memory::GetAddress(0x263A53), g_display_options);

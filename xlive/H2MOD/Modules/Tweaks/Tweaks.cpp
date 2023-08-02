@@ -7,7 +7,6 @@
 #include "Blam/Engine/tag_files/files_windows.h"
 
 #include "H2MOD/Modules/Accounts/AccountLogin.h"
-#include "H2MOD/Modules/CustomResolutions/CustomResolutions.h"
 #include "H2MOD/Modules/MapManager/MapManager.h"
 #include "H2MOD/Modules/OnScreenDebug/OnscreenDebug.h"
 #include "H2MOD/Modules/Shell/Config.h"
