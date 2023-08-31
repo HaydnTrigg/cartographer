@@ -67,8 +67,8 @@ s_aspect_ratio calculate_aspect_ratio(size_t width, size_t height)
 	size_t gcd = calculate_gcd(width, height);
 
 	s_aspect_ratio aspect_ratio;
-	aspect_ratio.x = (byte)(width / gcd);
-	aspect_ratio.y = (byte)(height / gcd);
+	aspect_ratio.x = byte(width / gcd);
+	aspect_ratio.y = byte(height / gcd);
 	return aspect_ratio;
 }
 
@@ -80,6 +80,7 @@ void create_new_display_setting_array()
 	DEVMODE screen;
 	screen.dmSize = sizeof(DEVMODE);
 
+	// Loop through every supported display setting 
 	for (size_t i = 0; EnumDisplaySettings(NULL, i, &screen) && count < k_max_display_option_count; i++)
 	{
 		// See if we already have a duplicate setting
@@ -128,6 +129,7 @@ void create_new_display_setting_array()
 	}
 	else
 	{
+		// Change address with references to beginning of display option struct and end of the struct 
 		WritePointer(Memory::GetAddress(0x263A53), g_display_options);
 		WritePointer(Memory::GetAddress(0x263A5E), &g_display_options[0].height);
 
@@ -155,6 +157,9 @@ void create_new_display_setting_array()
 
 		WriteValue<DWORD>(Memory::GetAddress(0x263BEA) + 1, count);
 
+		// Sort display resolution count from lowest resolution to greatest
+		// We can't sort from highest to lowest since it'll break the ui for the display settings
+		// Maybe rewrite the functions for this in the future to fix this?
 		qsort_s(g_display_options, count, sizeof(s_display_option), compare_display_options, NULL);
 	}
 }
