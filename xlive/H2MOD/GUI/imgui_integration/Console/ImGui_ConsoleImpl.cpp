@@ -197,10 +197,10 @@ int CartographerConsole::TextEditCallback(ImGuiInputTextCallbackData* data)
 				if (console_data->m_history_string_index >= 0)
 				{
 					const char* new_text_box_from_history = NULL;
-					for (int i = (int)output_buffer->GetHeaderCount() - 1; i >= 0; i--)
+					for (size_t i = output_buffer->GetHeaderCount() - 1; i >= 0; i--)
 					{
 						auto& string_header = output_buffer->GetHeader(i);
-						int string_header_index_to_history_index = (int)output_buffer->GetHeaderCount() - 1 - i;
+						int string_header_index_to_history_index = output_buffer->GetHeaderCount() - 1 - i;
 						if (string_header.flags & StringFlag_History)
 						{
 							if ((prev_history_index == -1 && console_data->m_history_string_index > prev_history_index)

@@ -1,6 +1,4 @@
 #pragma once
-#include "stdafx.h"
-
 static std::string empty = std::string();
 
 /// Command Variable
